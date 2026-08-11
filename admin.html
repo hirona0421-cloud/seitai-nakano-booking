@@ -289,7 +289,59 @@ OPENの時間だけお客様側に表示されます。
 ></div>
 
 </section>
+<section class="card">
 
+<h2>予約不可時間</h2>
+
+<p class="muted">
+予定がある時間帯を登録すると、その時間と重なる予約枠はお客様側に表示されなくなります。
+</p>
+
+<div class="row">
+
+<div>
+<label>開始時間</label>
+<input
+  type="time"
+  id="blockedStart"
+  step="1800"
+>
+</div>
+
+<div>
+<label>終了時間</label>
+<input
+  type="time"
+  id="blockedEnd"
+  step="1800"
+>
+</div>
+
+</div>
+
+<input
+  id="blockedMemo"
+  placeholder="メモ　例：外出・私用（お客様には表示されません）"
+>
+
+<button
+  class="primary"
+  id="addBlockedTime"
+>
+この時間を予約不可にする
+</button>
+
+<div
+  id="blockedMsg"
+  class="msg muted"
+></div>
+
+<div
+  id="blockedList"
+  style="margin-top:14px"
+></div>
+
+</section>
 
 <section class="card">
 
