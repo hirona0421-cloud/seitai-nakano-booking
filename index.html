@@ -41,6 +41,7 @@ h2{
 .muted{
   color:#77716a;
   font-size:13px;
+  line-height:1.6;
 }
 
 .menu,
@@ -81,6 +82,11 @@ textarea{
   border-radius:12px;
   font:inherit;
   margin-top:6px;
+  background:#fff;
+}
+
+textarea{
+  min-height:90px;
 }
 
 label{
@@ -99,6 +105,11 @@ label{
   padding:15px;
   font-weight:700;
   margin-top:16px;
+  font:inherit;
+}
+
+.primary:disabled{
+  opacity:.55;
 }
 
 .msg{
@@ -109,8 +120,33 @@ label{
 
 .success{
   background:#eaf3ec;
-  padding:12px;
-  border-radius:12px;
+  border:1px solid #cbdccb;
+  padding:16px;
+  border-radius:14px;
+  margin-top:14px;
+}
+
+.successTitle{
+  font-size:18px;
+  font-weight:700;
+  margin-bottom:10px;
+}
+
+.successDetail{
+  line-height:1.8;
+}
+
+.notice{
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px solid #cbdccb;
+  font-size:13px;
+  color:#5f675f;
+  line-height:1.6;
+}
+
+.hidden{
+  display:none;
 }
 </style>
 </head>
@@ -128,7 +164,7 @@ label{
 <h2>1. メニュー</h2>
 
 <div id="menus">
-<span class="muted">読み込み中…</span>
+  <span class="muted">読み込み中…</span>
 </div>
 
 </section>
@@ -168,7 +204,7 @@ label{
 
 <label>
 お名前
-<input id="name">
+<input id="name" autocomplete="name">
 </label>
 
 <label>
@@ -176,6 +212,7 @@ label{
 <input
   id="tel"
   inputmode="tel"
+  autocomplete="tel"
 >
 </label>
 
@@ -195,6 +232,25 @@ label{
   id="msg"
   class="msg"
 ></div>
+
+<div
+  id="successBox"
+  class="success hidden"
+>
+  <div class="successTitle">
+    予約を受け付けました
+  </div>
+
+  <div
+    id="successDetail"
+    class="successDetail"
+  ></div>
+
+  <div class="notice">
+    ご予約内容の変更・キャンセルをご希望の場合は、
+    店舗までご連絡ください。
+  </div>
+</div>
 
 </section>
 
@@ -216,17 +272,29 @@ const supabase=createClient(
 
 let selectedMenu=null;
 let selectedTime=null;
+let bookingInProgress=false;
 
 
 const dateEl=
   document.getElementById('date');
+
+const bookButton=
+  document.getElementById('book');
+
+const msg=
+  document.getElementById('msg');
+
+const successBox=
+  document.getElementById('successBox');
+
+const successDetail=
+  document.getElementById('successDetail');
 
 
 dateEl.min=
   new Date()
   .toISOString()
   .slice(0,10);
-
 
 
 async function loadMenus(){
@@ -260,23 +328,20 @@ async function loadMenus(){
     const button=
       document.createElement('button');
 
-
     button.className='menu';
-
 
     button.innerHTML=
       `
-      <span>
-      ${menu.name}
-      </span>
-
-      <strong>
-      ${Number(menu.price).toLocaleString()}円
-      </strong>
+      <span>${menu.name}</span>
+      <strong>${Number(menu.price).toLocaleString()}円</strong>
       `;
 
 
     button.onclick=()=>{
+
+      if(bookingInProgress){
+        return;
+      }
 
       document
         .querySelectorAll('.menu')
@@ -285,15 +350,14 @@ async function loadMenus(){
             item.classList.remove('active')
         );
 
-
       button
         .classList
         .add('active');
 
-
       selectedMenu=
         menu;
 
+      hideSuccess();
 
       loadSlots();
 
@@ -307,12 +371,10 @@ async function loadMenus(){
 }
 
 
-
 async function loadSlots(){
 
   const box=
     document.getElementById('slots');
-
 
   box.innerHTML='';
 
@@ -368,9 +430,7 @@ async function loadSlots(){
     const button=
       document.createElement('button');
 
-
     button.className='slot';
-
 
     button.textContent=
       String(
@@ -381,6 +441,10 @@ async function loadSlots(){
 
     button.onclick=()=>{
 
+      if(bookingInProgress){
+        return;
+      }
+
       document
         .querySelectorAll('.slot')
         .forEach(
@@ -388,14 +452,14 @@ async function loadSlots(){
             item.classList.remove('active')
         );
 
-
       button
         .classList
         .add('active');
 
-
       selectedTime=
         slot.start_time;
+
+      hideSuccess();
 
     };
 
@@ -407,15 +471,33 @@ async function loadSlots(){
 }
 
 
+function hideSuccess(){
 
-dateEl.onchange=
-  loadSlots;
+  successBox
+    .classList
+    .add('hidden');
+
+}
 
 
+dateEl.onchange=()=>{
 
-document
-.getElementById('book')
-.onclick=async()=>{
+  if(bookingInProgress){
+    return;
+  }
+
+  hideSuccess();
+
+  loadSlots();
+
+};
+
+
+bookButton.onclick=async()=>{
+
+  if(bookingInProgress){
+    return;
+  }
 
 
   const name=
@@ -439,9 +521,7 @@ document
       .trim();
 
 
-  const msg=
-    document
-      .getElementById('msg');
+  hideSuccess();
 
 
   if(
@@ -457,7 +537,7 @@ document
   ){
 
     msg.textContent=
-      '必要項目を入力してください';
+      'メニュー・日付・時間・お名前・電話番号を入力してください。';
 
     return;
   }
@@ -466,142 +546,162 @@ document
   const bookingDate=
     dateEl.value;
 
-
   const bookingTime=
     selectedTime;
-
 
   const bookingMenu=
     selectedMenu;
 
 
-  const r=
-    await supabase.rpc(
-      'nakano_create_booking',
-      {
-        p_date:
-          bookingDate,
+  bookingInProgress=true;
 
-        p_start_time:
-          bookingTime,
+  bookButton.disabled=true;
 
-        p_menu_id:
-          bookingMenu.id,
+  bookButton.textContent=
+    '予約を送信しています…';
 
-        p_customer_name:
-          name,
-
-        p_phone:
-          tel,
-
-        p_memo:
-          memo||null
-      }
-    );
-
-
-  if(r.error){
-
-    msg.className='msg';
-
-    msg.textContent=
-      '予約できませんでした。空き状況をもう一度確認してください。';
-
-
-    await loadSlots();
-
-    return;
-  }
-
-
-  msg.className=
-    'msg success';
-
-
-  msg.innerHTML=
-    `
-    予約を受け付けました。<br>
-
-    <strong>
-    ${bookingMenu.name}
-     /
-    ${bookingDate}
-     /
-    ${String(bookingTime).slice(0,5)}
-    </strong>
-    `;
+  msg.textContent='';
 
 
   try{
 
-    const {
-      error:notifyError
-    }=
-    await supabase.functions.invoke(
-      'nakano-booking-notify',
-      {
-        body:{
-          booking_date:
+    const r=
+      await supabase.rpc(
+        'nakano_create_booking',
+        {
+          p_date:
             bookingDate,
 
-          start_time:
+          p_start_time:
             bookingTime,
 
-          menu_name:
-            bookingMenu.name,
+          p_menu_id:
+            bookingMenu.id,
 
-          customer_name:
+          p_customer_name:
             name,
 
-          phone:
+          p_phone:
             tel,
 
-          memo:
+          p_memo:
             memo||null
         }
+      );
+
+
+    if(r.error){
+
+      msg.textContent=
+        '予約できませんでした。空き状況をもう一度確認してください。';
+
+      await loadSlots();
+
+      return;
+
+    }
+
+
+    successDetail.innerHTML=
+      `
+      <strong>${bookingMenu.name}</strong><br>
+      ${bookingDate}<br>
+      ${String(bookingTime).slice(0,5)}<br>
+      ${name} 様
+      `;
+
+
+    successBox
+      .classList
+      .remove('hidden');
+
+
+    successBox
+      .scrollIntoView({
+        behavior:'smooth',
+        block:'center'
+      });
+
+
+    try{
+
+      const {
+        error:notifyError
+      }=
+      await supabase.functions.invoke(
+        'nakano-booking-notify',
+        {
+          body:{
+            booking_date:
+              bookingDate,
+
+            start_time:
+              bookingTime,
+
+            menu_name:
+              bookingMenu.name,
+
+            customer_name:
+              name,
+
+            phone:
+              tel,
+
+            memo:
+              memo||null
+          }
+        }
+      );
+
+
+      if(notifyError){
+
+        console.error(
+          '通知送信エラー',
+          notifyError
+        );
+
       }
-    );
 
-
-    if(notifyError){
+    }
+    catch(error){
 
       console.error(
-        '通知送信エラー',
-        notifyError
+        '通知処理エラー',
+        error
       );
 
     }
 
+
+    document
+      .getElementById('name')
+      .value='';
+
+    document
+      .getElementById('tel')
+      .value='';
+
+    document
+      .getElementById('memo')
+      .value='';
+
+
+    await loadSlots();
+
   }
-  catch(error){
+  finally{
 
-    console.error(
-      '通知処理エラー',
-      error
-    );
+    bookingInProgress=false;
+
+    bookButton.disabled=false;
+
+    bookButton.textContent=
+      '予約する';
 
   }
 
-
-  document
-    .getElementById('name')
-    .value='';
-
-
-  document
-    .getElementById('tel')
-    .value='';
-
-
-  document
-    .getElementById('memo')
-    .value='';
-
-
-  await loadSlots();
-
-}
-
+};
 
 
 loadMenus();
