@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>整体なかの｜管理</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Yu Gothic",Meiryo,sans-serif;margin:0;background:#f6f3ee;color:#2f2d2a}
+main{max-width:620px;margin:auto;padding:18px 14px 80px}.card{background:#fff;border:1px solid #e7e0d7;border-radius:18px;padding:18px;margin-bottom:14px}
+h1{margin:0;font-size:24px}h2{font-size:19px;margin:0 0 10px}.muted{color:#77716a;font-size:13px}input{width:100%;box-sizing:border-box;padding:13px;border:1px solid #e7e0d7;border-radius:12px;font:inherit;margin:6px 0 10px}
+.primary,.secondary{width:100%;border-radius:13px;padding:13px;font-weight:700;font:inherit}.primary{background:#61574d;color:#fff;border:0}.secondary{background:#fff;border:1px solid #e7e0d7;margin-top:8px}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.slot{border:1px solid #e7e0d7;border-radius:12px;padding:12px 6px;font-weight:700}.open{background:#eaf3ec}.closed{background:#f4ece9;color:#8a7770}
+.booking{padding:10px 0;border-bottom:1px solid #e7e0d7;line-height:1.5}.hidden{display:none}
+</style></head><body><main>
+<h1>整体なかの</h1><p class="muted">店側 予約管理</p>
+<section class="card" id="loginCard"><h2>管理者ログイン</h2><input id="email" type="email" placeholder="メールアドレス"><input id="password" type="password" placeholder="パスワード"><button class="primary" id="login">ログイン</button><p id="loginMsg" class="muted"></p></section>
+<div id="adminArea" class="hidden"><section class="card"><h2>管理日</h2><input type="date" id="date"><button class="secondary" id="logout">ログアウト</button></section>
+<section class="card"><h2>空き枠 OPEN / CLOSE</h2><p class="muted">タップで切り替えます。</p><div id="slots" class="slots"></div></section>
+<section class="card"><h2>予約一覧</h2><div id="bookings" class="muted"></div></section></div>
+<script type="module">
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const supabase=createClient('https://scjzofjvxmchfjsngqtb.supabase.co','sb_publishable_EGlr-6w0xh4gD8OImboE_Q_V-COJ7t9');
+const times=[];for(let h=8;h<=22;h++)for(const m of [0,30])if(!(h===22&&m===30))times.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`);
+async function syncAuth(){const s=(await supabase.auth.getSession()).data.session;document.getElementById('loginCard').classList.toggle('hidden',!!s);document.getElementById('adminArea').classList.toggle('hidden',!s);if(s){const d=document.getElementById('date');if(!d.value)d.value=new Date().toISOString().slice(0,10);load()}}
+document.getElementById('login').onclick=async()=>{const email=document.getElementById('email').value.trim(),password=document.getElementById('password').value,msg=document.getElementById('loginMsg');const r=await supabase.auth.signInWithPassword({email,password});msg.textContent=r.error?'ログインできません。入力内容を確認してください。':'';if(!r.error)syncAuth()};
+document.getElementById('logout').onclick=async()=>{await supabase.auth.signOut();syncAuth()};
+document.getElementById('date').onchange=load;
+async function load(){
+ const date=document.getElementById('date').value;if(!date)return;
+ const r=await supabase.from('nakano_open_slots').select('*').eq('slot_date',date);const box=document.getElementById('slots');box.innerHTML='';
+ if(r.error){box.innerHTML='<span class="muted">空き枠を読み込めませんでした</span>';return}
+ const map=new Map((r.data||[]).map(x=>[String(x.start_time),x]));
+ times.forEach(t=>{const row=map.get(t),isOpen=!!row?.is_open,b=document.createElement('button');b.className='slot '+(isOpen?'open':'closed');b.textContent=t.slice(0,5);b.onclick=async()=>{const u=await supabase.from('nakano_open_slots').upsert({slot_date:date,start_time:t,is_open:!isOpen},{onConflict:'slot_date,start_time'});if(u.error)alert(u.error.message);await load()};box.appendChild(b)});
+ const br=await supabase.from('nakano_bookings').select('*').eq('booking_date',date).eq('status','confirmed').order('start_time');const bb=document.getElementById('bookings');
+ if(br.error){bb.textContent='予約一覧を読み込めませんでした';return}
+ bb.innerHTML=br.data?.length?br.data.map(b=>`<div class="booking"><strong>${String(b.start_time).slice(0,5)}　${b.menu_name}</strong><br>${b.customer_name}　${b.phone}${b.memo?`<br><span class="muted">${b.memo}</span>`:''}</div>`).join(''):'予約はありません。';
+}
+supabase.auth.onAuthStateChange(syncAuth);syncAuth();
+</script></main></body></html>
