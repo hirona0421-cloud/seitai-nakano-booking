@@ -20,7 +20,7 @@ label{display:block;font-size:13px;font-weight:700;margin-top:12px}.primary{widt
 <label>気になる症状・部位<textarea id="memo"></textarea></label><button class="primary" id="book">予約する</button><div id="msg" class="msg"></div></section>
 <script type="module">
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-const supabase=createClient('https://scjzofjvxmchfjsngqtb.supabase.co','sb_publishable_EGlr-6w0xh4gD8OImboE_Q_V-COJ7t9');
+const supabase=createClient('https://scjzofjyxmchfjsngqtb.supabase.co','sb_publishable_EGlr-6w0xh4gD8OImboE_Q_V-COJ7t9');
 let selectedMenu=null,selectedTime=null;
 const dateEl=document.getElementById('date');dateEl.min=new Date().toISOString().slice(0,10);
 async function loadMenus(){
