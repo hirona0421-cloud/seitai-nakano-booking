@@ -1,48 +1,614 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
 <title>整体なかの｜予約</title>
+
 <style>
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Yu Gothic",Meiryo,sans-serif;margin:0;background:#f6f3ee;color:#2f2d2a}
-main{max-width:560px;margin:auto;padding:18px 14px 80px}.card{background:#fff;border:1px solid #e7e0d7;border-radius:18px;padding:18px;margin-bottom:14px}
-h1{margin:0;font-size:25px}h2{font-size:19px;margin:0 0 10px}.muted{color:#77716a;font-size:13px}
-.menu,.slot{border:1px solid #e7e0d7;border-radius:12px;background:#fff;padding:13px;font:inherit}.menu{width:100%;display:flex;justify-content:space-between;margin-bottom:8px;text-align:left}
-.menu.active,.slot.active{background:#eee7df;border-color:#61574d}.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-input,textarea{width:100%;box-sizing:border-box;padding:13px;border:1px solid #e7e0d7;border-radius:12px;font:inherit;margin-top:6px}
-label{display:block;font-size:13px;font-weight:700;margin-top:12px}.primary{width:100%;border:0;border-radius:13px;background:#61574d;color:#fff;padding:15px;font-weight:700;margin-top:16px}
-.msg{font-size:13px;margin-top:12px;line-height:1.6}.success{background:#eaf3ec;padding:12px;border-radius:12px}
-</style></head><body><main>
-<h1>整体なかの</h1><p class="muted">オンライン予約</p>
-<section class="card"><h2>1. メニュー</h2><div id="menus"><span class="muted">読み込み中…</span></div></section>
-<section class="card"><h2>2. 日付</h2><input type="date" id="date"></section>
-<section class="card"><h2>3. 空き時間</h2><p class="muted">表示されている時間だけ予約できます。</p><div id="slots" class="slots"></div></section>
-<section class="card"><h2>4. お客様情報</h2>
-<label>お名前<input id="name"></label><label>電話番号<input id="tel" inputmode="tel"></label>
-<label>気になる症状・部位<textarea id="memo"></textarea></label><button class="primary" id="book">予約する</button><div id="msg" class="msg"></div></section>
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Yu Gothic",Meiryo,sans-serif;
+  margin:0;
+  background:#f6f3ee;
+  color:#2f2d2a;
+}
+
+main{
+  max-width:560px;
+  margin:auto;
+  padding:18px 14px 80px;
+}
+
+.card{
+  background:#fff;
+  border:1px solid #e7e0d7;
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:14px;
+}
+
+h1{
+  margin:0;
+  font-size:25px;
+}
+
+h2{
+  font-size:19px;
+  margin:0 0 10px;
+}
+
+.muted{
+  color:#77716a;
+  font-size:13px;
+}
+
+.menu,
+.slot{
+  border:1px solid #e7e0d7;
+  border-radius:12px;
+  background:#fff;
+  padding:13px;
+  font:inherit;
+}
+
+.menu{
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:8px;
+  text-align:left;
+}
+
+.menu.active,
+.slot.active{
+  background:#eee7df;
+  border-color:#61574d;
+}
+
+.slots{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+
+input,
+textarea{
+  width:100%;
+  box-sizing:border-box;
+  padding:13px;
+  border:1px solid #e7e0d7;
+  border-radius:12px;
+  font:inherit;
+  margin-top:6px;
+}
+
+label{
+  display:block;
+  font-size:13px;
+  font-weight:700;
+  margin-top:12px;
+}
+
+.primary{
+  width:100%;
+  border:0;
+  border-radius:13px;
+  background:#61574d;
+  color:#fff;
+  padding:15px;
+  font-weight:700;
+  margin-top:16px;
+}
+
+.msg{
+  font-size:13px;
+  margin-top:12px;
+  line-height:1.6;
+}
+
+.success{
+  background:#eaf3ec;
+  padding:12px;
+  border-radius:12px;
+}
+</style>
+</head>
+
+<body>
+
+<main>
+
+<h1>整体なかの</h1>
+<p class="muted">オンライン予約</p>
+
+
+<section class="card">
+
+<h2>1. メニュー</h2>
+
+<div id="menus">
+<span class="muted">読み込み中…</span>
+</div>
+
+</section>
+
+
+<section class="card">
+
+<h2>2. 日付</h2>
+
+<input
+  type="date"
+  id="date"
+>
+
+</section>
+
+
+<section class="card">
+
+<h2>3. 空き時間</h2>
+
+<p class="muted">
+表示されている時間だけ予約できます。
+</p>
+
+<div
+  id="slots"
+  class="slots"
+></div>
+
+</section>
+
+
+<section class="card">
+
+<h2>4. お客様情報</h2>
+
+<label>
+お名前
+<input id="name">
+</label>
+
+<label>
+電話番号
+<input
+  id="tel"
+  inputmode="tel"
+>
+</label>
+
+<label>
+気になる症状・部位
+<textarea id="memo"></textarea>
+</label>
+
+<button
+  class="primary"
+  id="book"
+>
+予約する
+</button>
+
+<div
+  id="msg"
+  class="msg"
+></div>
+
+</section>
+
+
 <script type="module">
-import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-const supabase=createClient('https://scjzofjyxmchfjsngqtb.supabase.co','sb_publishable_EGlr-6w0xh4gD8OImboE_Q_V-COJ7t9');
-let selectedMenu=null,selectedTime=null;
-const dateEl=document.getElementById('date');dateEl.min=new Date().toISOString().slice(0,10);
+
+import {
+  createClient
+}
+from
+'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+
+const supabase=createClient(
+  'https://scjzofjyxmchfjsngqtb.supabase.co',
+  'sb_publishable_EGlr-6w0xh4gD8OImboE_Q_V-COJ7t9'
+);
+
+
+let selectedMenu=null;
+let selectedTime=null;
+
+
+const dateEl=
+  document.getElementById('date');
+
+
+dateEl.min=
+  new Date()
+  .toISOString()
+  .slice(0,10);
+
+
+
 async function loadMenus(){
- const r=await supabase.from('nakano_menus').select('*').eq('is_active',true).order('display_order');
- const box=document.getElementById('menus'); if(r.error){box.textContent='メニューを読み込めませんでした';return}
- box.innerHTML=''; r.data.forEach(m=>{const b=document.createElement('button');b.className='menu';b.innerHTML=`<span>${m.name}</span><strong>${Number(m.price).toLocaleString()}円</strong>`;b.onclick=()=>{document.querySelectorAll('.menu').forEach(x=>x.classList.remove('active'));b.classList.add('active');selectedMenu=m;loadSlots()};box.appendChild(b)})
+
+  const r=
+    await supabase
+      .from('nakano_menus')
+      .select('*')
+      .eq('is_active',true)
+      .order('display_order');
+
+
+  const box=
+    document.getElementById('menus');
+
+
+  if(r.error){
+
+    box.textContent=
+      'メニューを読み込めませんでした';
+
+    return;
+  }
+
+
+  box.innerHTML='';
+
+
+  r.data.forEach(menu=>{
+
+    const button=
+      document.createElement('button');
+
+
+    button.className='menu';
+
+
+    button.innerHTML=
+      `
+      <span>
+      ${menu.name}
+      </span>
+
+      <strong>
+      ${Number(menu.price).toLocaleString()}円
+      </strong>
+      `;
+
+
+    button.onclick=()=>{
+
+      document
+        .querySelectorAll('.menu')
+        .forEach(
+          item=>
+            item.classList.remove('active')
+        );
+
+
+      button
+        .classList
+        .add('active');
+
+
+      selectedMenu=
+        menu;
+
+
+      loadSlots();
+
+    };
+
+
+    box.appendChild(button);
+
+  });
+
 }
+
+
+
 async function loadSlots(){
- const box=document.getElementById('slots');box.innerHTML='';selectedTime=null;
- if(!selectedMenu||!dateEl.value){box.innerHTML='<span class="muted">メニューと日付を選択してください</span>';return}
- const r=await supabase.rpc('nakano_available_slots',{p_date:dateEl.value,p_menu_id:selectedMenu.id});
- if(r.error){box.innerHTML='<span class="muted">空き時間を読み込めませんでした</span>';return}
- if(!r.data?.length){box.innerHTML='<span class="muted">この日は予約可能な時間がありません</span>';return}
- r.data.forEach(s=>{const b=document.createElement('button');b.className='slot';b.textContent=String(s.start_time).slice(0,5);b.onclick=()=>{document.querySelectorAll('.slot').forEach(x=>x.classList.remove('active'));b.classList.add('active');selectedTime=s.start_time};box.appendChild(b)})
+
+  const box=
+    document.getElementById('slots');
+
+
+  box.innerHTML='';
+
+  selectedTime=null;
+
+
+  if(
+    !selectedMenu
+    ||
+    !dateEl.value
+  ){
+
+    box.innerHTML=
+      '<span class="muted">メニューと日付を選択してください</span>';
+
+    return;
+  }
+
+
+  const r=
+    await supabase.rpc(
+      'nakano_available_slots',
+      {
+        p_date:
+          dateEl.value,
+
+        p_menu_id:
+          selectedMenu.id
+      }
+    );
+
+
+  if(r.error){
+
+    box.innerHTML=
+      '<span class="muted">空き時間を読み込めませんでした</span>';
+
+    return;
+  }
+
+
+  if(!r.data?.length){
+
+    box.innerHTML=
+      '<span class="muted">この日は予約可能な時間がありません</span>';
+
+    return;
+  }
+
+
+  r.data.forEach(slot=>{
+
+    const button=
+      document.createElement('button');
+
+
+    button.className='slot';
+
+
+    button.textContent=
+      String(
+        slot.start_time
+      )
+      .slice(0,5);
+
+
+    button.onclick=()=>{
+
+      document
+        .querySelectorAll('.slot')
+        .forEach(
+          item=>
+            item.classList.remove('active')
+        );
+
+
+      button
+        .classList
+        .add('active');
+
+
+      selectedTime=
+        slot.start_time;
+
+    };
+
+
+    box.appendChild(button);
+
+  });
+
 }
-dateEl.onchange=loadSlots;
-document.getElementById('book').onclick=async()=>{
- const name=document.getElementById('name').value.trim(),tel=document.getElementById('tel').value.trim(),memo=document.getElementById('memo').value.trim(),msg=document.getElementById('msg');
- if(!selectedMenu||!dateEl.value||!selectedTime||!name||!tel){msg.textContent='必要項目を入力してください';return}
- const r=await supabase.rpc('nakano_create_booking',{p_date:dateEl.value,p_start_time:selectedTime,p_menu_id:selectedMenu.id,p_customer_name:name,p_phone:tel,p_memo:memo||null});
- if(r.error){msg.textContent='予約できませんでした。空き状況をもう一度確認してください。';await loadSlots();return}
- msg.className='msg success';msg.innerHTML=`予約を受け付けました。<br><strong>${selectedMenu.name} / ${dateEl.value} / ${String(selectedTime).slice(0,5)}</strong>`;await loadSlots();
-};
+
+
+
+dateEl.onchange=
+  loadSlots;
+
+
+
+document
+.getElementById('book')
+.onclick=async()=>{
+
+
+  const name=
+    document
+      .getElementById('name')
+      .value
+      .trim();
+
+
+  const tel=
+    document
+      .getElementById('tel')
+      .value
+      .trim();
+
+
+  const memo=
+    document
+      .getElementById('memo')
+      .value
+      .trim();
+
+
+  const msg=
+    document
+      .getElementById('msg');
+
+
+  if(
+    !selectedMenu
+    ||
+    !dateEl.value
+    ||
+    !selectedTime
+    ||
+    !name
+    ||
+    !tel
+  ){
+
+    msg.textContent=
+      '必要項目を入力してください';
+
+    return;
+  }
+
+
+  const bookingDate=
+    dateEl.value;
+
+
+  const bookingTime=
+    selectedTime;
+
+
+  const bookingMenu=
+    selectedMenu;
+
+
+  const r=
+    await supabase.rpc(
+      'nakano_create_booking',
+      {
+        p_date:
+          bookingDate,
+
+        p_start_time:
+          bookingTime,
+
+        p_menu_id:
+          bookingMenu.id,
+
+        p_customer_name:
+          name,
+
+        p_phone:
+          tel,
+
+        p_memo:
+          memo||null
+      }
+    );
+
+
+  if(r.error){
+
+    msg.className='msg';
+
+    msg.textContent=
+      '予約できませんでした。空き状況をもう一度確認してください。';
+
+
+    await loadSlots();
+
+    return;
+  }
+
+
+  msg.className=
+    'msg success';
+
+
+  msg.innerHTML=
+    `
+    予約を受け付けました。<br>
+
+    <strong>
+    ${bookingMenu.name}
+     /
+    ${bookingDate}
+     /
+    ${String(bookingTime).slice(0,5)}
+    </strong>
+    `;
+
+
+  try{
+
+    const {
+      error:notifyError
+    }=
+    await supabase.functions.invoke(
+      'nakano-booking-notify',
+      {
+        body:{
+          booking_date:
+            bookingDate,
+
+          start_time:
+            bookingTime,
+
+          menu_name:
+            bookingMenu.name,
+
+          customer_name:
+            name,
+
+          phone:
+            tel,
+
+          memo:
+            memo||null
+        }
+      }
+    );
+
+
+    if(notifyError){
+
+      console.error(
+        '通知送信エラー',
+        notifyError
+      );
+
+    }
+
+  }
+  catch(error){
+
+    console.error(
+      '通知処理エラー',
+      error
+    );
+
+  }
+
+
+  document
+    .getElementById('name')
+    .value='';
+
+
+  document
+    .getElementById('tel')
+    .value='';
+
+
+  document
+    .getElementById('memo')
+    .value='';
+
+
+  await loadSlots();
+
+}
+
+
+
 loadMenus();
-</script></main></body></html>
+
+</script>
+
+</main>
+
+</body>
+</html>
