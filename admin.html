@@ -1978,7 +1978,7 @@ async function load(){
 
   }
 
-
+await loadBlockedTimes(date);
   const {
 
     data:slotRows,
@@ -2341,7 +2341,229 @@ async function load(){
 }
 
 
+async function loadBlockedTimes(date){
 
+  const box=
+    document.getElementById('blockedList');
+
+  const msg=
+    document.getElementById('blockedMsg');
+
+  if(!box){
+    return;
+  }
+
+  const {
+    data,
+    error
+  }=
+  await supabase
+    .from('nakano_blocked_times')
+    .select('*')
+    .eq('blocked_date',date)
+    .order('start_time');
+
+  if(error){
+
+    box.innerHTML='';
+
+    if(msg){
+      msg.textContent=
+        '予約不可時間を読み込めませんでした。';
+    }
+
+    return;
+  }
+
+  if(msg){
+    msg.textContent='';
+  }
+
+  if(!data?.length){
+
+    box.innerHTML=
+      '<span class="muted">この日の予約不可時間はありません。</span>';
+
+    return;
+  }
+
+  box.innerHTML='';
+
+  data.forEach(item=>{
+
+    const div=
+      document.createElement('div');
+
+    div.className='booking';
+
+    const time=
+      document.createElement('strong');
+
+    time.textContent=
+      `${String(item.start_time).slice(0,5)} ～ ${String(item.end_time).slice(0,5)}`;
+
+    div.appendChild(time);
+
+    if(item.memo){
+
+      const memo=
+        document.createElement('div');
+
+      memo.className='muted';
+
+      memo.style.marginTop='4px';
+
+      memo.textContent=item.memo;
+
+      div.appendChild(memo);
+    }
+
+    const button=
+      document.createElement('button');
+
+    button.className='danger smallBtn';
+
+    button.textContent='予約不可を解除';
+
+    button.onclick=
+      async()=>{
+
+        if(
+          !confirm(
+            'この予約不可時間を解除しますか？'
+          )
+        ){
+          return;
+        }
+
+        const {
+          error:deleteError
+        }=
+        await supabase
+          .from('nakano_blocked_times')
+          .delete()
+          .eq('id',item.id);
+
+        if(deleteError){
+
+          alert(
+            '解除できませんでした。'
+          );
+
+          return;
+        }
+
+        await loadBlockedTimes(date);
+        await loadAdminTimes();
+      };
+
+    div.appendChild(button);
+
+    box.appendChild(div);
+  });
+
+}
+
+
+document
+.getElementById('addBlockedTime')
+.onclick=async()=>{
+
+  const date=
+    document
+      .getElementById('date')
+      .value;
+
+  const start=
+    document
+      .getElementById('blockedStart')
+      .value;
+
+  const end=
+    document
+      .getElementById('blockedEnd')
+      .value;
+
+  const memo=
+    document
+      .getElementById('blockedMemo')
+      .value
+      .trim();
+
+  const msg=
+    document
+      .getElementById('blockedMsg');
+
+  msg.textContent='';
+
+  if(
+    !date
+    ||
+    !start
+    ||
+    !end
+  ){
+
+    msg.textContent=
+      '日付・開始時間・終了時間を入力してください。';
+
+    return;
+  }
+
+  if(end<=start){
+
+    msg.textContent=
+      '終了時間は開始時間より後にしてください。';
+
+    return;
+  }
+
+  const {
+    error
+  }=
+  await supabase
+    .from('nakano_blocked_times')
+    .insert({
+
+      blocked_date:date,
+
+      start_time:start,
+
+      end_time:end,
+
+      memo:memo||null
+
+    });
+
+  if(error){
+
+    console.error(error);
+
+    msg.textContent=
+      '予約不可時間を登録できませんでした。';
+
+    return;
+  }
+
+  document
+    .getElementById('blockedStart')
+    .value='';
+
+  document
+    .getElementById('blockedEnd')
+    .value='';
+
+  document
+    .getElementById('blockedMemo')
+    .value='';
+
+  msg.textContent=
+    '予約不可時間を登録しました。';
+
+  await loadBlockedTimes(date);
+
+  await loadAdminTimes();
+};
 supabase.auth.onAuthStateChange(
 
   syncAuth
