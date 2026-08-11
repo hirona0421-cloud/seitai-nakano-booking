@@ -602,32 +602,81 @@ bookButton.onclick=async()=>{
     }
 
 // LINEユーザーを予約に紐付け
+let lineUser =
+  window.nakanoLineUser || null;
+
+try {
+
+  if(window.liff){
+
+    await liff.init({
+      liffId: "2011071292-KT8sSyCN"
+    });
+
+    if(liff.isLoggedIn()){
+
+      const token =
+        liff.getDecodedIDToken();
+
+      if(token?.sub){
+
+        lineUser = {
+          userId: token.sub,
+          displayName: token.name || ""
+        };
+
+      }else{
+
+        const profile =
+          await liff.getProfile();
+
+        lineUser = {
+          userId: profile.userId,
+          displayName: profile.displayName || ""
+        };
+
+      }
+
+      window.nakanoLineUser =
+        lineUser;
+
+    }
+
+  }
+
+}catch(error){
+
+  console.error(
+    "LINE情報取得エラー",
+    error
+  );
+
+}
+
 if(
   r.data
   &&
-  window.nakanoLineUser?.userId
+  lineUser?.userId
 ){
 
-  const lineResult=
+  const lineResult =
     await supabase.rpc(
-      'nakano_attach_line_to_booking',
+      "nakano_attach_line_to_booking",
       {
-        p_booking_id:
-          r.data,
-
-        p_line_user_id:
-          window.nakanoLineUser.userId,
-
+        p_booking_id: r.data,
+        p_line_user_id: lineUser.userId,
         p_line_display_name:
-          window.nakanoLineUser.displayName || null
+          lineUser.displayName || null
       }
     );
 
   if(lineResult.error){
+
     console.error(
-      'LINE紐付けエラー',
+      "LINE紐付けエラー",
       lineResult.error
     );
+
   }
 
 }
