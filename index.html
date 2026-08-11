@@ -601,7 +601,36 @@ bookButton.onclick=async()=>{
 
     }
 
+// LINEユーザーを予約に紐付け
+if(
+  r.data
+  &&
+  window.nakanoLineUser?.userId
+){
 
+  const lineResult=
+    await supabase.rpc(
+      'nakano_attach_line_to_booking',
+      {
+        p_booking_id:
+          r.data,
+
+        p_line_user_id:
+          window.nakanoLineUser.userId,
+
+        p_line_display_name:
+          window.nakanoLineUser.displayName || null
+      }
+    );
+
+  if(lineResult.error){
+    console.error(
+      'LINE紐付けエラー',
+      lineResult.error
+    );
+  }
+
+}
     successDetail.innerHTML=
       `
       <strong>${bookingMenu.name}</strong><br>
