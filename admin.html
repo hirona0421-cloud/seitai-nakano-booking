@@ -16,7 +16,7 @@ h1{margin:0;font-size:24px}h2{font-size:19px;margin:0 0 10px}.muted{color:#77716
 <section class="card"><h2>予約一覧</h2><div id="bookings" class="muted"></div></section></div>
 <script type="module">
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-const supabase=createClient('https://scjzofjvxmchfjsngqtb.supabase.co','sb_publishable_EGlr-6w0xh4gD8OImboE_Q_V-COJ7t9');
+const supabase=createClient('https://scjzofjyxmchfjsngqtb.supabase.co','sb_publishable_EGlr-6w0xh4gD8OImboE_Q_V-COJ7t9');
 const times=[];for(let h=8;h<=22;h++)for(const m of [0,30])if(!(h===22&&m===30))times.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`);
 async function syncAuth(){const s=(await supabase.auth.getSession()).data.session;document.getElementById('loginCard').classList.toggle('hidden',!!s);document.getElementById('adminArea').classList.toggle('hidden',!s);if(s){const d=document.getElementById('date');if(!d.value)d.value=new Date().toISOString().slice(0,10);load()}}
 document.getElementById('login').onclick=async()=>{const email=document.getElementById('email').value.trim(),password=document.getElementById('password').value,msg=document.getElementById('loginMsg');const r=await supabase.auth.signInWithPassword({email,password});msg.textContent=r.error?'ログインできません。入力内容を確認してください。':'';if(!r.error)syncAuth()};
