@@ -148,7 +148,13 @@ label{
 .hidden{
   display:none;
 }
+
+#lineStatus{
+  margin:8px 0 0;
+}
 </style>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 
 <body>
@@ -158,13 +164,22 @@ label{
 <h1>整体なかの</h1>
 <p class="muted">オンライン予約</p>
 
+<p
+  id="lineStatus"
+  class="muted"
+>
+LINE連携を確認しています…
+</p>
+
 
 <section class="card">
 
 <h2>1. メニュー</h2>
 
 <div id="menus">
-  <span class="muted">読み込み中…</span>
+  <span class="muted">
+    読み込み中…
+  </span>
 </div>
 
 </section>
@@ -204,7 +219,10 @@ label{
 
 <label>
 お名前
-<input id="name" autocomplete="name">
+<input
+  id="name"
+  autocomplete="name"
+>
 </label>
 
 <label>
@@ -237,19 +255,21 @@ label{
   id="successBox"
   class="success hidden"
 >
-  <div class="successTitle">
-    予約を受け付けました
-  </div>
 
-  <div
-    id="successDetail"
-    class="successDetail"
-  ></div>
+<div class="successTitle">
+予約を受け付けました
+</div>
 
-  <div class="notice">
-    ご予約内容の変更・キャンセルをご希望の場合は、
-    店舗までご連絡ください。
-  </div>
+<div
+  id="successDetail"
+  class="successDetail"
+></div>
+
+<div class="notice">
+ご予約内容の変更・キャンセルをご希望の場合は、
+店舗までご連絡ください。
+</div>
+
 </div>
 
 </section>
@@ -270,9 +290,14 @@ const supabase=createClient(
 );
 
 
+const LIFF_ID=
+  '2011071292-KT8sSyCN';
+
+
 let selectedMenu=null;
 let selectedTime=null;
 let bookingInProgress=false;
+let lineUser=null;
 
 
 const dateEl=
@@ -290,11 +315,104 @@ const successBox=
 const successDetail=
   document.getElementById('successDetail');
 
+const lineStatus=
+  document.getElementById('lineStatus');
+
 
 dateEl.min=
   new Date()
   .toISOString()
   .slice(0,10);
+
+
+async function initLine(){
+
+  try{
+
+    if(!window.liff){
+
+      throw new Error(
+        'LIFF SDK not loaded'
+      );
+
+    }
+
+
+    await window.liff.init({
+      liffId:
+        LIFF_ID
+    });
+
+
+    if(
+      !window.liff.isLoggedIn()
+    ){
+
+      lineStatus.textContent=
+        'LINEログインへ移動します…';
+
+
+      window.liff.login({
+        redirectUri:
+          'https://seitai-nakano.github.io/seitai-nakano-booking/'
+      });
+
+      return null;
+
+    }
+
+
+    const profile=
+      await window.liff.getProfile();
+
+
+    lineUser={
+
+      userId:
+        profile.userId,
+
+      displayName:
+        profile.displayName || ''
+
+    };
+
+
+    window.nakanoLineUser=
+      lineUser;
+
+
+    lineStatus.textContent=
+      `LINE連携済み：${
+        lineUser.displayName
+        ||
+        'ログイン済み'
+      }`;
+
+
+    return lineUser;
+
+  }
+  catch(error){
+
+    console.error(
+      'LINE連携エラー',
+      error
+    );
+
+
+    lineStatus.textContent=
+      'LINE連携を確認できませんでした';
+
+
+    return null;
+
+  }
+
+}
+
+
+const lineReadyPromise=
+  initLine();
 
 
 async function loadMenus(){
@@ -303,12 +421,19 @@ async function loadMenus(){
     await supabase
       .from('nakano_menus')
       .select('*')
-      .eq('is_active',true)
-      .order('display_order');
+      .eq(
+        'is_active',
+        true
+      )
+      .order(
+        'display_order'
+      );
 
 
   const box=
-    document.getElementById('menus');
+    document.getElementById(
+      'menus'
+    );
 
 
   if(r.error){
@@ -317,6 +442,7 @@ async function loadMenus(){
       'メニューを読み込めませんでした';
 
     return;
+
   }
 
 
@@ -326,45 +452,74 @@ async function loadMenus(){
   r.data.forEach(menu=>{
 
     const button=
-      document.createElement('button');
+      document.createElement(
+        'button'
+      );
 
-    button.className='menu';
+
+    button.className=
+      'menu';
+
 
     button.innerHTML=
       `
-      <span>${menu.name}</span>
-      <strong>${Number(menu.price).toLocaleString()}円</strong>
+      <span>
+        ${menu.name}
+      </span>
+
+      <strong>
+        ${Number(
+          menu.price
+        ).toLocaleString()}円
+      </strong>
       `;
 
 
     button.onclick=()=>{
 
-      if(bookingInProgress){
+      if(
+        bookingInProgress
+      ){
         return;
       }
 
+
       document
-        .querySelectorAll('.menu')
+        .querySelectorAll(
+          '.menu'
+        )
         .forEach(
           item=>
-            item.classList.remove('active')
+            item
+              .classList
+              .remove(
+                'active'
+              )
         );
+
 
       button
         .classList
-        .add('active');
+        .add(
+          'active'
+        );
+
 
       selectedMenu=
         menu;
 
+
       hideSuccess();
+
 
       loadSlots();
 
     };
 
 
-    box.appendChild(button);
+    box.appendChild(
+      button
+    );
 
   });
 
@@ -374,9 +529,13 @@ async function loadMenus(){
 async function loadSlots(){
 
   const box=
-    document.getElementById('slots');
+    document.getElementById(
+      'slots'
+    );
+
 
   box.innerHTML='';
+
 
   selectedTime=null;
 
@@ -391,6 +550,7 @@ async function loadSlots(){
       '<span class="muted">メニューと日付を選択してください</span>';
 
     return;
+
   }
 
 
@@ -398,11 +558,13 @@ async function loadSlots(){
     await supabase.rpc(
       'nakano_available_slots',
       {
+
         p_date:
           dateEl.value,
 
         p_menu_id:
           selectedMenu.id
+
       }
     );
 
@@ -413,58 +575,86 @@ async function loadSlots(){
       '<span class="muted">空き時間を読み込めませんでした</span>';
 
     return;
+
   }
 
 
-  if(!r.data?.length){
+  if(
+    !r.data?.length
+  ){
 
     box.innerHTML=
       '<span class="muted">この日は予約可能な時間がありません</span>';
 
     return;
+
   }
 
 
   r.data.forEach(slot=>{
 
     const button=
-      document.createElement('button');
+      document.createElement(
+        'button'
+      );
 
-    button.className='slot';
+
+    button.className=
+      'slot';
+
 
     button.textContent=
       String(
         slot.start_time
       )
-      .slice(0,5);
+      .slice(
+        0,
+        5
+      );
 
 
     button.onclick=()=>{
 
-      if(bookingInProgress){
+      if(
+        bookingInProgress
+      ){
         return;
       }
 
+
       document
-        .querySelectorAll('.slot')
+        .querySelectorAll(
+          '.slot'
+        )
         .forEach(
           item=>
-            item.classList.remove('active')
+            item
+              .classList
+              .remove(
+                'active'
+              )
         );
+
 
       button
         .classList
-        .add('active');
+        .add(
+          'active'
+        );
+
 
       selectedTime=
         slot.start_time;
+
 
       hideSuccess();
 
     };
 
 
-    box.appendChild(button);
+    box.appendChild(
+      button
+    );
 
   });
 
@@ -475,48 +665,64 @@ function hideSuccess(){
 
   successBox
     .classList
-    .add('hidden');
+    .add(
+      'hidden'
+    );
 
 }
 
 
 dateEl.onchange=()=>{
 
-  if(bookingInProgress){
+  if(
+    bookingInProgress
+  ){
     return;
   }
 
+
   hideSuccess();
+
 
   loadSlots();
 
 };
 
 
-bookButton.onclick=async()=>{
+bookButton.onclick=
+async()=>{
 
-  if(bookingInProgress){
+
+  if(
+    bookingInProgress
+  ){
     return;
   }
 
 
   const name=
     document
-      .getElementById('name')
+      .getElementById(
+        'name'
+      )
       .value
       .trim();
 
 
   const tel=
     document
-      .getElementById('tel')
+      .getElementById(
+        'tel'
+      )
       .value
       .trim();
 
 
   const memo=
     document
-      .getElementById('memo')
+      .getElementById(
+        'memo'
+      )
       .value
       .trim();
 
@@ -540,35 +746,99 @@ bookButton.onclick=async()=>{
       'メニュー・日付・時間・お名前・電話番号を入力してください。';
 
     return;
+
   }
 
 
   const bookingDate=
     dateEl.value;
 
+
   const bookingTime=
     selectedTime;
+
 
   const bookingMenu=
     selectedMenu;
 
 
-  bookingInProgress=true;
+  bookingInProgress=
+    true;
 
-  bookButton.disabled=true;
+
+  bookButton.disabled=
+    true;
+
 
   bookButton.textContent=
     '予約を送信しています…';
+
 
   msg.textContent='';
 
 
   try{
 
+
+    if(
+      !lineUser
+    ){
+
+      lineUser=
+        await lineReadyPromise;
+
+    }
+
+
+    if(
+      !lineUser
+      &&
+      window.liff
+      &&
+      window.liff.isLoggedIn()
+    ){
+
+      try{
+
+        const profile=
+          await window.liff
+            .getProfile();
+
+
+        lineUser={
+
+          userId:
+            profile.userId,
+
+          displayName:
+            profile.displayName
+            ||
+            ''
+
+        };
+
+
+        window.nakanoLineUser=
+          lineUser;
+
+      }
+      catch(error){
+
+        console.error(
+          '予約時LINE情報取得エラー',
+          error
+        );
+
+      }
+
+    }
+
+
     const r=
       await supabase.rpc(
         'nakano_create_booking',
         {
+
           p_date:
             bookingDate,
 
@@ -585,154 +855,193 @@ bookButton.onclick=async()=>{
             tel,
 
           p_memo:
-            memo||null
+            memo
+            ||
+            null
+
         }
       );
 
 
     if(r.error){
 
+      console.error(
+        '予約作成エラー',
+        r.error
+      );
+
+
       msg.textContent=
         '予約できませんでした。空き状況をもう一度確認してください。';
 
+
       await loadSlots();
+
 
       return;
 
     }
 
-// LINEユーザーを予約に紐付け
-let lineUser =
-  window.nakanoLineUser || null;
 
-try {
+    if(
+      r.data
+      &&
+      lineUser?.userId
+    ){
 
-  if(window.liff){
+      const lineResult=
+        await supabase.rpc(
+          'nakano_attach_line_to_booking',
+          {
 
-    await liff.init({
-      liffId: "2011071292-KT8sSyCN"
-    });
+            p_booking_id:
+              r.data,
 
-    if(liff.isLoggedIn()){
+            p_line_user_id:
+              lineUser.userId,
 
-      const token =
-        liff.getDecodedIDToken();
+            p_line_display_name:
+              lineUser.displayName
+              ||
+              null
 
-      if(token?.sub){
+          }
+        );
 
-        lineUser = {
-          userId: token.sub,
-          displayName: token.name || ""
-        };
 
-      }else{
+      if(
+        lineResult.error
+      ){
 
-        const profile =
-          await liff.getProfile();
+        console.error(
+          'LINE紐付けエラー',
+          lineResult.error
+        );
 
-        lineUser = {
-          userId: profile.userId,
-          displayName: profile.displayName || ""
-        };
+
+        msg.textContent=
+          '予約は完了しましたが、LINE連携情報の保存に失敗しました。';
+
+      }
+      else{
+
+        lineStatus.textContent=
+          `LINE連携済み：${
+            lineUser.displayName
+            ||
+            'ログイン済み'
+          }`;
 
       }
 
-      window.nakanoLineUser =
-        lineUser;
+    }
+    else{
+
+      console.warn(
+        'LINEユーザー情報なし',
+        {
+          bookingId:
+            r.data,
+
+          lineUser:
+            lineUser
+        }
+      );
+
+
+      msg.textContent=
+        '予約は完了しましたが、LINE連携情報を取得できませんでした。';
 
     }
 
-  }
 
-}catch(error){
-
-  console.error(
-    "LINE情報取得エラー",
-    error
-  );
-
-}
-
-if(
-  r.data
-  &&
-  lineUser?.userId
-){
-
-  const lineResult =
-    await supabase.rpc(
-      "nakano_attach_line_to_booking",
-      {
-        p_booking_id: r.data,
-        p_line_user_id: lineUser.userId,
-        p_line_display_name:
-          lineUser.displayName || null
-      }
-    );
-
-  if(lineResult.error){
-
-    console.error(
-      "LINE紐付けエラー",
-      lineResult.error
-    );
-
-  }
-
-}
     successDetail.innerHTML=
       `
-      <strong>${bookingMenu.name}</strong><br>
-      ${bookingDate}<br>
-      ${String(bookingTime).slice(0,5)}<br>
+      <strong>
+        ${bookingMenu.name}
+      </strong>
+      <br>
+
+      ${bookingDate}
+      <br>
+
+      ${
+        String(
+          bookingTime
+        )
+        .slice(
+          0,
+          5
+        )
+      }
+      <br>
+
       ${name} 様
       `;
 
 
     successBox
       .classList
-      .remove('hidden');
+      .remove(
+        'hidden'
+      );
 
 
     successBox
       .scrollIntoView({
-        behavior:'smooth',
-        block:'center'
+
+        behavior:
+          'smooth',
+
+        block:
+          'center'
+
       });
 
 
     try{
 
       const {
-        error:notifyError
+        error:
+          notifyError
       }=
-      await supabase.functions.invoke(
-        'nakano-booking-notify',
-        {
-          body:{
-            booking_date:
-              bookingDate,
+      await supabase
+        .functions
+        .invoke(
+          'nakano-booking-notify',
+          {
 
-            start_time:
-              bookingTime,
+            body:{
 
-            menu_name:
-              bookingMenu.name,
+              booking_date:
+                bookingDate,
 
-            customer_name:
-              name,
+              start_time:
+                bookingTime,
 
-            phone:
-              tel,
+              menu_name:
+                bookingMenu.name,
 
-            memo:
-              memo||null
+              customer_name:
+                name,
+
+              phone:
+                tel,
+
+              memo:
+                memo
+                ||
+                null
+
+            }
+
           }
-        }
-      );
+        );
 
 
-      if(notifyError){
+      if(
+        notifyError
+      ){
 
         console.error(
           '通知送信エラー',
@@ -753,15 +1062,23 @@ if(
 
 
     document
-      .getElementById('name')
+      .getElementById(
+        'name'
+      )
       .value='';
 
-    document
-      .getElementById('tel')
-      .value='';
 
     document
-      .getElementById('memo')
+      .getElementById(
+        'tel'
+      )
+      .value='';
+
+
+    document
+      .getElementById(
+        'memo'
+      )
       .value='';
 
 
@@ -770,9 +1087,13 @@ if(
   }
   finally{
 
-    bookingInProgress=false;
+    bookingInProgress=
+      false;
 
-    bookButton.disabled=false;
+
+    bookButton.disabled=
+      false;
+
 
     bookButton.textContent=
       '予約する';
@@ -788,37 +1109,5 @@ loadMenus();
 
 </main>
 
-<!-- LINE LIFF -->
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-
-<script>
-(async function () {
-  try {
-    await liff.init({
-      liffId: "2011071292-KT8sSyCN"
-    });
-
-    if (!liff.isLoggedIn()) {
-      liff.login({
-        redirectUri: window.location.href
-      });
-      return;
-    }
-
-    const profile = await liff.getProfile();
-
-    window.nakanoLineUser = {
-      userId: profile.userId,
-      displayName: profile.displayName || "",
-      pictureUrl: profile.pictureUrl || ""
-    };
-
-    console.log("LINE連携成功", window.nakanoLineUser);
-
-  } catch (error) {
-    console.error("LINE連携エラー", error);
-  }
-})();
-</script>
 </body>
 </html>
