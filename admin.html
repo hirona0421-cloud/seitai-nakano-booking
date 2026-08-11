@@ -2572,6 +2572,272 @@ supabase.auth.onAuthStateChange(
 
 
 syncAuth();
+(function(){
+
+  // 予約変更欄に「予約日」を自動追加
+  if(!document.getElementById('editDate')){
+
+    const current =
+      document.getElementById('editCurrent');
+
+    const label =
+      document.createElement('label');
+
+    label.textContent='予約日';
+
+    const input =
+      document.createElement('input');
+
+    input.type='date';
+    input.id='editDate';
+
+    current.insertAdjacentElement(
+      'afterend',
+      input
+    );
+
+    input.insertAdjacentElement(
+      'beforebegin',
+      label
+    );
+  }
+
+  // 日付またはメニューを変更したら、その日の空き時間を再取得
+  document
+  .getElementById('editDate')
+  .onchange=
+  ()=>loadEditTimes();
+
+  document
+  .getElementById('editMenu')
+  .onchange=
+  ()=>loadEditTimes();
+
+
+  // 予約変更時の空き時間取得を「editDate」基準に変更
+  loadEditTimes=async function(){
+
+    if(!editingBooking){
+      return;
+    }
+
+    const menuId=
+      document
+      .getElementById('editMenu')
+      .value;
+
+    const date=
+      document
+      .getElementById('editDate')
+      .value;
+
+    const select=
+      document
+      .getElementById('editTime');
+
+    select.innerHTML=
+      '<option value="">時間を選択</option>';
+
+    const data=
+      await getAvailableTimes(
+        menuId,
+        date
+      );
+
+    const currentTime=
+      String(
+        editingBooking.start_time
+      );
+
+    const allTimes=[
+      ...(data||[])
+    ];
+
+    const isOriginalDate=
+      date ===
+      editingBooking.booking_date;
+
+    // 元の予約日時だけは、現在の予約枠として選べるよう残す
+    if(
+      isOriginalDate
+      &&
+      editingBooking.menu_id === menuId
+      &&
+      !allTimes.some(
+        slot=>
+          String(slot.start_time)
+          ===
+          currentTime
+      )
+    ){
+      allTimes.push({
+        start_time:currentTime
+      });
+    }
+
+    allTimes.sort(
+      (a,b)=>
+        String(a.start_time)
+        .localeCompare(
+          String(b.start_time)
+        )
+    );
+
+    allTimes.forEach(slot=>{
+
+      const option=
+        document
+        .createElement('option');
+
+      option.value=
+        slot.start_time;
+
+      option.textContent=
+        String(slot.start_time)
+        .slice(0,5);
+
+      if(
+        isOriginalDate
+        &&
+        String(slot.start_time)
+        ===
+        currentTime
+      ){
+        option.selected=true;
+      }
+
+      select.appendChild(option);
+
+    });
+
+  };
+
+
+  // openEditを拡張して、元の予約日を日付欄へセット
+  const originalOpenEdit=
+    openEdit;
+
+  openEdit=function(booking){
+
+    document
+    .getElementById('editDate')
+    .value=
+    booking.booking_date;
+
+    originalOpenEdit(booking);
+
+  };
+
+
+  // 保存処理を「editDate」基準に変更
+  document
+  .getElementById('saveEdit')
+  .onclick=async()=>{
+
+    if(!editingBooking){
+      return;
+    }
+
+    const p_booking_id=
+      editingBooking.id;
+
+    const p_date=
+      document
+      .getElementById('editDate')
+      .value;
+
+    const p_menu_id=
+      document
+      .getElementById('editMenu')
+      .value;
+
+    const p_start_time=
+      document
+      .getElementById('editTime')
+      .value;
+
+    const p_customer_name=
+      document
+      .getElementById('editName')
+      .value
+      .trim();
+
+    const p_phone=
+      document
+      .getElementById('editPhone')
+      .value
+      .trim();
+
+    const p_memo=
+      document
+      .getElementById('editMemo')
+      .value
+      .trim()
+      ||
+      null;
+
+    const msg=
+      document
+      .getElementById('editMsg');
+
+    if(
+      !p_date
+      ||
+      !p_menu_id
+      ||
+      !p_start_time
+      ||
+      !p_customer_name
+      ||
+      !p_phone
+    ){
+      msg.textContent=
+        '日付・メニュー・時間・お客様名・電話番号を入力してください。';
+      return;
+    }
+
+    const {
+      error
+    }=
+    await supabase.rpc(
+
+      'nakano_admin_change_booking',
+
+      {
+        p_booking_id,
+        p_date,
+        p_start_time,
+        p_menu_id,
+        p_customer_name,
+        p_phone,
+        p_memo
+      }
+
+    );
+
+    if(error){
+
+      console.error(error);
+
+      msg.textContent=
+        '変更できませんでした。別の日付・時間を確認してください。';
+
+      return;
+    }
+
+    // 変更後の日付を管理日にして、その日の予約一覧を表示
+    document
+    .getElementById('date')
+    .value=
+    p_date;
+
+    closeEdit();
+
+    await load();
+
+  };
+
+})();
 
 </script>
 
