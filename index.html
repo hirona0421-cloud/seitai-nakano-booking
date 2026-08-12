@@ -10,28 +10,66 @@
 <style>
 *{box-sizing:border-box}
 html,body{max-width:100%;overflow-x:hidden}
+
 body{
   margin:0;
   background:#f6f3ee;
   color:#2f2d2a;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Yu Gothic",Meiryo,sans-serif;
 }
+
 main{
   max-width:580px;
   margin:auto;
   padding:22px 14px 80px;
 }
-h1{margin:0;font-size:26px;letter-spacing:.02em}
-h2{font-size:19px;margin:0 0 12px}
-p{line-height:1.7}
-a{text-decoration:none}
-.muted{color:#77716a;font-size:13px;line-height:1.65}
-.required{color:#9b4138;font-size:12px;margin-left:5px}
-.optional{color:#77716a;font-size:12px;margin-left:5px}
-.hidden{display:none!important}
 
-.header{margin-bottom:18px}
-.subtitle{margin:5px 0 0;color:#77716a;font-size:14px}
+h1{
+  margin:0;
+  font-size:26px;
+  letter-spacing:.02em
+}
+
+h2{
+  font-size:19px;
+  margin:0 0 12px
+}
+
+p{line-height:1.7}
+
+a{text-decoration:none}
+
+.muted{
+  color:#77716a;
+  font-size:13px;
+  line-height:1.65
+}
+
+.required{
+  color:#9b4138;
+  font-size:12px;
+  margin-left:5px
+}
+
+.optional{
+  color:#77716a;
+  font-size:12px;
+  margin-left:5px
+}
+
+.hidden{
+  display:none!important
+}
+
+.header{
+  margin-bottom:18px
+}
+
+.subtitle{
+  margin:5px 0 0;
+  color:#77716a;
+  font-size:14px
+}
 
 .lineBox{
   margin-top:14px;
@@ -64,13 +102,15 @@ a{text-decoration:none}
   font-size:13px;
 }
 
-.menu,.slot{
+.menu,
+.slot{
   border:1px solid #e7e0d7;
   border-radius:13px;
   background:#fff;
   font:inherit;
   color:inherit;
 }
+
 .menu{
   width:100%;
   display:flex;
@@ -81,10 +121,24 @@ a{text-decoration:none}
   margin-bottom:8px;
   text-align:left;
 }
-.menuName{font-weight:700}
-.menuSub{font-size:12px;color:#77716a;margin-top:3px}
-.menuPrice{font-weight:700;white-space:nowrap}
-.menu.active,.slot.active{
+
+.menuName{
+  font-weight:700
+}
+
+.menuSub{
+  font-size:12px;
+  color:#77716a;
+  margin-top:3px
+}
+
+.menuPrice{
+  font-weight:700;
+  white-space:nowrap
+}
+
+.menu.active,
+.slot.active{
   background:#eee7df;
   border-color:#61574d;
   box-shadow:0 0 0 1px #61574d inset;
@@ -95,10 +149,23 @@ a{text-decoration:none}
   grid-template-columns:repeat(3,minmax(0,1fr));
   gap:8px;
 }
-.slot{padding:13px 5px;font-weight:700}
 
-input,textarea,select,button{font:inherit;max-width:100%}
-input,textarea,select{
+.slot{
+  padding:13px 5px;
+  font-weight:700
+}
+
+input,
+textarea,
+select,
+button{
+  font:inherit;
+  max-width:100%
+}
+
+input,
+textarea,
+select{
   width:100%;
   min-width:0;
   border:1px solid #e7e0d7;
@@ -108,14 +175,23 @@ input,textarea,select{
   margin-top:6px;
   color:#2f2d2a;
 }
+
 input[type="date"]{
   -webkit-appearance:none;
   appearance:none;
   height:49px;
   min-height:49px;
 }
-input[type="date"]::-webkit-date-and-time-value{text-align:left}
-textarea{min-height:95px;resize:vertical}
+
+input[type="date"]::-webkit-date-and-time-value{
+  text-align:left
+}
+
+textarea{
+  min-height:95px;
+  resize:vertical
+}
+
 label{
   display:block;
   margin-top:13px;
@@ -123,29 +199,37 @@ label{
   font-weight:700;
 }
 
-.primary,.secondary,.danger{
+.primary,
+.secondary,
+.danger{
   width:100%;
   border-radius:13px;
   padding:14px;
   font-weight:700;
   margin-top:10px;
 }
+
 .primary{
   background:#61574d;
   border:1px solid #61574d;
   color:#fff;
 }
+
 .secondary{
   background:#fff;
   border:1px solid #cfc6bc;
   color:#49443f;
 }
+
 .danger{
   background:#fff;
   border:1px solid #d8aaa5;
   color:#9b4138;
 }
-button:disabled{opacity:.55}
+
+button:disabled{
+  opacity:.55
+}
 
 .msg{
   font-size:13px;
@@ -160,6 +244,7 @@ button:disabled{opacity:.55}
   overflow:hidden;
   margin-top:12px;
 }
+
 .summaryRow{
   display:grid;
   grid-template-columns:100px 1fr;
@@ -167,9 +252,21 @@ button:disabled{opacity:.55}
   padding:11px 12px;
   border-bottom:1px solid #eee7df;
 }
-.summaryRow:last-child{border-bottom:0}
-.summaryKey{font-size:12px;color:#77716a}
-.summaryValue{font-size:14px;font-weight:600;overflow-wrap:anywhere}
+
+.summaryRow:last-child{
+  border-bottom:0
+}
+
+.summaryKey{
+  font-size:12px;
+  color:#77716a
+}
+
+.summaryValue{
+  font-size:14px;
+  font-weight:600;
+  overflow-wrap:anywhere
+}
 
 .success{
   background:#edf4ee;
@@ -177,11 +274,13 @@ button:disabled{opacity:.55}
   border-radius:18px;
   padding:20px;
 }
+
 .successTitle{
   font-size:21px;
   font-weight:700;
   margin-bottom:12px;
 }
+
 .successNote{
   margin-top:14px;
   padding-top:13px;
@@ -198,6 +297,7 @@ button:disabled{opacity:.55}
   padding:13px;
   margin-bottom:14px;
 }
+
 .manageBanner a{
   color:#554b42;
   font-weight:700;
@@ -211,6 +311,23 @@ button:disabled{opacity:.55}
   font-size:12px;
   line-height:1.7;
   color:#706a64;
+}
+
+.karteGuide{
+  margin-top:16px;
+  padding:15px;
+  border-radius:14px;
+  background:#fff;
+  border:1px solid #cbdccb;
+  color:#4d574d;
+  font-size:13px;
+  line-height:1.7;
+}
+
+.karteGuideTitle{
+  font-size:16px;
+  font-weight:700;
+  margin-bottom:4px;
 }
 
 .cancelled{
@@ -237,11 +354,20 @@ button:disabled{opacity:.55}
   gap:8px;
   margin-top:12px;
 }
-.actions button{margin-top:0}
+
+.actions button{
+  margin-top:0
+}
 
 @media(max-width:420px){
-  .summaryRow{grid-template-columns:82px 1fr}
-  .actions{grid-template-columns:1fr}
+
+  .summaryRow{
+    grid-template-columns:82px 1fr
+  }
+
+  .actions{
+    grid-template-columns:1fr
+  }
 }
 </style>
 
@@ -252,54 +378,134 @@ button:disabled{opacity:.55}
 <main>
 
 <header class="header">
-  <h1>整体なかの</h1>
-  <p class="subtitle">オンライン予約</p>
 
-  <div id="lineStatus" class="lineBox">
+  <h1>整体なかの</h1>
+
+  <p class="subtitle">
+    オンライン予約
+  </p>
+
+  <div
+    id="lineStatus"
+    class="lineBox"
+  >
     LINEとの連携を確認しています…
   </div>
+
 </header>
 
-<div id="latestManage" class="manageBanner hidden">
+
+<div
+  id="latestManage"
+  class="manageBanner hidden"
+>
+
   予約済みの内容を確認・変更する場合は
-  <a id="latestManageLink" href="#">こちら</a>
+
+  <a
+    id="latestManageLink"
+    href="#"
+  >
+    こちら
+  </a>
+
 </div>
+
 
 <div id="bookingArea">
 
+
 <section class="card">
-  <h2><span class="step">1</span>メニューを選択</h2>
+
+  <h2>
+    <span class="step">1</span>
+    メニューを選択
+  </h2>
+
   <div id="menus">
-    <span class="muted">メニューを読み込んでいます…</span>
+
+    <span class="muted">
+      メニューを読み込んでいます…
+    </span>
+
   </div>
+
 </section>
 
+
 <section class="card">
-  <h2><span class="step">2</span>日付を選択</h2>
-  <input type="date" id="date">
+
+  <h2>
+    <span class="step">2</span>
+    日付を選択
+  </h2>
+
+  <input
+    type="date"
+    id="date"
+  >
+
 </section>
 
-<section class="card">
-  <h2><span class="step">3</span>時間を選択</h2>
-  <p class="muted">ご予約いただける時間のみ表示されます。</p>
 
-  <div id="slots" class="slots">
-    <span class="muted">メニューと日付を選択してください。</span>
+<section class="card">
+
+  <h2>
+    <span class="step">3</span>
+    時間を選択
+  </h2>
+
+  <p class="muted">
+    ご予約いただける時間のみ表示されます。
+  </p>
+
+  <div
+    id="slots"
+    class="slots"
+  >
+
+    <span class="muted">
+      メニューと日付を選択してください。
+    </span>
+
   </div>
+
 </section>
 
+
 <section class="card">
-  <h2><span class="step">4</span>お客様情報</h2>
+
+  <h2>
+    <span class="step">4</span>
+    お客様情報
+  </h2>
+
 
   <label>
+
     お名前
-    <span class="required">必須</span>
-    <input id="name" autocomplete="name" placeholder="例：中野 太郎">
+
+    <span class="required">
+      必須
+    </span>
+
+    <input
+      id="name"
+      autocomplete="name"
+      placeholder="例：中野 太郎"
+    >
+
   </label>
 
+
   <label>
+
     電話番号
-    <span class="required">必須</span>
+
+    <span class="required">
+      必須
+    </span>
+
     <input
       id="tel"
       type="tel"
@@ -307,361 +513,863 @@ button:disabled{opacity:.55}
       autocomplete="tel"
       placeholder="例：09012345678"
     >
+
   </label>
 
+
   <label>
+
     気になる症状・部位
-    <span class="optional">任意</span>
+
+    <span class="optional">
+      任意
+    </span>
+
     <textarea
       id="memo"
       placeholder="例：首・肩のこり、腰の重さなど"
     ></textarea>
+
   </label>
 
+
   <div class="notice">
-    ご入力いただいた情報は、ご予約管理およびご連絡のために使用します。
+
+    ご入力いただいた情報は、
+    ご予約管理およびご連絡のために使用します。
+
   </div>
 
-  <button class="primary" id="confirmBooking">
+
+  <button
+    class="primary"
+    id="confirmBooking"
+  >
     予約内容を確認する
   </button>
 
-  <div id="msg" class="msg"></div>
+
+  <div
+    id="msg"
+    class="msg"
+  ></div>
+
 </section>
 
-<section id="confirmCard" class="card hidden">
-  <h2>予約内容の確認</h2>
 
-  <p class="muted">内容をご確認のうえ、予約を確定してください。</p>
+<section
+  id="confirmCard"
+  class="card hidden"
+>
 
-  <div id="confirmSummary" class="summary"></div>
+  <h2>
+    予約内容の確認
+  </h2>
 
-  <button class="primary" id="book">
+  <p class="muted">
+    内容をご確認のうえ、予約を確定してください。
+  </p>
+
+  <div
+    id="confirmSummary"
+    class="summary"
+  ></div>
+
+
+  <button
+    class="primary"
+    id="book"
+  >
     この内容で予約する
   </button>
 
-  <button class="secondary" id="backToEdit">
+
+  <button
+    class="secondary"
+    id="backToEdit"
+  >
     内容を修正する
   </button>
 
-  <div id="confirmMsg" class="msg"></div>
+
+  <div
+    id="confirmMsg"
+    class="msg"
+  ></div>
+
 </section>
+
 
 </div>
 
-<section id="successArea" class="success hidden">
 
-  <div class="successTitle">ご予約が確定しました</div>
+<section
+  id="successArea"
+  class="success hidden"
+>
 
-  <div id="successDetail" class="summary"></div>
+  <div class="successTitle">
+    ご予約が確定しました
+  </div>
 
-  <div id="successLineText" class="successNote">
+
+  <div
+    id="successDetail"
+    class="summary"
+  ></div>
+
+
+  <div
+    id="successLineText"
+    class="successNote"
+  >
     予約内容をLINEでお送りします。
   </div>
 
-  <a id="manageLink" href="#">
-    <button class="secondary" type="button">
+
+  <!-- 初回カルテ未入力の人だけ表示 -->
+  <div
+    id="karteGuide"
+    class="karteGuide hidden"
+  >
+
+    <div class="karteGuideTitle">
+      初めてご来店の方へ
+    </div>
+
+    ご来店前に初回カルテをご入力ください。<br>
+    一度ご入力いただければ、
+    次回以降は原則ご記入いただく必要はありません。
+
+    <a
+      id="karteLink"
+      href="#"
+    >
+
+      <button
+        class="primary"
+        type="button"
+      >
+        初回カルテを入力する
+      </button>
+
+    </a>
+
+  </div>
+
+
+  <a
+    id="manageLink"
+    href="#"
+  >
+
+    <button
+      class="secondary"
+      type="button"
+    >
       予約内容の確認・変更・キャンセル
     </button>
+
   </a>
 
-  <button id="newBooking" class="secondary" type="button">
+
+  <button
+    id="newBooking"
+    class="secondary"
+    type="button"
+  >
     別の予約をする
   </button>
 
 </section>
 
-<section id="manageArea" class="hidden">
 
-  <section class="card">
-    <h2>ご予約内容</h2>
+<section
+  id="manageArea"
+  class="hidden"
+>
 
-    <div id="manageLoading" class="muted">
-      ご予約内容を確認しています…
+
+<section class="card">
+
+  <h2>
+    ご予約内容
+  </h2>
+
+
+  <div
+    id="manageLoading"
+    class="muted"
+  >
+    ご予約内容を確認しています…
+  </div>
+
+
+  <div
+    id="manageContent"
+    class="hidden"
+  >
+
+    <div
+      id="manageSummary"
+      class="summary"
+    ></div>
+
+
+    <div
+      id="manageResultMsg"
+      class="okmsg hidden"
+    ></div>
+
+
+    <div
+      id="manageCancelled"
+      class="cancelled hidden"
+    >
+      このご予約はキャンセル済みです。
     </div>
 
-    <div id="manageContent" class="hidden">
-      <div id="manageSummary" class="summary"></div>
 
-      <div id="manageResultMsg" class="okmsg hidden"></div>
+    <div
+      id="manageActions"
+      class="actions"
+    >
 
-      <div id="manageCancelled" class="cancelled hidden">
-        このご予約はキャンセル済みです。
-      </div>
+      <button
+        class="secondary"
+        id="openManageEdit"
+      >
+        予約を変更
+      </button>
 
-      <div id="manageActions" class="actions">
-        <button class="secondary" id="openManageEdit">
-          予約を変更
-        </button>
 
-        <button class="danger" id="cancelCustomerBooking">
-          予約をキャンセル
-        </button>
-      </div>
+      <button
+        class="danger"
+        id="cancelCustomerBooking"
+      >
+        予約をキャンセル
+      </button>
+
     </div>
 
-    <div id="manageError" class="msg"></div>
-  </section>
+  </div>
 
-  <section id="manageEditCard" class="card hidden">
 
-    <h2>予約を変更</h2>
-
-    <label>
-      メニュー
-      <select id="manageMenu"></select>
-    </label>
-
-    <label>
-      日付
-      <input type="date" id="manageDate">
-    </label>
-
-    <label>
-      時間
-      <select id="manageTime">
-        <option value="">時間を選択</option>
-      </select>
-    </label>
-
-    <button class="primary" id="saveManageEdit">
-      この内容に変更する
-    </button>
-
-    <button class="secondary" id="closeManageEdit">
-      変更をやめる
-    </button>
-
-    <div id="manageEditMsg" class="msg"></div>
-
-  </section>
-
-  <a href="./">
-    <button class="secondary" type="button">
-      新しく予約する
-    </button>
-  </a>
+  <div
+    id="manageError"
+    class="msg"
+  ></div>
 
 </section>
+
+
+<section
+  id="manageEditCard"
+  class="card hidden"
+>
+
+  <h2>
+    予約を変更
+  </h2>
+
+
+  <label>
+
+    メニュー
+
+    <select id="manageMenu"></select>
+
+  </label>
+
+
+  <label>
+
+    日付
+
+    <input
+      type="date"
+      id="manageDate"
+    >
+
+  </label>
+
+
+  <label>
+
+    時間
+
+    <select id="manageTime">
+
+      <option value="">
+        時間を選択
+      </option>
+
+    </select>
+
+  </label>
+
+
+  <button
+    class="primary"
+    id="saveManageEdit"
+  >
+    この内容に変更する
+  </button>
+
+
+  <button
+    class="secondary"
+    id="closeManageEdit"
+  >
+    変更をやめる
+  </button>
+
+
+  <div
+    id="manageEditMsg"
+    class="msg"
+  ></div>
+
+</section>
+
+
+<a href="./">
+
+  <button
+    class="secondary"
+    type="button"
+  >
+    新しく予約する
+  </button>
+
+</a>
+
+
+</section>
+
 
 <script type="module">
 
 import {createClient}
 from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-const supabase=createClient(
+
+const supabase=
+createClient(
+
   'https://scjzofjyxmchfjsngqtb.supabase.co',
+
   'sb_publishable_EGlr-6w0xh4gD8OImboE_Q_V-COJ7t9'
+
 );
 
-const LIFF_ID='2011071292-KT8sSyCN';
+
+const LIFF_ID=
+  '2011071292-KT8sSyCN';
+
 
 const BASE_URL=
   'https://seitai-nakano.github.io/seitai-nakano-booking/';
 
-const $=id=>document.getElementById(id);
+
+const $=
+  id=>document.getElementById(id);
+
 
 let menus=[];
+
 let selectedMenu=null;
+
 let selectedTime=null;
+
 let lineUser=null;
+
 let bookingInProgress=false;
+
 let manageBooking=null;
 
-const params=new URLSearchParams(location.search);
-const manageToken=params.get('manage');
+
+const params=
+  new URLSearchParams(
+    location.search
+  );
+
+
+const manageToken=
+  params.get(
+    'manage'
+  );
+
+
+/* =====================================================
+   共通
+===================================================== */
 
 function esc(value){
-  return String(value??'')
-    .replaceAll('&','&amp;')
-    .replaceAll('<','&lt;')
-    .replaceAll('>','&gt;')
-    .replaceAll('"','&quot;')
-    .replaceAll("'","&#039;");
+
+  return String(
+    value??''
+  )
+
+  .replaceAll(
+    '&',
+    '&amp;'
+  )
+
+  .replaceAll(
+    '<',
+    '&lt;'
+  )
+
+  .replaceAll(
+    '>',
+    '&gt;'
+  )
+
+  .replaceAll(
+    '"',
+    '&quot;'
+  )
+
+  .replaceAll(
+    "'",
+    "&#039;"
+  );
+
 }
+
 
 function japanParts(){
-  const parts=
-    new Intl.DateTimeFormat('en-US',{
-      timeZone:'Asia/Tokyo',
-      year:'numeric',
-      month:'2-digit',
-      day:'2-digit',
-      hour:'2-digit',
-      minute:'2-digit',
-      hourCycle:'h23'
-    }).formatToParts(new Date());
 
-  const get=type=>parts.find(x=>x.type===type)?.value||'';
+  const parts=
+
+    new Intl.DateTimeFormat(
+
+      'en-US',
+
+      {
+
+        timeZone:
+          'Asia/Tokyo',
+
+        year:
+          'numeric',
+
+        month:
+          '2-digit',
+
+        day:
+          '2-digit',
+
+        hour:
+          '2-digit',
+
+        minute:
+          '2-digit',
+
+        hourCycle:
+          'h23'
+
+      }
+
+    ).formatToParts(
+      new Date()
+    );
+
+
+  const get=
+    type=>
+      parts.find(
+        x=>x.type===type
+      )?.value
+      ||
+      '';
+
 
   return {
-    y:Number(get('year')),
-    m:Number(get('month')),
-    d:Number(get('day')),
-    h:Number(get('hour')),
-    min:Number(get('minute'))
+
+    y:
+      Number(
+        get('year')
+      ),
+
+    m:
+      Number(
+        get('month')
+      ),
+
+    d:
+      Number(
+        get('day')
+      ),
+
+    h:
+      Number(
+        get('hour')
+      ),
+
+    min:
+      Number(
+        get('minute')
+      )
+
   };
+
 }
+
 
 function todayJapan(){
-  const p=japanParts();
 
-  return `${String(p.y).padStart(4,'0')}-${String(p.m).padStart(2,'0')}-${String(p.d).padStart(2,'0')}`;
+  const p=
+    japanParts();
+
+
+  return `${
+    String(
+      p.y
+    ).padStart(
+      4,
+      '0'
+    )
+  }-${
+    String(
+      p.m
+    ).padStart(
+      2,
+      '0'
+    )
+  }-${
+    String(
+      p.d
+    ).padStart(
+      2,
+      '0'
+    )
+  }`;
+
 }
 
-function addDaysIso(dateString,days){
-  const [y,m,d]=dateString.split('-').map(Number);
+
+function addDaysIso(
+  dateString,
+  days
+){
+
+  const [
+    y,
+    m,
+    d
+  ]=
+    dateString
+      .split('-')
+      .map(Number);
+
 
   const date=
+
     new Date(
+
       Date.UTC(
         y,
         m-1,
         d
       )
+
     );
 
+
   date.setUTCDate(
-    date.getUTCDate()+days
+    date.getUTCDate()
+    +
+    days
   );
+
 
   return date
     .toISOString()
-    .slice(0,10);
+    .slice(
+      0,
+      10
+    );
+
 }
 
+
 function tomorrowJapan(){
+
   return addDaysIso(
     todayJapan(),
     1
   );
+
 }
+
 
 function currentJapanMinutes(){
-  const p=japanParts();
+
+  const p=
+    japanParts();
+
   return p.h*60+p.min;
+
 }
 
-function isPastSlot(date,time){
-  if(date!==todayJapan()){
+
+function isPastSlot(
+  date,
+  time
+){
+
+  if(
+    date
+    !==
+    todayJapan()
+  ){
+
     return false;
+
   }
 
-  const [h,m]=
-    String(time)
-      .slice(0,5)
-      .split(':')
-      .map(Number);
 
-  return h*60+m<=currentJapanMinutes();
+  const [
+    h,
+    m
+  ]=
+
+    String(
+      time
+    )
+
+    .slice(
+      0,
+      5
+    )
+
+    .split(':')
+
+    .map(Number);
+
+
+  return (
+    h*60+m
+    <=
+    currentJapanMinutes()
+  );
+
 }
 
+
 function formatDate(date){
+
   if(!date){
     return '';
   }
 
-  const [y,m,d]=
-    date.split('-').map(Number);
+
+  const [
+    y,
+    m,
+    d
+  ]=
+    date
+      .split('-')
+      .map(Number);
+
 
   const dt=
+
     new Date(
+
       Date.UTC(
         y,
         m-1,
         d
       )
+
     );
 
+
   return new Intl.DateTimeFormat(
+
     'ja-JP',
+
     {
-      timeZone:'UTC',
-      month:'numeric',
-      day:'numeric',
-      weekday:'short'
+
+      timeZone:
+        'UTC',
+
+      month:
+        'numeric',
+
+      day:
+        'numeric',
+
+      weekday:
+        'short'
+
     }
+
   ).format(dt);
+
 }
+
 
 function yen(value){
-  return `${Number(value||0).toLocaleString()}円`;
+
+  return `${
+    Number(
+      value||0
+    ).toLocaleString()
+  }円`;
+
 }
+
 
 function summaryHtml(rows){
-  return rows.map(([key,value])=>`
-    <div class="summaryRow">
-      <div class="summaryKey">${esc(key)}</div>
-      <div class="summaryValue">${esc(value)}</div>
-    </div>
-  `).join('');
+
+  return rows.map(
+    ([key,value])=>`
+
+      <div class="summaryRow">
+
+        <div class="summaryKey">
+          ${esc(key)}
+        </div>
+
+        <div class="summaryValue">
+          ${esc(value)}
+        </div>
+
+      </div>
+
+    `
+  ).join('');
+
 }
+
 
 function phoneIsValid(value){
+
   const digits=
-    value.replace(/\D/g,'');
+    value.replace(
+      /\D/g,
+      ''
+    );
+
 
   return (
-    digits.length===10 ||
+
+    digits.length===10
+
+    ||
+
     digits.length===11
+
   );
+
 }
 
+
+/* =====================================================
+   予約管理URL
+===================================================== */
+
 function setLatestManage(token){
+
   if(!token){
     return;
   }
 
+
   localStorage.setItem(
+
     'nakano_latest_manage_token',
+
     token
+
   );
 
+
   const url=
+
     `${BASE_URL}?manage=${encodeURIComponent(token)}`;
 
-  $('latestManageLink').href=url;
-  $('latestManage').classList.remove('hidden');
+
+  $('latestManageLink').href=
+    url;
+
+
+  $('latestManage')
+    .classList
+    .remove(
+      'hidden'
+    );
+
 }
 
+
 function loadLatestManage(){
+
   if(manageToken){
     return;
   }
 
+
   const token=
+
     localStorage.getItem(
       'nakano_latest_manage_token'
     );
 
+
   if(token){
-    setLatestManage(token);
+
+    setLatestManage(
+      token
+    );
+
   }
+
 }
 
+
+/* =====================================================
+   通知
+===================================================== */
+
 async function invokeNotification(body){
+
   try{
 
     const {error}=
+
       await supabase.functions.invoke(
+
         'nakano-booking-notify',
+
         {
           body
         }
+
       );
 
+
     if(error){
+
       console.error(
         '通知エラー',
         error
       );
 
       return false;
+
     }
+
 
     return true;
 
-  }catch(error){
+  }
+  catch(error){
 
     console.error(
       '通知エラー',
@@ -669,8 +1377,15 @@ async function invokeNotification(body){
     );
 
     return false;
+
   }
+
 }
+
+
+/* =====================================================
+   LINE
+===================================================== */
 
 async function initLine(){
 
@@ -680,19 +1395,28 @@ async function initLine(){
       'ご予約内容の確認・変更ができます。';
 
     return null;
+
   }
+
 
   try{
 
     if(!window.liff){
+
       throw new Error(
         'LIFF SDK not loaded'
       );
+
     }
 
+
     await window.liff.init({
-      liffId:LIFF_ID
+
+      liffId:
+        LIFF_ID
+
     });
+
 
     if(
       !window.liff.isLoggedIn()
@@ -701,148 +1425,253 @@ async function initLine(){
       $('lineStatus').textContent=
         'LINE連携のためログイン画面へ移動します…';
 
+
       window.liff.login({
-        redirectUri:BASE_URL
+
+        redirectUri:
+          BASE_URL
+
       });
 
+
       return null;
+
     }
 
+
     const profile=
-      await window.liff.getProfile();
+
+      await window.liff
+        .getProfile();
+
 
     lineUser={
-      userId:profile.userId,
+
+      userId:
+        profile.userId,
+
       displayName:
-        profile.displayName||''
+        profile.displayName
+        ||
+        ''
+
     };
+
 
     $('lineStatus').textContent=
       'LINEで予約完了のお知らせを受け取れます。';
 
+
     return lineUser;
 
-  }catch(error){
+  }
+  catch(error){
 
     console.error(
       'LINE連携エラー',
       error
     );
 
+
     $('lineStatus').textContent=
       'オンライン予約をご利用いただけます。';
 
+
     return null;
+
   }
+
 }
+
 
 const lineReadyPromise=
   initLine();
 
+
+/* =====================================================
+   メニュー
+===================================================== */
+
 async function loadMenus(){
 
-  const {data,error}=
+  const {
+    data,
+    error
+  }=
+
     await supabase
-      .from('nakano_menus')
-      .select('*')
-      .eq(
-        'is_active',
-        true
-      )
-      .order(
-        'display_order'
-      );
+
+    .from(
+      'nakano_menus'
+    )
+
+    .select('*')
+
+    .eq(
+      'is_active',
+      true
+    )
+
+    .order(
+      'display_order'
+    );
+
 
   if(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
+
 
     $('menus').innerHTML=
+
       '<span class="muted">メニューを読み込めませんでした。時間をおいて再度お試しください。</span>';
 
+
     return;
+
   }
 
-  menus=data||[];
+
+  menus=
+    data||[];
+
 
   if(!manageToken){
 
     $('menus').innerHTML='';
 
-    menus.forEach(menu=>{
 
-      const button=
-        document.createElement(
-          'button'
-        );
+    menus.forEach(
+      menu=>{
 
-      button.className=
-        'menu';
+        const button=
 
-      button.innerHTML=`
-        <div>
-          <div class="menuName">
-            ${esc(menu.name)}
-          </div>
-
-          ${
-            menu.minutes
-            ? `<div class="menuSub">${Number(menu.minutes)}分</div>`
-            : ''
-          }
-        </div>
-
-        <div class="menuPrice">
-          ${yen(menu.price)}
-        </div>
-      `;
-
-      button.onclick=()=>{
-
-        if(bookingInProgress){
-          return;
-        }
-
-        document
-          .querySelectorAll('.menu')
-          .forEach(
-            x=>
-              x.classList.remove(
-                'active'
-              )
+          document.createElement(
+            'button'
           );
 
-        button
-          .classList
-          .add('active');
 
-        selectedMenu=
-          menu;
+        button.className=
+          'menu';
 
-        selectedTime=
-          null;
 
-        $('confirmCard')
-          .classList
-          .add('hidden');
+        button.innerHTML=`
 
-        loadSlots();
-      };
+          <div>
 
-      $('menus')
-        .appendChild(button);
-    });
+            <div class="menuName">
+              ${esc(menu.name)}
+            </div>
+
+            ${
+              menu.minutes
+              ?
+              `<div class="menuSub">${Number(menu.minutes)}分</div>`
+              :
+              ''
+            }
+
+          </div>
+
+          <div class="menuPrice">
+            ${yen(menu.price)}
+          </div>
+
+        `;
+
+
+        button.onclick=
+        ()=>{
+
+          if(
+            bookingInProgress
+          ){
+            return;
+          }
+
+
+          document
+
+            .querySelectorAll(
+              '.menu'
+            )
+
+            .forEach(
+              x=>
+
+                x.classList.remove(
+                  'active'
+                )
+
+            );
+
+
+          button
+            .classList
+            .add(
+              'active'
+            );
+
+
+          selectedMenu=
+            menu;
+
+
+          selectedTime=
+            null;
+
+
+          $('confirmCard')
+            .classList
+            .add(
+              'hidden'
+            );
+
+
+          loadSlots();
+
+        };
+
+
+        $('menus')
+          .appendChild(
+            button
+          );
+
+      }
+
+    );
+
   }
 
+
   $('manageMenu').innerHTML=
+
     '<option value="">メニューを選択</option>'
+
     +
-    menus.map(menu=>`
-      <option value="${esc(menu.id)}">
-        ${esc(menu.name)}　${yen(menu.price)}
-      </option>
-    `).join('');
+
+    menus.map(
+      menu=>`
+
+        <option value="${esc(menu.id)}">
+
+          ${esc(menu.name)}　
+          ${yen(menu.price)}
+
+        </option>
+
+      `
+    ).join('');
+
 }
+
+
+/* =====================================================
+   空き枠
+===================================================== */
 
 async function getAvailableSlots(
   menuId,
@@ -850,156 +1679,269 @@ async function getAvailableSlots(
 ){
 
   if(
-    !menuId ||
+    !menuId
+    ||
     !date
   ){
+
     return [];
+
   }
 
-  const {data,error}=
+
+  const {
+    data,
+    error
+  }=
+
     await supabase.rpc(
+
       'nakano_available_slots',
+
       {
-        p_date:date,
-        p_menu_id:menuId
+
+        p_date:
+          date,
+
+        p_menu_id:
+          menuId
+
       }
+
     );
+
 
   if(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
 
     return [];
+
   }
 
-  return (data||[])
-    .filter(
-      slot=>
-        !isPastSlot(
-          date,
-          slot.start_time
-        )
-    );
+
+  return (
+    data||[]
+  )
+
+  .filter(
+    slot=>
+
+      !isPastSlot(
+        date,
+        slot.start_time
+      )
+
+  );
+
 }
+
 
 async function loadSlots(){
 
   const box=
     $('slots');
 
+
   box.innerHTML='';
 
-  selectedTime=null;
+
+  selectedTime=
+    null;
+
 
   $('confirmCard')
     .classList
-    .add('hidden');
+    .add(
+      'hidden'
+    );
+
 
   if(
-    !selectedMenu ||
+    !selectedMenu
+    ||
     !$('date').value
   ){
 
     box.innerHTML=
+
       '<span class="muted">メニューと日付を選択してください。</span>';
 
+
     return;
+
   }
 
+
   box.innerHTML=
+
     '<span class="muted">空き時間を確認しています…</span>';
 
+
   const slots=
+
     await getAvailableSlots(
+
       selectedMenu.id,
+
       $('date').value
+
     );
+
 
   box.innerHTML='';
 
-  if(!slots.length){
+
+  if(
+    !slots.length
+  ){
 
     box.innerHTML=
+
       '<span class="muted">この日は現在ご予約いただける時間がありません。</span>';
 
+
     return;
+
   }
 
-  slots.forEach(slot=>{
 
-    const button=
-      document.createElement(
-        'button'
-      );
+  slots.forEach(
+    slot=>{
 
-    button.className=
-      'slot';
+      const button=
 
-    button.textContent=
-      String(
-        slot.start_time
-      ).slice(0,5);
-
-    button.onclick=()=>{
-
-      document
-        .querySelectorAll('.slot')
-        .forEach(
-          x=>
-            x.classList.remove(
-              'active'
-            )
+        document.createElement(
+          'button'
         );
 
-      button
-        .classList
-        .add('active');
 
-      selectedTime=
-        slot.start_time;
+      button.className=
+        'slot';
 
-      $('confirmCard')
-        .classList
-        .add('hidden');
-    };
 
-    box.appendChild(button);
-  });
+      button.textContent=
+
+        String(
+          slot.start_time
+        ).slice(
+          0,
+          5
+        );
+
+
+      button.onclick=
+      ()=>{
+
+        document
+
+          .querySelectorAll(
+            '.slot'
+          )
+
+          .forEach(
+            x=>
+
+              x.classList.remove(
+                'active'
+              )
+
+          );
+
+
+        button
+          .classList
+          .add(
+            'active'
+          );
+
+
+        selectedTime=
+          slot.start_time;
+
+
+        $('confirmCard')
+          .classList
+          .add(
+            'hidden'
+          );
+
+      };
+
+
+      box.appendChild(
+        button
+      );
+
+    }
+
+  );
+
 }
+
 
 $('date').min=
   todayJapan();
 
+
 $('manageDate').min=
   todayJapan();
 
-$('date').onchange=()=>{
 
-  selectedTime=null;
+$('date').onchange=
+()=>{
+
+  selectedTime=
+    null;
+
 
   loadSlots();
+
 };
 
-$('confirmBooking').onclick=()=>{
+
+/* =====================================================
+   予約確認
+===================================================== */
+
+$('confirmBooking').onclick=
+()=>{
 
   const name=
-    $('name').value.trim();
+    $('name')
+      .value
+      .trim();
+
 
   const tel=
-    $('tel').value.trim();
+    $('tel')
+      .value
+      .trim();
+
 
   const memo=
-    $('memo').value.trim();
+    $('memo')
+      .value
+      .trim();
 
-  $('msg').textContent='';
 
-  if(!selectedMenu){
+  $('msg').textContent=
+    '';
+
+
+  if(
+    !selectedMenu
+  ){
 
     $('msg').textContent=
       'メニューを選択してください。';
 
     return;
+
   }
+
 
   if(
     !$('date').value
@@ -1009,15 +1951,21 @@ $('confirmBooking').onclick=()=>{
       '日付を選択してください。';
 
     return;
+
   }
 
-  if(!selectedTime){
+
+  if(
+    !selectedTime
+  ){
 
     $('msg').textContent=
       '時間を選択してください。';
 
     return;
+
   }
+
 
   if(!name){
 
@@ -1025,167 +1973,295 @@ $('confirmBooking').onclick=()=>{
       'お名前を入力してください。';
 
     return;
+
   }
 
+
   if(
-    !phoneIsValid(tel)
+    !phoneIsValid(
+      tel
+    )
   ){
 
     $('msg').textContent=
       '電話番号を確認してください。';
 
     return;
+
   }
 
+
   $('confirmSummary').innerHTML=
+
     summaryHtml([
+
       [
         'メニュー',
         selectedMenu.name
       ],
+
       [
         '日時',
-        `${formatDate(
-          $('date').value
-        )} ${String(
-          selectedTime
-        ).slice(0,5)}`
+
+        `${
+          formatDate(
+            $('date').value
+          )
+        } ${
+          String(
+            selectedTime
+          ).slice(
+            0,
+            5
+          )
+        }`
+
       ],
+
       [
         '料金',
         yen(
           selectedMenu.price
         )
       ],
+
       [
         'お名前',
         name
       ],
+
       [
         '電話番号',
         tel
       ],
+
       [
         '症状・部位',
         memo||'未入力'
       ]
+
     ]);
+
 
   $('confirmCard')
     .classList
-    .remove('hidden');
+    .remove(
+      'hidden'
+    );
+
 
   $('confirmCard')
     .scrollIntoView({
-      behavior:'smooth',
-      block:'start'
+
+      behavior:
+        'smooth',
+
+      block:
+        'start'
+
     });
+
 };
 
-$('backToEdit').onclick=()=>{
+
+$('backToEdit').onclick=
+()=>{
 
   $('confirmCard')
     .classList
-    .add('hidden');
+    .add(
+      'hidden'
+    );
+
 
   $('bookingArea')
     .scrollIntoView({
-      behavior:'smooth',
-      block:'start'
+
+      behavior:
+        'smooth',
+
+      block:
+        'start'
+
     });
+
 };
 
-$('book').onclick=async()=>{
 
-  if(bookingInProgress){
+/* =====================================================
+   予約確定
+===================================================== */
+
+$('book').onclick=
+async()=>{
+
+  if(
+    bookingInProgress
+  ){
     return;
   }
 
+
   const name=
-    $('name').value.trim();
+
+    $('name')
+      .value
+      .trim();
+
 
   const tel=
-    $('tel').value.trim();
+
+    $('tel')
+      .value
+      .trim();
+
 
   const memo=
-    $('memo').value.trim();
+
+    $('memo')
+      .value
+      .trim();
+
 
   if(
-    !selectedMenu ||
-    !$('date').value ||
-    !selectedTime ||
-    !name ||
-    !phoneIsValid(tel)
+
+    !selectedMenu
+
+    ||
+
+    !$('date').value
+
+    ||
+
+    !selectedTime
+
+    ||
+
+    !name
+
+    ||
+
+    !phoneIsValid(
+      tel
+    )
+
   ){
 
     $('confirmMsg').textContent=
-      '入力内容をもう一度確認してください。';
+      '入力内容をもう一度確認してください.';
 
     return;
+
   }
+
 
   const bookingDate=
     $('date').value;
 
+
   const bookingTime=
     selectedTime;
+
 
   const bookingMenu=
     selectedMenu;
 
-  bookingInProgress=true;
+
+  bookingInProgress=
+    true;
+
 
   $('book').disabled=
     true;
 
+
   $('backToEdit').disabled=
     true;
+
 
   $('book').textContent=
     '予約を確定しています…';
 
+
   $('confirmMsg').textContent=
     '';
 
+
   try{
 
-    if(!lineUser){
+
+    /* LINEプロフィール確認 */
+
+    if(
+      !lineUser
+    ){
 
       lineUser=
         await lineReadyPromise;
+
     }
 
+
     if(
-      !lineUser &&
+
+      !lineUser
+
+      &&
+
       window.liff?.isLoggedIn()
+
     ){
+
       try{
 
         const profile=
+
           await window.liff
             .getProfile();
 
+
         lineUser={
+
           userId:
             profile.userId,
 
           displayName:
-            profile.displayName||''
+            profile.displayName
+            ||
+            ''
+
         };
 
-      }catch(error){
-
-        console.error(error);
       }
+      catch(error){
+
+        console.error(
+          error
+        );
+
+      }
+
     }
 
+
+    /* 予約作成 */
+
     const {
-      data:bookingId,
-      error:createError
+
+      data:
+        bookingId,
+
+      error:
+        createError
+
     }=
+
       await supabase.rpc(
+
         'nakano_create_booking',
+
         {
+
           p_date:
             bookingDate,
 
@@ -1203,34 +2279,59 @@ $('book').onclick=async()=>{
 
           p_memo:
             memo||null
+
         }
+
       );
 
-    if(createError){
+
+    if(
+      createError
+    ){
 
       console.error(
         createError
       );
 
+
       $('confirmMsg').textContent=
+
         '申し訳ありません。この時間は予約できなくなりました。空き時間をもう一度お選びください。';
+
 
       await loadSlots();
 
+
       return;
+
     }
 
+
+    /* LINEを予約に紐付け */
+
     if(
-      bookingId &&
+
+      bookingId
+
+      &&
+
       lineUser?.userId
+
     ){
 
       const {
-        error:lineError
+
+        error:
+          lineError
+
       }=
+
         await supabase.rpc(
+
           'nakano_attach_line_to_booking',
+
           {
+
             p_booking_id:
               bookingId,
 
@@ -1241,49 +2342,146 @@ $('book').onclick=async()=>{
               lineUser.displayName
               ||
               null
+
           }
+
         );
 
-      if(lineError){
+
+      if(
+        lineError
+      ){
 
         console.error(
+
           'LINE保存エラー',
+
           lineError
+
         );
+
       }
+
     }
 
-    let token=null;
+
+    /* =================================================
+       初回カルテトークン取得
+       未入力の人だけ返ってくる
+    ================================================= */
+
+    let karteToken=
+      null;
+
 
     const {
-      data:tokenData,
-      error:tokenError
+
+      data:
+        karteTokenData,
+
+      error:
+        karteTokenError
+
     }=
+
       await supabase.rpc(
-        'nakano_customer_get_manage_token',
+
+        'nakano_customer_get_karte_token',
+
         {
+
           p_booking_id:
             bookingId,
 
           p_phone:
             tel
+
         }
+
       );
 
+
     if(
-      !tokenError &&
+      karteTokenError
+    ){
+
+      console.error(
+
+        'カルテ確認エラー',
+
+        karteTokenError
+
+      );
+
+    }
+    else if(
+      karteTokenData
+    ){
+
+      karteToken=
+        karteTokenData;
+
+    }
+
+
+    /* 予約変更・キャンセル用トークン */
+
+    let token=
+      null;
+
+
+    const {
+
+      data:
+        tokenData,
+
+      error:
+        tokenError
+
+    }=
+
+      await supabase.rpc(
+
+        'nakano_customer_get_manage_token',
+
+        {
+
+          p_booking_id:
+            bookingId,
+
+          p_phone:
+            tel
+
+        }
+
+      );
+
+
+    if(
+
+      !tokenError
+
+      &&
+
       tokenData
+
     ){
 
       token=
         tokenData;
 
+
       setLatestManage(
         token
       );
+
     }
 
+
+    /* 通知 */
+
     await invokeNotification({
+
       booking_date:
         bookingDate,
 
@@ -1301,502 +2499,862 @@ $('book').onclick=async()=>{
 
       memo:
         memo||null
+
     });
 
+
+    /* 完了画面 */
+
     $('successDetail').innerHTML=
+
       summaryHtml([
+
         [
           'メニュー',
           bookingMenu.name
         ],
+
         [
+
           '日時',
-          `${formatDate(
-            bookingDate
-          )} ${String(
-            bookingTime
-          ).slice(0,5)}`
+
+          `${
+            formatDate(
+              bookingDate
+            )
+          } ${
+            String(
+              bookingTime
+            ).slice(
+              0,
+              5
+            )
+          }`
+
         ],
+
         [
           '料金',
           yen(
             bookingMenu.price
           )
         ],
+
         [
           'お名前',
           name
         ]
+
       ]);
 
+
     if(
-      bookingDate===
-        tomorrowJapan()
+
+      bookingDate
+      ===
+      tomorrowJapan()
+
       &&
+
       currentJapanMinutes()
-        >=
+      >=
       22*60
+
     ){
 
       $('successLineText').textContent=
+
         '明日のご予約を承りました。予約内容はLINEでもお送りします。';
 
-    }else{
+    }
+    else{
 
       $('successLineText').textContent=
+
         '予約内容をLINEでお送りします。前日にもご案内をお送りします。';
+
     }
 
-    if(token){
+
+    /* 初回カルテボタン */
+
+    if(
+      karteToken
+    ){
+
+      $('karteLink').href=
+
+        `${BASE_URL}karte.html?token=${encodeURIComponent(karteToken)}`;
+
+
+      $('karteGuide')
+        .classList
+        .remove(
+          'hidden'
+        );
+
+    }
+    else{
+
+      $('karteGuide')
+        .classList
+        .add(
+          'hidden'
+        );
+
+    }
+
+
+    /* 予約変更URL */
+
+    if(
+      token
+    ){
 
       $('manageLink').href=
+
         `${BASE_URL}?manage=${encodeURIComponent(token)}`;
 
-      $('manageLink')
-        .classList
-        .remove('hidden');
-
-    }else{
 
       $('manageLink')
         .classList
-        .add('hidden');
+        .remove(
+          'hidden'
+        );
+
     }
+    else{
+
+      $('manageLink')
+        .classList
+        .add(
+          'hidden'
+        );
+
+    }
+
 
     $('bookingArea')
       .classList
-      .add('hidden');
+      .add(
+        'hidden'
+      );
+
 
     $('successArea')
       .classList
-      .remove('hidden');
+      .remove(
+        'hidden'
+      );
+
 
     $('successArea')
       .scrollIntoView({
-        behavior:'smooth',
-        block:'start'
+
+        behavior:
+          'smooth',
+
+        block:
+          'start'
+
       });
 
-  }catch(error){
+  }
+  catch(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
+
 
     $('confirmMsg').textContent=
+
       '予約処理中にエラーが発生しました。もう一度お試しください。';
 
-  }finally{
+  }
+  finally{
 
-    bookingInProgress=false;
+    bookingInProgress=
+      false;
+
 
     $('book').disabled=
       false;
 
+
     $('backToEdit').disabled=
       false;
 
+
     $('book').textContent=
       'この内容で予約する';
+
   }
+
 };
 
-$('newBooking').onclick=()=>{
+
+/* =====================================================
+   別の予約
+===================================================== */
+
+$('newBooking').onclick=
+()=>{
 
   selectedMenu=
     null;
 
+
   selectedTime=
     null;
 
-  $('name').value='';
-  $('tel').value='';
-  $('memo').value='';
-  $('date').value='';
+
+  $('name').value=
+    '';
+
+
+  $('tel').value=
+    '';
+
+
+  $('memo').value=
+    '';
+
+
+  $('date').value=
+    '';
+
+
+  $('karteGuide')
+    .classList
+    .add(
+      'hidden'
+    );
+
 
   document
+
     .querySelectorAll(
       '.menu,.slot'
     )
+
     .forEach(
       x=>
-        x.classList
-          .remove('active')
+
+        x.classList.remove(
+          'active'
+        )
+
     );
 
+
   $('slots').innerHTML=
+
     '<span class="muted">メニューと日付を選択してください。</span>';
+
 
   $('confirmCard')
     .classList
-    .add('hidden');
+    .add(
+      'hidden'
+    );
+
 
   $('successArea')
     .classList
-    .add('hidden');
+    .add(
+      'hidden'
+    );
+
 
   $('bookingArea')
     .classList
-    .remove('hidden');
+    .remove(
+      'hidden'
+    );
+
 
   window.scrollTo({
-    top:0,
-    behavior:'smooth'
+
+    top:
+      0,
+
+    behavior:
+      'smooth'
+
   });
+
 };
+
+
+/* =====================================================
+   お客様予約管理
+===================================================== */
 
 async function loadManageBooking(){
 
-  if(!manageToken){
+  if(
+    !manageToken
+  ){
     return;
   }
 
+
   localStorage.setItem(
+
     'nakano_latest_manage_token',
+
     manageToken
+
   );
+
 
   $('bookingArea')
     .classList
-    .add('hidden');
+    .add(
+      'hidden'
+    );
+
 
   $('successArea')
     .classList
-    .add('hidden');
+    .add(
+      'hidden'
+    );
+
 
   $('latestManage')
     .classList
-    .add('hidden');
+    .add(
+      'hidden'
+    );
+
 
   $('manageArea')
     .classList
-    .remove('hidden');
+    .remove(
+      'hidden'
+    );
+
 
   const {
+
     data,
+
     error
+
   }=
+
     await supabase.rpc(
+
       'nakano_customer_get_booking',
+
       {
+
         p_token:
           manageToken
+
       }
+
     );
+
 
   $('manageLoading')
     .classList
-    .add('hidden');
+    .add(
+      'hidden'
+    );
+
 
   if(
-    error ||
+
+    error
+
+    ||
+
     !data
+
   ){
 
     console.error(
       error
     );
 
+
     $('manageError').textContent=
+
       'ご予約を確認できませんでした。URLをご確認ください。';
 
+
     return;
+
   }
+
 
   manageBooking=
     data;
 
+
   renderManageBooking();
+
 }
+
 
 function renderManageBooking(){
 
-  if(!manageBooking){
+  if(
+    !manageBooking
+  ){
     return;
   }
 
+
   $('manageContent')
     .classList
-    .remove('hidden');
+    .remove(
+      'hidden'
+    );
+
 
   $('manageSummary').innerHTML=
+
     summaryHtml([
+
       [
         'メニュー',
         manageBooking.menu_name
       ],
+
       [
+
         '日時',
-        `${formatDate(
-          manageBooking.booking_date
-        )} ${String(
-          manageBooking.start_time
-        ).slice(0,5)}`
+
+        `${
+          formatDate(
+            manageBooking.booking_date
+          )
+        } ${
+          String(
+            manageBooking.start_time
+          ).slice(
+            0,
+            5
+          )
+        }`
+
       ],
+
       [
         '料金',
         yen(
           manageBooking.price
         )
       ],
+
       [
         'お名前',
         manageBooking.customer_name
       ],
+
       [
         '電話番号',
         manageBooking.phone
       ],
+
       [
         '症状・部位',
+
         manageBooking.memo
         ||
         '未入力'
+
       ]
+
     ]);
 
+
   const cancelled=
+
     manageBooking.status
     !==
     'confirmed';
 
+
   $('manageCancelled')
     .classList
     .toggle(
+
       'hidden',
+
       !cancelled
+
     );
+
 
   $('manageActions')
     .classList
     .toggle(
+
       'hidden',
+
       cancelled
+
     );
+
 
   $('manageEditCard')
     .classList
-    .add('hidden');
+    .add(
+      'hidden'
+    );
+
 }
+
+
+/* =====================================================
+   予約変更
+===================================================== */
 
 $('openManageEdit').onclick=
 async()=>{
 
-  if(!manageBooking){
+  if(
+    !manageBooking
+  ){
     return;
   }
 
+
   $('manageResultMsg')
     .classList
-    .add('hidden');
+    .add(
+      'hidden'
+    );
+
 
   $('manageError').textContent=
     '';
 
+
   $('manageMenu').value=
     manageBooking.menu_id;
+
 
   $('manageDate').value=
     manageBooking.booking_date;
 
+
   $('manageEditMsg').textContent=
     '';
 
+
   await loadManageTimes();
+
 
   $('manageEditCard')
     .classList
-    .remove('hidden');
+    .remove(
+      'hidden'
+    );
+
 
   $('manageEditCard')
     .scrollIntoView({
-      behavior:'smooth',
-      block:'start'
+
+      behavior:
+        'smooth',
+
+      block:
+        'start'
+
     });
+
 };
+
 
 async function loadManageTimes(){
 
-  if(!manageBooking){
+  if(
+    !manageBooking
+  ){
     return;
   }
+
 
   const menuId=
     $('manageMenu').value;
 
+
   const date=
     $('manageDate').value;
+
 
   const select=
     $('manageTime');
 
+
   select.innerHTML=
+
     '<option value="">時間を選択</option>';
 
+
   if(
-    !menuId ||
+    !menuId
+    ||
     !date
   ){
     return;
   }
 
+
   let slots=
+
     await getAvailableSlots(
+
       menuId,
+
       date
+
     );
 
+
   const currentTime=
+
     String(
       manageBooking.start_time
     );
 
+
   const same=
-    date===
-      manageBooking.booking_date
+
+    date
+    ===
+    manageBooking.booking_date
+
     &&
-    menuId===
-      manageBooking.menu_id;
+
+    menuId
+    ===
+    manageBooking.menu_id;
+
 
   if(
+
     same
+
     &&
+
     !slots.some(
       x=>
+
         String(
           x.start_time
         )
         ===
         currentTime
     )
+
   ){
 
     slots.push({
+
       start_time:
         currentTime
+
     });
+
   }
+
 
   slots.sort(
     (a,b)=>
+
       String(
         a.start_time
       )
+
       .localeCompare(
+
         String(
           b.start_time
         )
+
       )
+
   );
 
-  slots.forEach(slot=>{
 
-    const option=
-      document.createElement(
-        'option'
+  slots.forEach(
+    slot=>{
+
+      const option=
+
+        document.createElement(
+          'option'
+        );
+
+
+      option.value=
+        slot.start_time;
+
+
+      option.textContent=
+
+        String(
+          slot.start_time
+        ).slice(
+          0,
+          5
+        );
+
+
+      if(
+
+        same
+
+        &&
+
+        String(
+          slot.start_time
+        )
+        ===
+        currentTime
+
+      ){
+
+        option.selected=
+          true;
+
+      }
+
+
+      select.appendChild(
+        option
       );
 
-    option.value=
-      slot.start_time;
-
-    option.textContent=
-      String(
-        slot.start_time
-      ).slice(0,5);
-
-    if(
-      same
-      &&
-      String(
-        slot.start_time
-      )
-      ===
-      currentTime
-    ){
-
-      option.selected=
-        true;
     }
 
-    select.appendChild(
-      option
-    );
-  });
+  );
+
 }
+
 
 $('manageMenu').onchange=
   loadManageTimes;
 
+
 $('manageDate').onchange=
   loadManageTimes;
+
 
 $('closeManageEdit').onclick=
 ()=>{
 
   $('manageEditCard')
     .classList
-    .add('hidden');
+    .add(
+      'hidden'
+    );
+
 };
+
 
 $('saveManageEdit').onclick=
 async()=>{
 
-  if(!manageBooking){
+  if(
+    !manageBooking
+  ){
     return;
   }
+
 
   const menuId=
     $('manageMenu').value;
 
+
   const date=
     $('manageDate').value;
+
 
   const time=
     $('manageTime').value;
 
+
   $('manageEditMsg').textContent=
     '';
+
 
   $('manageError').textContent=
     '';
 
+
   $('manageResultMsg')
     .classList
-    .add('hidden');
+    .add(
+      'hidden'
+    );
+
 
   if(
-    !menuId ||
-    !date ||
+
+    !menuId
+
+    ||
+
+    !date
+
+    ||
+
     !time
+
   ){
 
     $('manageEditMsg').textContent=
+
       'メニュー・日付・時間を選択してください。';
 
+
     return;
+
   }
 
+
   if(
+
     !confirm(
       'この内容に予約を変更しますか？'
     )
+
   ){
     return;
   }
+
 
   $('saveManageEdit').disabled=
     true;
 
+
   $('closeManageEdit').disabled=
     true;
+
 
   $('saveManageEdit').textContent=
     '変更しています…';
 
+
   try{
 
-    const {error}=
+    const {
+      error
+    }=
+
       await supabase.rpc(
+
         'nakano_customer_change_booking',
+
         {
+
           p_token:
             manageToken,
 
@@ -1808,8 +3366,11 @@ async()=>{
 
           p_menu_id:
             menuId
+
         }
+
       );
+
 
     if(error){
 
@@ -1817,115 +3378,194 @@ async()=>{
         error
       );
 
+
       $('manageEditMsg').textContent=
+
         '変更できませんでした。別の日時をお選びください。';
+
 
       await loadManageTimes();
 
+
       return;
+
     }
 
+
     const {
+
       data,
-      error:getError
+
+      error:
+        getError
+
     }=
+
       await supabase.rpc(
+
         'nakano_customer_get_booking',
+
         {
+
           p_token:
             manageToken
+
         }
+
       );
 
+
     if(
-      !getError &&
+
+      !getError
+
+      &&
+
       data
+
     ){
 
       manageBooking=
         data;
+
     }
 
+
     await invokeNotification({
+
       action:
         'booking_changed',
 
       token:
         manageToken
+
     });
+
 
     renderManageBooking();
 
+
     $('manageResultMsg').textContent=
+
       'ご予約内容を変更しました。';
+
 
     $('manageResultMsg')
       .classList
-      .remove('hidden');
+      .remove(
+        'hidden'
+      );
+
 
     window.scrollTo({
-      top:0,
-      behavior:'smooth'
+
+      top:
+        0,
+
+      behavior:
+        'smooth'
+
     });
 
-  }finally{
+  }
+  finally{
 
     $('saveManageEdit').disabled=
       false;
 
+
     $('closeManageEdit').disabled=
       false;
 
+
     $('saveManageEdit').textContent=
       'この内容に変更する';
+
   }
+
 };
+
+
+/* =====================================================
+   キャンセル
+===================================================== */
 
 $('cancelCustomerBooking').onclick=
 async()=>{
 
-  if(!manageBooking){
-    return;
-  }
-
   if(
-    !confirm(
-      `${formatDate(
-        manageBooking.booking_date
-      )} ${String(
-        manageBooking.start_time
-      ).slice(0,5)}の予約をキャンセルしますか？`
-    )
+    !manageBooking
   ){
     return;
   }
 
+
+  if(
+
+    !confirm(
+
+      `${
+        formatDate(
+          manageBooking.booking_date
+        )
+      } ${
+        String(
+          manageBooking.start_time
+        ).slice(
+          0,
+          5
+        )
+      }の予約をキャンセルしますか？`
+
+    )
+
+  ){
+    return;
+  }
+
+
   $('manageError').textContent=
     '';
 
+
   $('manageResultMsg')
     .classList
-    .add('hidden');
+    .add(
+      'hidden'
+    );
+
 
   $('cancelCustomerBooking').disabled=
     true;
 
+
   $('openManageEdit').disabled=
     true;
+
 
   $('cancelCustomerBooking').textContent=
     'キャンセルしています…';
 
+
   try{
 
-    const {error}=
+    const {
+      error
+    }=
+
       await supabase.rpc(
+
         'nakano_customer_cancel_booking',
+
         {
+
           p_token:
             manageToken
+
         }
+
       );
+
 
     if(error){
 
@@ -1933,78 +3573,126 @@ async()=>{
         error
       );
 
+
       $('manageError').textContent=
+
         'キャンセルできませんでした。店舗までご連絡ください。';
 
+
       return;
+
     }
 
+
     await invokeNotification({
+
       action:
         'booking_cancelled',
 
       token:
         manageToken
+
     });
 
-    const {data}=
+
+    const {
+      data
+    }=
+
       await supabase.rpc(
+
         'nakano_customer_get_booking',
+
         {
+
           p_token:
             manageToken
+
         }
+
       );
+
 
     if(data){
 
       manageBooking=
         data;
 
-    }else{
+    }
+    else{
 
       manageBooking.status=
         'cancelled';
+
     }
+
 
     renderManageBooking();
 
+
     $('manageResultMsg').textContent=
+
       'ご予約をキャンセルしました。';
+
 
     $('manageResultMsg')
       .classList
-      .remove('hidden');
+      .remove(
+        'hidden'
+      );
+
 
     window.scrollTo({
-      top:0,
-      behavior:'smooth'
+
+      top:
+        0,
+
+      behavior:
+        'smooth'
+
     });
 
-  }finally{
+  }
+  finally{
 
     $('cancelCustomerBooking').disabled=
       false;
 
+
     $('openManageEdit').disabled=
       false;
 
+
     $('cancelCustomerBooking').textContent=
       '予約をキャンセル';
+
   }
+
 };
+
+
+/* =====================================================
+   起動
+===================================================== */
 
 async function start(){
 
   loadLatestManage();
 
+
   await loadMenus();
 
-  if(manageToken){
+
+  if(
+    manageToken
+  ){
 
     await loadManageBooking();
+
   }
+
 }
+
 
 start();
 
