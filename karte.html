@@ -1,0 +1,975 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>整体なかの｜初回カルテ</title>
+
+<style>
+*{box-sizing:border-box}
+html,body{max-width:100%;overflow-x:hidden}
+body{
+  margin:0;
+  background:#f6f3ee;
+  color:#2f2d2a;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Yu Gothic",Meiryo,sans-serif;
+}
+main{
+  max-width:620px;
+  margin:auto;
+  padding:22px 14px 80px;
+}
+h1{margin:0;font-size:26px}
+h2{font-size:19px;margin:0 0 12px}
+h3{font-size:16px;margin:20px 0 10px}
+p{line-height:1.7}
+.muted{color:#77716a;font-size:13px;line-height:1.65}
+.hidden{display:none!important}
+
+.card{
+  background:#fff;
+  border:1px solid #e7e0d7;
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:14px;
+}
+
+.notice{
+  background:#faf8f5;
+  border-radius:13px;
+  padding:12px;
+  font-size:13px;
+  line-height:1.7;
+  margin-bottom:14px;
+}
+
+.required{
+  color:#9b4138;
+  font-size:12px;
+  margin-left:5px;
+}
+
+.optional{
+  color:#77716a;
+  font-size:12px;
+  margin-left:5px;
+}
+
+label{
+  display:block;
+  margin-top:13px;
+  font-size:13px;
+  font-weight:700;
+}
+
+input,select,textarea,button{
+  font:inherit;
+  max-width:100%;
+}
+
+input,select,textarea{
+  width:100%;
+  min-width:0;
+  border:1px solid #e7e0d7;
+  border-radius:12px;
+  background:#fff;
+  padding:13px;
+  margin-top:6px;
+  color:#2f2d2a;
+}
+
+textarea{
+  min-height:95px;
+  resize:vertical;
+}
+
+input[type="date"]{
+  -webkit-appearance:none;
+  appearance:none;
+  height:49px;
+}
+
+.row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.primary,.secondary{
+  width:100%;
+  border-radius:13px;
+  padding:14px;
+  font-weight:700;
+  margin-top:10px;
+}
+
+.primary{
+  background:#61574d;
+  color:#fff;
+  border:1px solid #61574d;
+}
+
+.secondary{
+  background:#fff;
+  color:#4d4843;
+  border:1px solid #d4cbc2;
+}
+
+button:disabled{
+  opacity:.55;
+}
+
+.checkRow{
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+  margin-top:14px;
+  font-size:13px;
+  line-height:1.65;
+  font-weight:400;
+}
+
+.checkRow input{
+  width:auto;
+  margin:3px 0 0;
+  flex:none;
+}
+
+.msg{
+  margin-top:10px;
+  font-size:13px;
+  line-height:1.65;
+  color:#9b4138;
+}
+
+.success{
+  background:#edf4ee;
+  border:1px solid #cbdccb;
+  border-radius:18px;
+  padding:20px;
+}
+
+.successTitle{
+  font-size:21px;
+  font-weight:700;
+  margin-bottom:10px;
+}
+
+.doneBox{
+  background:#fff;
+  border:1px solid #d8e6da;
+  border-radius:14px;
+  padding:14px;
+  margin-top:13px;
+}
+
+.scale{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:6px;
+}
+
+.scale label{
+  margin:0;
+}
+
+.scale input{
+  display:none;
+}
+
+.scale span{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:42px;
+  border:1px solid #e2dbd3;
+  border-radius:10px;
+  background:#fff;
+  font-size:13px;
+  font-weight:700;
+}
+
+.scale input:checked + span{
+  background:#eee7df;
+  border-color:#61574d;
+  box-shadow:0 0 0 1px #61574d inset;
+}
+
+@media(max-width:420px){
+  .row{grid-template-columns:1fr}
+  .scale{grid-template-columns:repeat(4,1fr)}
+}
+</style>
+</head>
+
+<body>
+<main>
+
+<header style="margin-bottom:18px">
+  <h1>整体なかの</h1>
+  <p class="muted">初回カルテ</p>
+</header>
+
+<section id="loading" class="card">
+  <p class="muted">カルテ情報を確認しています…</p>
+</section>
+
+<section id="invalidArea" class="card hidden">
+  <h2>カルテページを確認できませんでした</h2>
+  <p class="muted">
+    URLが正しくない可能性があります。店舗までお問い合わせください。
+  </p>
+</section>
+
+<section id="completedArea" class="success hidden">
+  <div class="successTitle">カルテは登録済みです</div>
+  <p>
+    初回カルテはすでにご記入いただいています。再度の入力は必要ありません。
+  </p>
+
+  <div class="doneBox">
+    体調や服薬などに大きな変更がある場合は、ご来店時にスタッフへお伝えください。
+  </div>
+</section>
+
+<div id="formArea" class="hidden">
+
+<section class="card">
+
+  <h2>基本情報</h2>
+
+  <div class="notice">
+    初回来店時のみご入力いただくカルテです。2回目以降は原則、再入力の必要はありません。
+  </div>
+
+  <label>
+    お名前
+    <span class="required">必須</span>
+    <input id="customerName" autocomplete="name" placeholder="例：中野 太郎">
+  </label>
+
+  <label>
+    ふりがな
+    <span class="optional">任意</span>
+    <input id="customerKana" placeholder="例：なかの たろう">
+  </label>
+
+  <label>
+    電話番号
+    <span class="required">必須</span>
+    <input
+      id="phone"
+      type="tel"
+      inputmode="tel"
+      autocomplete="tel"
+      placeholder="例：09012345678"
+    >
+  </label>
+
+  <div class="row">
+
+    <label>
+      生年月日
+      <span class="optional">任意</span>
+      <input id="birthDate" type="date">
+    </label>
+
+    <label>
+      職業
+      <span class="optional">任意</span>
+      <input id="occupation" placeholder="例：デスクワーク">
+    </label>
+
+  </div>
+
+  <label>
+    住所
+    <span class="optional">任意</span>
+    <input id="address" autocomplete="street-address" placeholder="市区町村まででも大丈夫です">
+  </label>
+
+</section>
+
+
+<section class="card">
+
+  <h2>現在のお身体について</h2>
+
+  <label>
+    今、一番気になる症状
+    <span class="required">必須</span>
+    <textarea
+      id="chiefComplaint"
+      placeholder="例：首と肩のこり、腰の重さなど"
+    ></textarea>
+  </label>
+
+  <label>
+    気になる部位
+    <span class="optional">任意</span>
+    <textarea
+      id="painfulAreas"
+      placeholder="例：首、肩、腰、右脚など"
+    ></textarea>
+  </label>
+
+  <label>
+    いつ頃から気になりますか
+    <span class="optional">任意</span>
+    <input
+      id="symptomSince"
+      placeholder="例：3日前から、半年ほど前から"
+    >
+  </label>
+
+  <label>
+    現在のつらさ
+    <span class="optional">任意</span>
+  </label>
+
+  <div class="scale" id="painScale"></div>
+
+</section>
+
+
+<section class="card">
+
+  <h2>健康状態の確認</h2>
+
+  <label>
+    既往歴・過去の大きな病気やけが
+    <span class="optional">任意</span>
+    <textarea
+      id="medicalHistory"
+      placeholder="特になければ未入力で大丈夫です"
+    ></textarea>
+  </label>
+
+  <label>
+    現在飲んでいる薬
+    <span class="optional">任意</span>
+    <textarea
+      id="medications"
+      placeholder="薬の名前が分からない場合は用途だけでも大丈夫です"
+    ></textarea>
+  </label>
+
+  <label>
+    現在通院中・治療中のもの
+    <span class="optional">任意</span>
+    <textarea id="currentTreatment"></textarea>
+  </label>
+
+  <label>
+    アレルギー
+    <span class="optional">任意</span>
+    <textarea
+      id="allergies"
+      placeholder="薬・食品・オイル・化粧品など"
+    ></textarea>
+  </label>
+
+  <label>
+    施術で触れてほしくない場所・注意してほしいこと
+    <span class="optional">任意</span>
+    <textarea
+      id="contraindications"
+      placeholder="例：手術痕がある、強く押してほしくない場所など"
+    ></textarea>
+  </label>
+
+  <label>
+    妊娠中・妊娠の可能性について
+    <span class="optional">任意</span>
+    <select id="pregnancyNote">
+      <option value="">該当しない / 回答しない</option>
+      <option value="妊娠中">妊娠中</option>
+      <option value="妊娠の可能性あり">妊娠の可能性あり</option>
+    </select>
+  </label>
+
+</section>
+
+
+<section class="card">
+
+  <h2>普段の状態・ご希望</h2>
+
+  <label>
+    睡眠について
+    <span class="optional">任意</span>
+    <textarea
+      id="sleepCondition"
+      placeholder="例：寝つきが悪い、途中で起きる、よく眠れている"
+    ></textarea>
+  </label>
+
+  <label>
+    生活習慣
+    <span class="optional">任意</span>
+    <textarea
+      id="lifestyle"
+      placeholder="例：長時間のデスクワーク、立ち仕事、運動習慣など"
+    ></textarea>
+  </label>
+
+  <label>
+    施術のご希望
+    <span class="optional">任意</span>
+    <textarea
+      id="treatmentRequest"
+      placeholder="例：肩を中心にしてほしい、強すぎる施術は苦手など"
+    ></textarea>
+  </label>
+
+  <label>
+    その他伝えておきたいこと
+    <span class="optional">任意</span>
+    <textarea id="customerMessage"></textarea>
+  </label>
+
+</section>
+
+
+<section class="card">
+
+  <h2>ご確認</h2>
+
+  <label class="checkRow">
+    <input type="checkbox" id="consentPersonalInfo">
+    <span>
+      入力した個人情報を、予約管理・施術・連絡・カルテ管理のために利用することに同意します。
+    </span>
+  </label>
+
+  <label class="checkRow">
+    <input type="checkbox" id="consentTreatment">
+    <span>
+      体調や既往歴などを申告したうえで施術を受け、必要に応じて施術内容の変更や中止をお願いされる場合があることを確認しました。
+    </span>
+  </label>
+
+  <button class="primary" id="submitKarte">
+    カルテを送信する
+  </button>
+
+  <div id="msg" class="msg"></div>
+
+</section>
+
+</div>
+
+
+<section id="successArea" class="success hidden">
+
+  <div class="successTitle">ご記入ありがとうございました</div>
+
+  <p>
+    初回カルテの登録が完了しました。
+  </p>
+
+  <div class="doneBox">
+    次回以降は、原則このカルテをもう一度ご記入いただく必要はありません。
+  </div>
+
+</section>
+
+
+<script type="module">
+
+import {createClient}
+from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const supabase=createClient(
+  'https://scjzofjyxmchfjsngqtb.supabase.co',
+  'sb_publishable_EGlr-6w0xh4gD8OImboE_Q_V-COJ7t9'
+);
+
+const $=id=>document.getElementById(id);
+
+const params=
+  new URLSearchParams(
+    location.search
+  );
+
+const token=
+  params.get('token');
+
+let submitting=false;
+
+
+function phoneIsValid(value){
+
+  const digits=
+    String(value||'')
+      .replace(/\D/g,'');
+
+  return (
+    digits.length===10
+    ||
+    digits.length===11
+  );
+
+}
+
+
+function buildPainScale(){
+
+  const box=
+    $('painScale');
+
+  box.innerHTML='';
+
+  for(let i=0;i<=10;i++){
+
+    const label=
+      document.createElement('label');
+
+    label.innerHTML=`
+      <input
+        type="radio"
+        name="painLevel"
+        value="${i}"
+      >
+      <span>${i}</span>
+    `;
+
+    box.appendChild(label);
+
+  }
+
+}
+
+
+function getPainLevel(){
+
+  const checked=
+    document.querySelector(
+      'input[name="painLevel"]:checked'
+    );
+
+  if(!checked){
+    return null;
+  }
+
+  return Number(
+    checked.value
+  );
+
+}
+
+
+async function checkStatus(){
+
+  $('loading')
+    .classList
+    .remove('hidden');
+
+  $('formArea')
+    .classList
+    .add('hidden');
+
+  $('completedArea')
+    .classList
+    .add('hidden');
+
+  $('invalidArea')
+    .classList
+    .add('hidden');
+
+
+  if(!token){
+
+    $('loading')
+      .classList
+      .add('hidden');
+
+    $('invalidArea')
+      .classList
+      .remove('hidden');
+
+    return;
+  }
+
+
+  const {
+    data,
+    error
+  }=
+    await supabase.rpc(
+      'nakano_customer_karte_status',
+      {
+        p_token:
+          token
+      }
+    );
+
+
+  $('loading')
+    .classList
+    .add('hidden');
+
+
+  if(error){
+
+    console.error(error);
+
+    $('invalidArea')
+      .classList
+      .remove('hidden');
+
+    return;
+  }
+
+
+  const status=
+    Array.isArray(data)
+    ?
+    data[0]
+    :
+    data;
+
+
+  if(
+    !status
+    ||
+    !status.customer_exists
+  ){
+
+    $('invalidArea')
+      .classList
+      .remove('hidden');
+
+    return;
+  }
+
+
+  if(
+    status.completed
+  ){
+
+    $('completedArea')
+      .classList
+      .remove('hidden');
+
+    return;
+  }
+
+
+  $('formArea')
+    .classList
+    .remove('hidden');
+
+}
+
+
+$('submitKarte').onclick=
+async()=>{
+
+  if(submitting){
+    return;
+  }
+
+
+  $('msg').textContent='';
+
+
+  const customerName=
+    $('customerName')
+      .value
+      .trim();
+
+  const customerKana=
+    $('customerKana')
+      .value
+      .trim();
+
+  const phone=
+    $('phone')
+      .value
+      .trim();
+
+  const chiefComplaint=
+    $('chiefComplaint')
+      .value
+      .trim();
+
+
+  if(!customerName){
+
+    $('msg').textContent=
+      'お名前を入力してください。';
+
+    return;
+  }
+
+
+  if(
+    !phoneIsValid(phone)
+  ){
+
+    $('msg').textContent=
+      '電話番号を確認してください。';
+
+    return;
+  }
+
+
+  if(!chiefComplaint){
+
+    $('msg').textContent=
+      '現在気になる症状を入力してください。';
+
+    return;
+  }
+
+
+  if(
+    !$('consentPersonalInfo').checked
+  ){
+
+    $('msg').textContent=
+      '個人情報の取扱いへの同意をお願いします。';
+
+    return;
+  }
+
+
+  if(
+    !$('consentTreatment').checked
+  ){
+
+    $('msg').textContent=
+      '施術に関する確認への同意をお願いします。';
+
+    return;
+  }
+
+
+  submitting=true;
+
+  $('submitKarte').disabled=
+    true;
+
+  $('submitKarte').textContent=
+    '送信しています…';
+
+
+  const payload={
+
+    p_token:
+      token,
+
+    p_customer_name:
+      customerName,
+
+    p_customer_name_kana:
+      customerKana
+      ||
+      null,
+
+    p_phone:
+      phone,
+
+    p_birth_date:
+      $('birthDate').value
+      ||
+      null,
+
+    p_address:
+      $('address')
+        .value
+        .trim()
+      ||
+      null,
+
+    p_occupation:
+      $('occupation')
+        .value
+        .trim()
+      ||
+      null,
+
+    p_chief_complaint:
+      chiefComplaint,
+
+    p_painful_areas:
+      $('painfulAreas')
+        .value
+        .trim()
+      ||
+      null,
+
+    p_symptom_since:
+      $('symptomSince')
+        .value
+        .trim()
+      ||
+      null,
+
+    p_pain_level:
+      getPainLevel(),
+
+    p_medical_history:
+      $('medicalHistory')
+        .value
+        .trim()
+      ||
+      null,
+
+    p_medications:
+      $('medications')
+        .value
+        .trim()
+      ||
+      null,
+
+    p_current_treatment:
+      $('currentTreatment')
+        .value
+        .trim()
+      ||
+      null,
+
+    p_allergies:
+      $('allergies')
+        .value
+        .trim()
+      ||
+      null,
+
+    p_contraindications:
+      $('contraindications')
+        .value
+        .trim()
+      ||
+      null,
+
+    p_pregnancy_note:
+      $('pregnancyNote').value
+      ||
+      null,
+
+    p_sleep_condition:
+      $('sleepCondition')
+        .value
+        .trim()
+      ||
+      null,
+
+    p_lifestyle:
+      $('lifestyle')
+        .value
+        .trim()
+      ||
+      null,
+
+    p_treatment_request:
+      $('treatmentRequest')
+        .value
+        .trim()
+      ||
+      null,
+
+    p_customer_message:
+      $('customerMessage')
+        .value
+        .trim()
+      ||
+      null,
+
+    p_consent_personal_info:
+      true,
+
+    p_consent_treatment:
+      true
+
+  };
+
+
+  try{
+
+    const {error}=
+      await supabase.rpc(
+        'nakano_customer_submit_initial_karte',
+        payload
+      );
+
+
+    if(error){
+
+      console.error(error);
+
+      const message=
+        String(
+          error.message
+          ||
+          ''
+        );
+
+
+      if(
+        message.includes(
+          '登録済み'
+        )
+      ){
+
+        $('formArea')
+          .classList
+          .add('hidden');
+
+        $('completedArea')
+          .classList
+          .remove('hidden');
+
+        return;
+
+      }
+
+
+      $('msg').textContent=
+        '送信できませんでした。入力内容を確認して、もう一度お試しください。';
+
+      return;
+
+    }
+
+
+    $('formArea')
+      .classList
+      .add('hidden');
+
+    $('successArea')
+      .classList
+      .remove('hidden');
+
+    window.scrollTo({
+      top:0,
+      behavior:'smooth'
+    });
+
+  }
+  finally{
+
+    submitting=false;
+
+    $('submitKarte').disabled=
+      false;
+
+    $('submitKarte').textContent=
+      'カルテを送信する';
+
+  }
+
+};
+
+
+buildPainScale();
+checkStatus();
+
+</script>
+
+</main>
+</body>
+</html>
