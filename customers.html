@@ -1,0 +1,2894 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>整体なかの｜顧客・電子カルテ</title>
+
+<style>
+*{box-sizing:border-box}
+html,body{max-width:100%;overflow-x:hidden}
+
+body{
+  margin:0;
+  background:#f6f3ee;
+  color:#2f2d2a;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Yu Gothic",Meiryo,sans-serif
+}
+
+main{
+  max-width:720px;
+  margin:auto;
+  padding:18px 14px 80px
+}
+
+h1{margin:0;font-size:24px}
+h2{margin:0 0 12px;font-size:19px}
+h3{margin:18px 0 8px;font-size:16px}
+
+a{
+  color:inherit;
+  text-decoration:none
+}
+
+.card{
+  background:#fff;
+  border:1px solid #e7e0d7;
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:14px
+}
+
+.muted{
+  color:#77716a;
+  font-size:13px;
+  line-height:1.65
+}
+
+.hidden{display:none!important}
+
+input,select,textarea,button{
+  font:inherit;
+  max-width:100%
+}
+
+input,select,textarea{
+  display:block;
+  width:100%;
+  min-width:0;
+  padding:13px;
+  margin:6px 0 10px;
+  border:1px solid #e2dbd3;
+  border-radius:12px;
+  background:#fff;
+  color:#2f2d2a
+}
+
+textarea{
+  min-height:95px;
+  resize:vertical
+}
+
+input[type="date"]{
+  -webkit-appearance:none;
+  appearance:none;
+  height:48px
+}
+
+label{
+  display:block;
+  margin-top:10px;
+  font-size:13px;
+  font-weight:700
+}
+
+.primary,
+.secondary,
+.danger{
+  width:100%;
+  border-radius:13px;
+  padding:13px;
+  font-weight:700
+}
+
+.primary{
+  border:0;
+  background:#61574d;
+  color:#fff
+}
+
+.secondary{
+  border:1px solid #d8d0c7;
+  background:#fff;
+  color:#4d4843;
+  margin-top:8px
+}
+
+.danger{
+  border:1px solid #d8aaa5;
+  background:#fff;
+  color:#9b4138;
+  margin-top:8px
+}
+
+button:disabled{opacity:.5}
+
+.row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:8px
+}
+
+.msg{
+  margin-top:9px;
+  font-size:13px;
+  line-height:1.6
+}
+
+.ok{
+  color:#46714d
+}
+
+.error{
+  color:#9b4138
+}
+
+.topActions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-bottom:14px
+}
+
+.topActions button{
+  margin:0
+}
+
+.searchArea{
+  position:sticky;
+  top:0;
+  z-index:5;
+  padding-top:3px
+}
+
+.searchCard{
+  box-shadow:0 4px 20px rgba(0,0,0,.04)
+}
+
+.kanaButtons{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:6px;
+  margin-top:8px
+}
+
+.kanaBtn{
+  border:1px solid #ddd4cb;
+  border-radius:10px;
+  background:#fff;
+  padding:9px 2px;
+  font-size:13px
+}
+
+.kanaBtn.active{
+  background:#61574d;
+  color:#fff;
+  border-color:#61574d
+}
+
+.customerList{
+  margin-top:12px
+}
+
+.customerItem{
+  border-bottom:1px solid #eee7df;
+  padding:13px 2px;
+  cursor:pointer
+}
+
+.customerItem:last-child{
+  border-bottom:0
+}
+
+.customerNo{
+  font-size:11px;
+  color:#8a837c
+}
+
+.customerName{
+  margin-top:2px;
+  font-size:16px;
+  font-weight:700
+}
+
+.customerKana{
+  font-size:12px;
+  color:#77716a
+}
+
+.customerMeta{
+  margin-top:4px;
+  font-size:12px;
+  color:#77716a;
+  line-height:1.6
+}
+
+.customerHeader{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px
+}
+
+.customerNumberBadge{
+  white-space:nowrap;
+  padding:5px 9px;
+  border-radius:999px;
+  background:#eee9e3;
+  color:#665f58;
+  font-size:12px;
+  font-weight:700
+}
+
+.statGrid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin-top:13px
+}
+
+.statBox{
+  padding:11px 7px;
+  border-radius:12px;
+  background:#faf8f5;
+  text-align:center
+}
+
+.statLabel{
+  font-size:10px;
+  color:#857e77
+}
+
+.statValue{
+  margin-top:3px;
+  font-size:14px;
+  font-weight:700
+}
+
+.warningBox{
+  padding:12px;
+  border-radius:12px;
+  background:#fff5ef;
+  border:1px solid #ead3c4;
+  font-size:13px;
+  line-height:1.7
+}
+
+.sectionDivider{
+  border:0;
+  border-top:1px solid #eee7df;
+  margin:18px 0
+}
+
+.historyItem{
+  padding:12px 0;
+  border-bottom:1px solid #eee7df;
+  line-height:1.6
+}
+
+.historyItem:last-child{
+  border-bottom:0
+}
+
+.historyDate{
+  font-weight:700
+}
+
+.historySub{
+  font-size:12px;
+  color:#77716a
+}
+
+.karteItem{
+  padding:13px 0;
+  border-bottom:1px solid #eee7df
+}
+
+.karteItem:last-child{
+  border-bottom:0
+}
+
+.karteTitle{
+  font-weight:700
+}
+
+.kartePreview{
+  margin-top:4px;
+  font-size:12px;
+  line-height:1.6;
+  color:#77716a
+}
+
+.smallActions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:8px
+}
+
+.smallActions button{
+  width:auto;
+  padding:8px 11px;
+  border-radius:9px
+}
+
+.badge{
+  display:inline-block;
+  margin-left:6px;
+  padding:3px 7px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:700
+}
+
+.badgeDone{
+  background:#e9f2e9;
+  color:#47714d
+}
+
+.badgeNone{
+  background:#f5ece8;
+  color:#8b5d52
+}
+
+.checkRow{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:9px 0;
+  font-size:13px
+}
+
+.checkRow input{
+  width:auto;
+  margin:0
+}
+
+.deleteZone{
+  margin-top:20px;
+  padding-top:18px;
+  border-top:1px solid #ebd8d5
+}
+
+@media(max-width:480px){
+
+  .row{
+    grid-template-columns:1fr
+  }
+
+  .topActions{
+    grid-template-columns:1fr
+  }
+
+  .kanaButtons{
+    grid-template-columns:repeat(4,minmax(0,1fr))
+  }
+
+  .statGrid{
+    grid-template-columns:1fr 1fr
+  }
+}
+</style>
+</head>
+
+<body>
+<main>
+
+<h1>整体なかの</h1>
+<p class="muted">顧客・電子カルテ管理</p>
+
+
+<section class="card" id="loginCard">
+
+<h2>管理者ログイン</h2>
+
+<input
+id="email"
+type="email"
+placeholder="メールアドレス"
+autocomplete="email"
+>
+
+<input
+id="password"
+type="password"
+placeholder="パスワード"
+autocomplete="current-password"
+>
+
+<button
+class="primary"
+id="login"
+>
+ログイン
+</button>
+
+<div
+id="loginMsg"
+class="msg"
+></div>
+
+</section>
+
+
+<div
+id="app"
+class="hidden"
+>
+
+<div class="topActions">
+
+<a href="./admin.html">
+
+<button
+class="secondary"
+type="button"
+>
+予約管理へ戻る
+</button>
+
+</a>
+
+<button
+class="secondary"
+id="logout"
+>
+ログアウト
+</button>
+
+</div>
+
+
+<div class="searchArea">
+
+<section class="card searchCard">
+
+<h2>顧客を探す</h2>
+
+<input
+id="search"
+placeholder="名前・ふりがな・電話番号・顧客番号"
+>
+
+<div
+id="kanaButtons"
+class="kanaButtons"
+></div>
+
+<button
+class="primary"
+id="newCustomer"
+style="margin-top:12px"
+>
+＋ 新しい顧客を登録
+</button>
+
+<div
+id="customerCount"
+class="muted"
+style="margin-top:10px"
+></div>
+
+<div
+id="customerList"
+class="customerList"
+></div>
+
+</section>
+
+</div>
+
+
+<section
+class="card hidden"
+id="customerCard"
+>
+
+<div class="customerHeader">
+
+<div>
+
+<h2 id="detailName">
+顧客情報
+</h2>
+
+<div
+id="detailKana"
+class="customerKana"
+></div>
+
+</div>
+
+<div
+id="detailNo"
+class="customerNumberBadge"
+></div>
+
+</div>
+
+
+<div
+id="customerStats"
+class="statGrid"
+></div>
+
+
+<hr class="sectionDivider">
+
+
+<h3>基本情報</h3>
+
+<label>ふりがな</label>
+
+<input
+id="editKana"
+placeholder="なかの たろう"
+>
+
+
+<label>お名前</label>
+
+<input
+id="editCustomerName"
+placeholder="お名前"
+>
+
+
+<label>電話番号</label>
+
+<input
+id="editPhone"
+inputmode="tel"
+placeholder="電話番号"
+>
+
+
+<div class="row">
+
+<div>
+
+<label>生年月日</label>
+
+<input
+type="date"
+id="editBirthDate"
+>
+
+</div>
+
+<div>
+
+<label>性別</label>
+
+<select id="editGender">
+
+<option value="">
+未設定
+</option>
+
+<option value="男性">
+男性
+</option>
+
+<option value="女性">
+女性
+</option>
+
+<option value="その他">
+その他
+</option>
+
+<option value="回答しない">
+回答しない
+</option>
+
+</select>
+
+</div>
+
+</div>
+
+
+<label>メールアドレス</label>
+
+<input
+id="editEmail"
+type="email"
+placeholder="メールアドレス"
+>
+
+
+<label>住所</label>
+
+<input
+id="editAddress"
+placeholder="住所"
+>
+
+
+<label>要注意・顧客メモ</label>
+
+<textarea
+id="editCustomerNote"
+placeholder="施術時の注意点、対応上のメモなど"
+></textarea>
+
+
+<button
+class="primary"
+id="saveCustomer"
+>
+顧客情報を保存
+</button>
+
+<div
+id="customerMsg"
+class="msg"
+></div>
+
+
+<hr class="sectionDivider">
+
+
+<h3>予約履歴</h3>
+
+<div id="bookingHistory"></div>
+
+
+<hr class="sectionDivider">
+
+
+<h3>
+初回カルテ
+<span
+id="initialKarteBadge"
+class="badge"
+></span>
+</h3>
+
+<div
+id="initialKarte"
+></div>
+
+
+<hr class="sectionDivider">
+
+
+<h3>施術記録</h3>
+
+<button
+class="primary"
+id="newKarte"
+>
+＋ 施術記録を追加
+</button>
+
+<div
+id="karteList"
+style="margin-top:12px"
+></div>
+
+
+<div class="deleteZone">
+
+<h3>テスト顧客・不要データ削除</h3>
+
+<div class="warningBox">
+この操作は、顧客情報・予約履歴・電子カルテをまとめて完全削除します。
+実際のお客様には使用しないでください。
+</div>
+
+<button
+class="danger"
+id="deleteCustomer"
+>
+この顧客を完全削除
+</button>
+
+</div>
+
+</section>
+
+
+<section
+class="card hidden"
+id="newCustomerCard"
+>
+
+<h2>新しい顧客を登録</h2>
+
+<label>ふりがな</label>
+
+<input
+id="newKana"
+placeholder="なかの たろう"
+>
+
+
+<label>お名前</label>
+
+<input
+id="newName"
+placeholder="お名前"
+>
+
+
+<label>電話番号</label>
+
+<input
+id="newPhone"
+inputmode="tel"
+placeholder="電話番号"
+>
+
+
+<button
+class="primary"
+id="createCustomer"
+>
+登録
+</button>
+
+<button
+class="secondary"
+id="cancelNewCustomer"
+>
+やめる
+</button>
+
+<div
+id="newCustomerMsg"
+class="msg"
+></div>
+
+</section>
+
+
+<section
+class="card hidden"
+id="karteEditor"
+>
+
+<h2 id="karteEditorTitle">
+施術記録
+</h2>
+
+
+<label>来店日</label>
+
+<input
+type="date"
+id="karteVisitDate"
+>
+
+
+<h3>症状・お客様情報</h3>
+
+
+<label>主訴</label>
+
+<textarea
+id="karteChiefComplaint"
+placeholder="一番つらい症状"
+></textarea>
+
+
+<label>気になる部位</label>
+
+<textarea
+id="kartePainfulAreas"
+placeholder="首・肩・腰など"
+></textarea>
+
+
+<label>いつ頃から</label>
+
+<input
+id="karteSince"
+placeholder="例：3日前から、半年ほど前から"
+>
+
+
+<label>つらさ 0〜10</label>
+
+<select id="kartePainLevel">
+
+<option value="">
+未入力
+</option>
+
+<option value="0">0</option>
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+<option value="6">6</option>
+<option value="7">7</option>
+<option value="8">8</option>
+<option value="9">9</option>
+<option value="10">10</option>
+
+</select>
+
+
+<label>既往歴</label>
+
+<textarea id="karteMedicalHistory"></textarea>
+
+
+<label>服薬</label>
+
+<textarea id="karteMedications"></textarea>
+
+
+<label>現在の通院・治療</label>
+
+<textarea id="karteCurrentTreatment"></textarea>
+
+
+<label>触れてほしくない部位・注意事項</label>
+
+<textarea id="karteContraindications"></textarea>
+
+
+<label>睡眠</label>
+
+<textarea id="karteSleep"></textarea>
+
+
+<label>生活習慣</label>
+
+<textarea id="karteLifestyle"></textarea>
+
+
+<label>お客様からの補足</label>
+
+<textarea id="karteCustomerMessage"></textarea>
+
+
+<hr class="sectionDivider">
+
+
+<h3>施術者記録</h3>
+
+
+<label>所見</label>
+
+<textarea
+id="karteFindings"
+placeholder="身体の状態、可動域、圧痛など"
+></textarea>
+
+
+<label>施術内容</label>
+
+<textarea
+id="karteTreatment"
+placeholder="実際に行った施術"
+></textarea>
+
+
+<label>施術後の状態</label>
+
+<textarea
+id="karteAfter"
+placeholder="変化、反応など"
+></textarea>
+
+
+<label>次回方針</label>
+
+<textarea
+id="karteNextPlan"
+placeholder="次回の施術方針"
+></textarea>
+
+
+<label>施術者メモ</label>
+
+<textarea
+id="karteTherapistNote"
+placeholder="スタッフ間の共有事項など"
+></textarea>
+
+
+<button
+class="primary"
+id="saveKarte"
+>
+保存
+</button>
+
+
+<button
+class="secondary"
+id="cancelKarte"
+>
+やめる
+</button>
+
+
+<button
+class="danger hidden"
+id="deleteKarte"
+>
+この施術記録を削除
+</button>
+
+
+<div
+id="karteMsg"
+class="msg"
+></div>
+
+</section>
+
+
+</div>
+
+
+<script type="module">
+
+import {createClient}
+from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+
+const supabase=
+createClient(
+  'https://scjzofjyxmchfjsngqtb.supabase.co',
+  'sb_publishable_EGlr-6w0xh4gD8OImboE_Q_V-COJ7t9'
+);
+
+
+const $=
+id=>document.getElementById(id);
+
+
+let customers=[];
+let selectedCustomer=null;
+let currentBookings=[];
+let currentKarte=[];
+let editingKarte=null;
+let currentKana='すべて';
+
+
+const kanaGroups=[
+  'すべて',
+  'あ',
+  'か',
+  'さ',
+  'た',
+  'な',
+  'は',
+  'ま',
+  'や',
+  'ら',
+  'わ',
+  '他'
+];
+
+
+function esc(value){
+
+  return String(value??'')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+
+}
+
+
+function todayJapan(){
+
+  return new Intl.DateTimeFormat(
+    'en-CA',
+    {
+      timeZone:'Asia/Tokyo'
+    }
+  ).format(
+    new Date()
+  );
+
+}
+
+
+function phoneDigits(value){
+
+  return String(
+    value||''
+  ).replace(
+    /\D/g,
+    ''
+  );
+
+}
+
+
+function kanaToHiragana(value){
+
+  return String(
+    value||''
+  )
+  .trim()
+  .replace(
+    /[\u30a1-\u30f6]/g,
+    ch=>
+      String.fromCharCode(
+        ch.charCodeAt(0)-0x60
+      )
+  );
+
+}
+
+
+function kanaGroup(value){
+
+  const kana=
+    kanaToHiragana(
+      value
+    );
+
+  if(!kana){
+    return '他';
+  }
+
+  const first=
+    kana[0];
+
+  const groups={
+
+    あ:
+      'あいうえおぁぃぅぇぉ',
+
+    か:
+      'かきくけこがぎぐげご',
+
+    さ:
+      'さしすせそざじずぜぞ',
+
+    た:
+      'たちつてとだぢづでどっ',
+
+    な:
+      'なにぬねの',
+
+    は:
+      'はひふへほばびぶべぼぱぴぷぺぽ',
+
+    ま:
+      'まみむめも',
+
+    や:
+      'やゆよゃゅょ',
+
+    ら:
+      'らりるれろ',
+
+    わ:
+      'わをんゎ'
+
+  };
+
+  for(
+    const [
+      group,
+      chars
+    ]
+    of Object.entries(groups)
+  ){
+
+    if(
+      chars.includes(first)
+    ){
+      return group;
+    }
+
+  }
+
+  return '他';
+
+}
+
+
+function displayCustomerNo(customer){
+
+  return customer
+    ?.customer_no_display
+    ?
+    `顧客No.${customer.customer_no_display}`
+    :
+    '';
+
+}
+
+
+async function syncAuth(){
+
+  const {
+    data:{session}
+  }=
+    await supabase.auth
+      .getSession();
+
+
+  $('loginCard')
+    .classList
+    .toggle(
+      'hidden',
+      !!session
+    );
+
+
+  $('app')
+    .classList
+    .toggle(
+      'hidden',
+      !session
+    );
+
+
+  if(session){
+
+    await loadCustomers();
+
+  }
+
+}
+
+
+$('login').onclick=
+async()=>{
+
+  const email=
+    $('email')
+      .value
+      .trim();
+
+  const password=
+    $('password').value;
+
+
+  const {error}=
+    await supabase.auth
+      .signInWithPassword({
+        email,
+        password
+      });
+
+
+  if(error){
+
+    $('loginMsg').textContent=
+      'ログインできません。';
+
+    $('loginMsg').className=
+      'msg error';
+
+    return;
+
+  }
+
+
+  $('loginMsg').textContent='';
+
+  await syncAuth();
+
+};
+
+
+$('logout').onclick=
+async()=>{
+
+  await supabase.auth
+    .signOut();
+
+  selectedCustomer=null;
+
+  $('customerCard')
+    .classList
+    .add('hidden');
+
+  await syncAuth();
+
+};
+
+
+function renderKanaButtons(){
+
+  $('kanaButtons').innerHTML=
+    kanaGroups.map(group=>`
+
+      <button
+        class="kanaBtn ${
+          currentKana===group
+          ?
+          'active'
+          :
+          ''
+        }"
+        data-group="${group}"
+      >
+        ${group}
+      </button>
+
+    `).join('');
+
+
+  document
+    .querySelectorAll(
+      '.kanaBtn'
+    )
+    .forEach(button=>{
+
+      button.onclick=
+      ()=>{
+
+        currentKana=
+          button.dataset.group;
+
+        renderKanaButtons();
+
+        renderCustomers();
+
+      };
+
+    });
+
+}
+
+
+async function loadCustomers(){
+
+  const {data,error}=
+    await supabase
+      .from(
+        'nakano_customers'
+      )
+      .select('*')
+      .eq(
+        'is_active',
+        true
+      );
+
+
+  if(error){
+
+    console.error(error);
+
+    $('customerList').innerHTML=
+      '<span class="muted">顧客一覧を読み込めませんでした。</span>';
+
+    return;
+
+  }
+
+
+  customers=
+    data||[];
+
+
+  customers.sort(
+    (a,b)=>{
+
+      const kanaA=
+        kanaToHiragana(
+          a.customer_name_kana
+          ||
+          a.customer_name
+        );
+
+      const kanaB=
+        kanaToHiragana(
+          b.customer_name_kana
+          ||
+          b.customer_name
+        );
+
+      const kanaCompare=
+        kanaA.localeCompare(
+          kanaB,
+          'ja'
+        );
+
+      if(kanaCompare!==0){
+        return kanaCompare;
+      }
+
+      return Number(
+        a.customer_no||0
+      )
+      -
+      Number(
+        b.customer_no||0
+      );
+
+    }
+  );
+
+
+  renderKanaButtons();
+
+  renderCustomers();
+
+}
+
+
+function renderCustomers(){
+
+  const search=
+    $('search')
+      .value
+      .trim()
+      .toLowerCase();
+
+
+  const filtered=
+    customers.filter(customer=>{
+
+      const searchable=
+        [
+          customer.customer_name,
+          customer.customer_name_kana,
+          customer.phone,
+          customer.phone_digits,
+          customer.customer_no,
+          customer.customer_no_display
+        ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+
+      if(
+        search
+        &&
+        !searchable.includes(
+          search
+        )
+      ){
+        return false;
+      }
+
+
+      if(
+        currentKana
+        !==
+        'すべて'
+      ){
+
+        const group=
+          kanaGroup(
+            customer.customer_name_kana
+            ||
+            customer.customer_name
+          );
+
+        if(
+          group
+          !==
+          currentKana
+        ){
+          return false;
+        }
+
+      }
+
+
+      return true;
+
+    });
+
+
+  $('customerCount').textContent=
+    `${filtered.length}人`;
+
+
+  if(
+    !filtered.length
+  ){
+
+    $('customerList').innerHTML=
+      '<span class="muted">該当するお客様はいません。</span>';
+
+    return;
+  }
+
+
+  $('customerList').innerHTML=
+    filtered.map(customer=>`
+
+      <div
+        class="customerItem"
+        data-id="${esc(customer.id)}"
+      >
+
+        <div class="customerNo">
+          ${esc(displayCustomerNo(customer))}
+        </div>
+
+        <div class="customerName">
+          ${esc(customer.customer_name)}
+        </div>
+
+        <div class="customerKana">
+          ${esc(customer.customer_name_kana||'')}
+        </div>
+
+        <div class="customerMeta">
+
+          ${
+            customer.phone
+            ?
+            esc(customer.phone)
+            :
+            '電話番号なし'
+          }
+
+        </div>
+
+      </div>
+
+    `).join('');
+
+
+  document
+    .querySelectorAll(
+      '.customerItem'
+    )
+    .forEach(item=>{
+
+      item.onclick=
+      ()=>{
+
+        openCustomer(
+          item.dataset.id
+        );
+
+      };
+
+    });
+
+}
+
+
+$('search').oninput=
+  renderCustomers;
+
+
+async function openCustomer(id){
+
+  selectedCustomer=
+    customers.find(
+      item=>
+        String(item.id)
+        ===
+        String(id)
+    );
+
+
+  if(!selectedCustomer){
+    return;
+  }
+
+
+  $('customerCard')
+    .classList
+    .remove('hidden');
+
+
+  $('newCustomerCard')
+    .classList
+    .add('hidden');
+
+
+  $('karteEditor')
+    .classList
+    .add('hidden');
+
+
+  fillCustomerForm();
+
+
+  await Promise.all([
+    loadBookingHistory(),
+    loadKarte()
+  ]);
+
+
+  $('customerCard')
+    .scrollIntoView({
+      behavior:'smooth',
+      block:'start'
+    });
+
+}
+
+
+function fillCustomerForm(){
+
+  const c=
+    selectedCustomer;
+
+
+  $('detailName').textContent=
+    c.customer_name
+    ||
+    '顧客情報';
+
+
+  $('detailKana').textContent=
+    c.customer_name_kana
+    ||
+    '';
+
+
+  $('detailNo').textContent=
+    displayCustomerNo(c);
+
+
+  $('editKana').value=
+    c.customer_name_kana
+    ||
+    '';
+
+
+  $('editCustomerName').value=
+    c.customer_name
+    ||
+    '';
+
+
+  $('editPhone').value=
+    c.phone
+    ||
+    '';
+
+
+  $('editBirthDate').value=
+    c.birth_date
+    ||
+    '';
+
+
+  $('editGender').value=
+    c.gender
+    ||
+    '';
+
+
+  $('editEmail').value=
+    c.email
+    ||
+    '';
+
+
+  $('editAddress').value=
+    c.address
+    ||
+    '';
+
+
+  $('editCustomerNote').value=
+    c.customer_note
+    ||
+    c.memo
+    ||
+    '';
+
+}
+
+
+$('saveCustomer').onclick=
+async()=>{
+
+  if(!selectedCustomer){
+    return;
+  }
+
+
+  const customerName=
+    $('editCustomerName')
+      .value
+      .trim();
+
+
+  const phone=
+    $('editPhone')
+      .value
+      .trim();
+
+
+  if(
+    !customerName
+    ||
+    !phoneDigits(phone)
+  ){
+
+    $('customerMsg').textContent=
+      'お名前と電話番号を入力してください。';
+
+    $('customerMsg').className=
+      'msg error';
+
+    return;
+
+  }
+
+
+  const digits=
+    phoneDigits(phone);
+
+
+  const duplicate=
+    customers.find(
+      item=>
+        item.id
+        !==
+        selectedCustomer.id
+        &&
+        item.phone_digits
+        ===
+        digits
+    );
+
+
+  if(duplicate){
+
+    $('customerMsg').textContent=
+      `同じ電話番号の顧客「${duplicate.customer_name}」が登録されています。`;
+
+    $('customerMsg').className=
+      'msg error';
+
+    return;
+
+  }
+
+
+  const {data,error}=
+    await supabase
+      .from(
+        'nakano_customers'
+      )
+      .update({
+
+        customer_name:
+          customerName,
+
+        customer_name_kana:
+          $('editKana')
+            .value
+            .trim()
+          ||
+          null,
+
+        phone,
+
+        phone_digits:
+          digits,
+
+        birth_date:
+          $('editBirthDate').value
+          ||
+          null,
+
+        gender:
+          $('editGender').value
+          ||
+          null,
+
+        email:
+          $('editEmail')
+            .value
+            .trim()
+          ||
+          null,
+
+        address:
+          $('editAddress')
+            .value
+            .trim()
+          ||
+          null,
+
+        customer_note:
+          $('editCustomerNote')
+            .value
+            .trim()
+          ||
+          null,
+
+        updated_at:
+          new Date()
+            .toISOString()
+
+      })
+      .eq(
+        'id',
+        selectedCustomer.id
+      )
+      .select()
+      .single();
+
+
+  if(error){
+
+    console.error(error);
+
+    $('customerMsg').textContent=
+      '保存できませんでした。';
+
+    $('customerMsg').className=
+      'msg error';
+
+    return;
+
+  }
+
+
+  selectedCustomer=
+    data;
+
+
+  $('customerMsg').textContent=
+    '顧客情報を保存しました。';
+
+  $('customerMsg').className=
+    'msg ok';
+
+
+  await loadCustomers();
+
+  selectedCustomer=
+    customers.find(
+      item=>
+        item.id===data.id
+    )
+    ||
+    data;
+
+
+  fillCustomerForm();
+
+};
+
+
+$('newCustomer').onclick=
+()=>{
+
+  $('newCustomerCard')
+    .classList
+    .remove('hidden');
+
+
+  $('customerCard')
+    .classList
+    .add('hidden');
+
+
+  $('karteEditor')
+    .classList
+    .add('hidden');
+
+
+  $('newKana').value='';
+  $('newName').value='';
+  $('newPhone').value='';
+  $('newCustomerMsg').textContent='';
+
+
+  $('newCustomerCard')
+    .scrollIntoView({
+      behavior:'smooth'
+    });
+
+};
+
+
+$('cancelNewCustomer').onclick=
+()=>{
+
+  $('newCustomerCard')
+    .classList
+    .add('hidden');
+
+};
+
+
+$('createCustomer').onclick=
+async()=>{
+
+  const name=
+    $('newName')
+      .value
+      .trim();
+
+
+  const phone=
+    $('newPhone')
+      .value
+      .trim();
+
+
+  const digits=
+    phoneDigits(phone);
+
+
+  if(
+    !name
+    ||
+    !digits
+  ){
+
+    $('newCustomerMsg').textContent=
+      'お名前と電話番号を入力してください。';
+
+    $('newCustomerMsg').className=
+      'msg error';
+
+    return;
+
+  }
+
+
+  const duplicate=
+    customers.find(
+      item=>
+        item.phone_digits
+        ===
+        digits
+    );
+
+
+  if(duplicate){
+
+    $('newCustomerMsg').textContent=
+      `同じ電話番号の顧客「${duplicate.customer_name}」がすでにいます。`;
+
+    $('newCustomerMsg').className=
+      'msg error';
+
+    return;
+
+  }
+
+
+  const {data,error}=
+    await supabase
+      .from(
+        'nakano_customers'
+      )
+      .insert({
+
+        customer_name:
+          name,
+
+        customer_name_kana:
+          $('newKana')
+            .value
+            .trim()
+          ||
+          null,
+
+        phone,
+
+        phone_digits:
+          digits,
+
+        is_active:
+          true
+
+      })
+      .select()
+      .single();
+
+
+  if(error){
+
+    console.error(error);
+
+    $('newCustomerMsg').textContent=
+      '登録できませんでした。';
+
+    $('newCustomerMsg').className=
+      'msg error';
+
+    return;
+
+  }
+
+
+  await loadCustomers();
+
+
+  $('newCustomerCard')
+    .classList
+    .add('hidden');
+
+
+  await openCustomer(
+    data.id
+  );
+
+};
+
+
+async function loadBookingHistory(){
+
+  if(!selectedCustomer){
+    return;
+  }
+
+
+  const {data,error}=
+    await supabase
+      .from(
+        'nakano_bookings'
+      )
+      .select('*')
+      .eq(
+        'customer_id',
+        selectedCustomer.id
+      )
+      .order(
+        'booking_date',
+        {
+          ascending:false
+        }
+      )
+      .order(
+        'start_time',
+        {
+          ascending:false
+        }
+      );
+
+
+  if(error){
+
+    console.error(error);
+
+    $('bookingHistory').innerHTML=
+      '<span class="muted">予約履歴を読み込めませんでした。</span>';
+
+    return;
+
+  }
+
+
+  currentBookings=
+    data||[];
+
+
+  const confirmed=
+    currentBookings.filter(
+      item=>
+        item.status==='confirmed'
+    );
+
+
+  const past=
+    currentBookings;
+
+
+  const lastVisit=
+    past.length
+    ?
+    past
+      .map(x=>x.booking_date)
+      .sort()
+      .reverse()[0]
+    :
+    '-';
+
+
+  const nextBooking=
+    confirmed.find(
+      item=>
+        item.booking_date
+        >=
+        todayJapan()
+    );
+
+
+  $('customerStats').innerHTML=`
+
+    <div class="statBox">
+
+      <div class="statLabel">
+        予約履歴
+      </div>
+
+      <div class="statValue">
+        ${past.length}回
+      </div>
+
+    </div>
+
+    <div class="statBox">
+
+      <div class="statLabel">
+        最終予約
+      </div>
+
+      <div class="statValue">
+        ${esc(lastVisit)}
+      </div>
+
+    </div>
+
+    <div class="statBox">
+
+      <div class="statLabel">
+        次回予約
+      </div>
+
+      <div class="statValue">
+        ${
+          nextBooking
+          ?
+          esc(nextBooking.booking_date)
+          :
+          'なし'
+        }
+      </div>
+
+    </div>
+
+  `;
+
+
+  if(
+    !currentBookings.length
+  ){
+
+    $('bookingHistory').innerHTML=
+      '<span class="muted">予約履歴はありません。</span>';
+
+    return;
+
+  }
+
+
+  $('bookingHistory').innerHTML=
+    currentBookings.map(item=>`
+
+      <div class="historyItem">
+
+        <div class="historyDate">
+
+          ${esc(item.booking_date)}
+
+          ${esc(
+            String(
+              item.start_time
+            ).slice(0,5)
+          )}
+
+        </div>
+
+        <div>
+          ${esc(item.menu_name)}
+        </div>
+
+        <div class="historySub">
+
+          ${
+            item.status==='confirmed'
+            ?
+            '予約'
+            :
+            'キャンセル'
+          }
+
+          ${
+            item.memo
+            ?
+            ` / ${esc(item.memo)}`
+            :
+            ''
+          }
+
+        </div>
+
+      </div>
+
+    `).join('');
+
+}
+
+
+async function loadKarte(){
+
+  if(!selectedCustomer){
+    return;
+  }
+
+
+  const {data,error}=
+    await supabase
+      .from(
+        'nakano_karte_records'
+      )
+      .select('*')
+      .eq(
+        'customer_id',
+        selectedCustomer.id
+      )
+      .order(
+        'visit_date',
+        {
+          ascending:false
+        }
+      )
+      .order(
+        'created_at',
+        {
+          ascending:false
+        }
+      );
+
+
+  if(error){
+
+    console.error(error);
+
+    $('karteList').innerHTML=
+      '<span class="muted">カルテを読み込めませんでした。</span>';
+
+    return;
+
+  }
+
+
+  currentKarte=
+    data||[];
+
+
+  const initial=
+    currentKarte
+      .slice()
+      .sort(
+        (a,b)=>
+          new Date(
+            a.created_at
+          )
+          -
+          new Date(
+            b.created_at
+          )
+      )[0];
+
+
+  if(initial){
+
+    $('initialKarteBadge').textContent=
+      '入力済み';
+
+    $('initialKarteBadge').className=
+      'badge badgeDone';
+
+
+    $('initialKarte').innerHTML=`
+
+      <div class="historyItem">
+
+        <strong>
+          ${esc(initial.visit_date)}
+        </strong>
+
+        ${
+          initial.chief_complaint
+          ?
+          `<br>主訴：${esc(initial.chief_complaint)}`
+          :
+          ''
+        }
+
+        ${
+          initial.painful_areas
+          ?
+          `<br>部位：${esc(initial.painful_areas)}`
+          :
+          ''
+        }
+
+        ${
+          initial.medical_history
+          ?
+          `<br>既往歴：${esc(initial.medical_history)}`
+          :
+          ''
+        }
+
+        ${
+          initial.medications
+          ?
+          `<br>服薬：${esc(initial.medications)}`
+          :
+          ''
+        }
+
+        <div class="smallActions">
+
+          <button
+            class="secondary editInitialKarte"
+          >
+            カルテを開く
+          </button>
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    document
+      .querySelector(
+        '.editInitialKarte'
+      )
+      .onclick=
+      ()=>openKarteEditor(
+        initial
+      );
+
+  }
+  else{
+
+    $('initialKarteBadge').textContent=
+      '未入力';
+
+    $('initialKarteBadge').className=
+      'badge badgeNone';
+
+
+    $('initialKarte').innerHTML=
+      '<span class="muted">初回カルテはまだありません。</span>';
+
+  }
+
+
+  renderKarteList();
+
+}
+
+
+function renderKarteList(){
+
+  if(
+    !currentKarte.length
+  ){
+
+    $('karteList').innerHTML=
+      '<span class="muted">施術記録はありません。</span>';
+
+    return;
+
+  }
+
+
+  $('karteList').innerHTML=
+    currentKarte.map(item=>`
+
+      <div class="karteItem">
+
+        <div class="karteTitle">
+
+          ${esc(item.visit_date)}
+
+          ${
+            item.chief_complaint
+            ?
+            `　${esc(item.chief_complaint)}`
+            :
+            ''
+          }
+
+        </div>
+
+        <div class="kartePreview">
+
+          ${
+            item.therapist_findings
+            ?
+            `所見：${esc(item.therapist_findings)}`
+            :
+            ''
+          }
+
+          ${
+            item.treatment_content
+            ?
+            `<br>施術：${esc(item.treatment_content)}`
+            :
+            ''
+          }
+
+        </div>
+
+        <div class="smallActions">
+
+          <button
+            class="secondary editKarte"
+            data-id="${esc(item.id)}"
+          >
+            開く・編集
+          </button>
+
+        </div>
+
+      </div>
+
+    `).join('');
+
+
+  document
+    .querySelectorAll(
+      '.editKarte'
+    )
+    .forEach(button=>{
+
+      button.onclick=
+      ()=>{
+
+        const item=
+          currentKarte.find(
+            row=>
+              row.id
+              ===
+              button.dataset.id
+          );
+
+        if(item){
+          openKarteEditor(item);
+        }
+
+      };
+
+    });
+
+}
+
+
+$('newKarte').onclick=
+()=>openKarteEditor(null);
+
+
+function openKarteEditor(item){
+
+  if(!selectedCustomer){
+    return;
+  }
+
+
+  editingKarte=
+    item;
+
+
+  $('karteEditor')
+    .classList
+    .remove('hidden');
+
+
+  $('karteEditorTitle').textContent=
+    item
+    ?
+    '施術記録を編集'
+    :
+    '新しい施術記録';
+
+
+  $('karteVisitDate').value=
+    item?.visit_date
+    ||
+    todayJapan();
+
+
+  $('karteChiefComplaint').value=
+    item?.chief_complaint
+    ||
+    '';
+
+
+  $('kartePainfulAreas').value=
+    item?.painful_areas
+    ||
+    '';
+
+
+  $('karteSince').value=
+    item?.symptom_since
+    ||
+    '';
+
+
+  $('kartePainLevel').value=
+    item?.pain_level
+    ??
+    '';
+
+
+  $('karteMedicalHistory').value=
+    item?.medical_history
+    ||
+    '';
+
+
+  $('karteMedications').value=
+    item?.medications
+    ||
+    '';
+
+
+  $('karteCurrentTreatment').value=
+    item?.current_treatment
+    ||
+    '';
+
+
+  $('karteContraindications').value=
+    item?.contraindications
+    ||
+    '';
+
+
+  $('karteSleep').value=
+    item?.sleep_condition
+    ||
+    '';
+
+
+  $('karteLifestyle').value=
+    item?.lifestyle
+    ||
+    '';
+
+
+  $('karteCustomerMessage').value=
+    item?.customer_message
+    ||
+    '';
+
+
+  $('karteFindings').value=
+    item?.therapist_findings
+    ||
+    '';
+
+
+  $('karteTreatment').value=
+    item?.treatment_content
+    ||
+    '';
+
+
+  $('karteAfter').value=
+    item?.after_condition
+    ||
+    '';
+
+
+  $('karteNextPlan').value=
+    item?.next_plan
+    ||
+    '';
+
+
+  $('karteTherapistNote').value=
+    item?.therapist_note
+    ||
+    '';
+
+
+  $('karteMsg').textContent='';
+
+
+  $('deleteKarte')
+    .classList
+    .toggle(
+      'hidden',
+      !item
+    );
+
+
+  $('karteEditor')
+    .scrollIntoView({
+      behavior:'smooth',
+      block:'start'
+    });
+
+}
+
+
+$('cancelKarte').onclick=
+()=>{
+
+  editingKarte=null;
+
+  $('karteEditor')
+    .classList
+    .add('hidden');
+
+};
+
+
+$('saveKarte').onclick=
+async()=>{
+
+  if(!selectedCustomer){
+    return;
+  }
+
+
+  const payload={
+
+    customer_id:
+      selectedCustomer.id,
+
+    visit_date:
+      $('karteVisitDate').value,
+
+    chief_complaint:
+      $('karteChiefComplaint')
+        .value
+        .trim()
+      ||
+      null,
+
+    painful_areas:
+      $('kartePainfulAreas')
+        .value
+        .trim()
+      ||
+      null,
+
+    symptom_since:
+      $('karteSince')
+        .value
+        .trim()
+      ||
+      null,
+
+    pain_level:
+      $('kartePainLevel').value
+      ===
+      ''
+      ?
+      null
+      :
+      Number(
+        $('kartePainLevel').value
+      ),
+
+    medical_history:
+      $('karteMedicalHistory')
+        .value
+        .trim()
+      ||
+      null,
+
+    medications:
+      $('karteMedications')
+        .value
+        .trim()
+      ||
+      null,
+
+    current_treatment:
+      $('karteCurrentTreatment')
+        .value
+        .trim()
+      ||
+      null,
+
+    contraindications:
+      $('karteContraindications')
+        .value
+        .trim()
+      ||
+      null,
+
+    sleep_condition:
+      $('karteSleep')
+        .value
+        .trim()
+      ||
+      null,
+
+    lifestyle:
+      $('karteLifestyle')
+        .value
+        .trim()
+      ||
+      null,
+
+    customer_message:
+      $('karteCustomerMessage')
+        .value
+        .trim()
+      ||
+      null,
+
+    therapist_findings:
+      $('karteFindings')
+        .value
+        .trim()
+      ||
+      null,
+
+    treatment_content:
+      $('karteTreatment')
+        .value
+        .trim()
+      ||
+      null,
+
+    after_condition:
+      $('karteAfter')
+        .value
+        .trim()
+      ||
+      null,
+
+    next_plan:
+      $('karteNextPlan')
+        .value
+        .trim()
+      ||
+      null,
+
+    therapist_note:
+      $('karteTherapistNote')
+        .value
+        .trim()
+      ||
+      null,
+
+    updated_at:
+      new Date()
+        .toISOString()
+
+  };
+
+
+  let error;
+
+
+  if(editingKarte){
+
+    const result=
+      await supabase
+        .from(
+          'nakano_karte_records'
+        )
+        .update(
+          payload
+        )
+        .eq(
+          'id',
+          editingKarte.id
+        );
+
+    error=
+      result.error;
+
+  }
+  else{
+
+    const result=
+      await supabase
+        .from(
+          'nakano_karte_records'
+        )
+        .insert(
+          payload
+        );
+
+    error=
+      result.error;
+
+  }
+
+
+  if(error){
+
+    console.error(error);
+
+    $('karteMsg').textContent=
+      '保存できませんでした。';
+
+    $('karteMsg').className=
+      'msg error';
+
+    return;
+
+  }
+
+
+  $('karteMsg').textContent=
+    '保存しました。';
+
+  $('karteMsg').className=
+    'msg ok';
+
+
+  editingKarte=null;
+
+
+  await loadKarte();
+
+
+  setTimeout(()=>{
+
+    $('karteEditor')
+      .classList
+      .add('hidden');
+
+  },500);
+
+};
+
+
+$('deleteKarte').onclick=
+async()=>{
+
+  if(!editingKarte){
+    return;
+  }
+
+
+  if(
+    !confirm(
+      'この施術記録を削除しますか？'
+    )
+  ){
+    return;
+  }
+
+
+  const {error}=
+    await supabase
+      .from(
+        'nakano_karte_records'
+      )
+      .delete()
+      .eq(
+        'id',
+        editingKarte.id
+      );
+
+
+  if(error){
+
+    alert(
+      '削除できませんでした。'
+    );
+
+    return;
+
+  }
+
+
+  editingKarte=null;
+
+
+  $('karteEditor')
+    .classList
+    .add('hidden');
+
+
+  await loadKarte();
+
+};
+
+
+$('deleteCustomer').onclick=
+async()=>{
+
+  if(!selectedCustomer){
+    return;
+  }
+
+
+  const name=
+    selectedCustomer.customer_name;
+
+
+  if(
+    !confirm(
+      `${name}さんを完全削除しますか？\n\n予約履歴とカルテも削除されます。`
+    )
+  ){
+    return;
+  }
+
+
+  const confirmation=
+    prompt(
+      '本当にテストデータを削除する場合は\n\n削除\n\nと入力してください。'
+    );
+
+
+  if(
+    confirmation
+    !==
+    '削除'
+  ){
+
+    return;
+  }
+
+
+  const {error}=
+    await supabase.rpc(
+      'nakano_admin_delete_test_customer',
+      {
+        p_customer_id:
+          selectedCustomer.id
+      }
+    );
+
+
+  if(error){
+
+    console.error(error);
+
+    alert(
+      '削除できませんでした。'
+    );
+
+    return;
+
+  }
+
+
+  alert(
+    '顧客データを削除しました。'
+  );
+
+
+  selectedCustomer=null;
+
+
+  $('customerCard')
+    .classList
+    .add('hidden');
+
+
+  $('karteEditor')
+    .classList
+    .add('hidden');
+
+
+  await loadCustomers();
+
+};
+
+
+supabase.auth
+  .onAuthStateChange(
+    ()=>syncAuth()
+  );
+
+
+syncAuth();
+
+</script>
+
+</main>
+</body>
+</html>
