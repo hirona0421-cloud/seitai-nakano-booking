@@ -1,22 +1,53 @@
 import {createClient}
 from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
+
 const supabase=createClient(
   'https://scjzofjyxmchfjsngqtb.supabase.co',
   'sb_publishable_EGlr-6w0xh4gD8OImboE_Q_V-COJ7t9'
 );
 
+
 const DAY_START=8*60;
 const DAY_END=22*60+30;
+
 const PX_PER_MINUTE=2;
 const SNAP_MINUTES=30;
 
-const DOWN_TRIGGER=24;
+/*
+  予約カードを何px下げたら
+  移動モードにするか
+*/
+const DOWN_TRIGGER=22;
+
+/*
+  左右端の自動スクロール領域
+*/
 const EDGE_ZONE=72;
+
 const MAX_AUTO_SPEED=13;
 
+
 let active=null;
+
 let autoFrame=null;
+
+let suppressClickUntil=0;
+
+let realtimeReloadTimer=null;
+
+let pendingRealtimeReload=false;
+
+
+/* =====================================================
+   共通
+===================================================== */
+
+function $(id){
+
+  return document.getElementById(id);
+
+}
 
 
 function timeToMinutes(time){
@@ -27,16 +58,28 @@ function timeToMinutes(time){
       .split(':')
       .map(Number);
 
+
   return h*60+m;
 }
 
 
 function minutesToTime(minutes){
 
-  const h=Math.floor(minutes/60);
-  const m=minutes%60;
+  const h=
+    Math.floor(
+      minutes/60
+    );
 
-  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`;
+
+  const m=
+    minutes%60;
+
+
+  return `${
+    String(h).padStart(2,'0')
+  }:${
+    String(m).padStart(2,'0')
+  }:00`;
 }
 
 
@@ -48,36 +91,129 @@ function snapMinutes(value){
 }
 
 
+function todayJapan(){
+
+  const parts=
+    new Intl.DateTimeFormat(
+      'en-US',
+      {
+        timeZone:'Asia/Tokyo',
+        year:'numeric',
+        month:'2-digit',
+        day:'2-digit'
+      }
+    )
+    .formatToParts(
+      new Date()
+    );
+
+
+  const get=
+    type=>
+      parts.find(
+        p=>p.type===type
+      )?.value;
+
+
+  return `${
+    get('year')
+  }-${
+    get('month')
+  }-${
+    get('day')
+  }`;
+}
+
+
+function currentJapanMinutes(){
+
+  const parts=
+    new Intl.DateTimeFormat(
+      'en-US',
+      {
+        timeZone:'Asia/Tokyo',
+        hour:'2-digit',
+        minute:'2-digit',
+        hourCycle:'h23'
+      }
+    )
+    .formatToParts(
+      new Date()
+    );
+
+
+  const hour=
+    Number(
+      parts.find(
+        p=>p.type==='hour'
+      )?.value
+      ||
+      0
+    );
+
+
+  const minute=
+    Number(
+      parts.find(
+        p=>p.type==='minute'
+      )?.value
+      ||
+      0
+    );
+
+
+  return hour*60+minute;
+}
+
+
+function selectedDate(){
+
+  return $('date')?.value
+    ||
+    '';
+}
+
+
+/* =====================================================
+   CSS
+===================================================== */
+
 function addStyles(){
 
   if(
     document.getElementById(
-      'nakanoDragStyle'
+      'nakanoUnifiedBookingStyle'
     )
   ){
     return;
   }
+
 
   const style=
     document.createElement(
       'style'
     );
 
+
   style.id=
-    'nakanoDragStyle';
+    'nakanoUnifiedBookingStyle';
+
 
   style.textContent=`
 
     .bookingBlock{
+
       user-select:none;
       -webkit-user-select:none;
+
       -webkit-touch-callout:none;
 
       /*
-        横方向は通常の
-        スケジュールスクロールを許可
+        普通に横へ動かした時は
+        時間軸の横スクロール
       */
       touch-action:pan-x;
+
     }
 
 
@@ -85,7 +221,7 @@ function addStyles(){
 
       z-index:100!important;
 
-      opacity:.96;
+      opacity:.97;
 
       transform:
         translateY(12px)
@@ -93,19 +229,21 @@ function addStyles(){
 
       box-shadow:
         0 0 0 3px rgba(97,87,77,.20),
-        0 8px 24px rgba(0,0,0,.22);
+        0 9px 26px rgba(0,0,0,.23);
 
       transition:none!important;
 
-      touch-action:none!important;
-
       cursor:grabbing;
+
+      touch-action:none!important;
 
     }
 
 
     body.bookingDragging{
+
       overscroll-behavior:none;
+
     }
 
 
@@ -135,7 +273,7 @@ function addStyles(){
       transform:
         translateX(-50%);
 
-      z-index:99999;
+      z-index:999999;
 
       min-width:190px;
 
@@ -145,42 +283,43 @@ function addStyles(){
 
       color:#fff;
 
-      padding:
-        11px 18px;
+      padding:10px 19px 11px;
 
-      border-radius:14px;
+      border-radius:15px;
 
       box-shadow:
-        0 6px 22px
-        rgba(0,0,0,.24);
+        0 6px 24px
+        rgba(0,0,0,.28);
 
       pointer-events:none;
 
     }
 
 
-    .dragTopHint .small{
+    .dragTopHintSmall{
 
       display:block;
 
       font-size:11px;
 
-      opacity:.78;
+      opacity:.76;
 
-      margin-bottom:2px;
+      margin-bottom:1px;
 
     }
 
 
-    .dragTopHint .time{
+    .dragTopHintTime{
 
       display:block;
 
-      font-size:24px;
+      font-size:25px;
+
+      line-height:1.2;
 
       font-weight:800;
 
-      letter-spacing:.03em;
+      letter-spacing:.04em;
 
     }
 
@@ -193,13 +332,13 @@ function addStyles(){
 
       bottom:0;
 
-      width:54px;
+      width:56px;
 
-      z-index:9998;
-
-      pointer-events:none;
+      z-index:99998;
 
       opacity:0;
+
+      pointer-events:none;
 
       transition:
         opacity .12s ease;
@@ -236,10 +375,166 @@ function addStyles(){
 
 
     .dragEdge.show{
+
       opacity:1;
+
+    }
+
+
+    .bookingOperationGuide{
+
+      margin-top:10px;
+
+      background:#faf8f5;
+
+      border:
+        1px solid
+        #e7e0d7;
+
+      border-radius:12px;
+
+      padding:10px 11px;
+
+      color:#665f59;
+
+      font-size:12px;
+
+      line-height:1.65;
+
+    }
+
+
+    .bookingOperationShort{
+
+      font-weight:700;
+
+      color:#514b45;
+
+    }
+
+
+    .bookingOperationGuide details{
+
+      margin-top:6px;
+
+    }
+
+
+    .bookingOperationGuide summary{
+
+      cursor:pointer;
+
+      font-size:12px;
+
+      color:#756d66;
+
+      list-style:none;
+
+    }
+
+
+    .bookingOperationGuide summary::-webkit-details-marker{
+
+      display:none;
+
+    }
+
+
+    .bookingOperationDetail{
+
+      padding-top:8px;
+
+      color:#746d67;
+
+      font-size:12px;
+
+      line-height:1.75;
+
+    }
+
+
+    .bookingRefreshRow{
+
+      display:flex;
+
+      align-items:center;
+
+      justify-content:space-between;
+
+      gap:8px;
+
+      margin-top:8px;
+
+    }
+
+
+    .bookingRefreshStatus{
+
+      font-size:11px;
+
+      color:#8a837d;
+
+    }
+
+
+    .bookingRefreshButton{
+
+      width:auto!important;
+
+      min-width:72px;
+
+      border:
+        1px solid
+        #ddd5cc;
+
+      background:#fff;
+
+      color:#554e48;
+
+      border-radius:10px;
+
+      padding:7px 10px;
+
+      font-size:12px;
+
+      font-weight:700;
+
+    }
+
+
+    .realtimePending{
+
+      position:fixed;
+
+      right:12px;
+
+      bottom:
+        calc(
+          18px
+          +
+          env(safe-area-inset-bottom)
+        );
+
+      z-index:99997;
+
+      background:#61574d;
+
+      color:#fff;
+
+      border-radius:999px;
+
+      padding:8px 12px;
+
+      font-size:12px;
+
+      box-shadow:
+        0 4px 18px
+        rgba(0,0,0,.18);
+
     }
 
   `;
+
 
   document.head.appendChild(
     style
@@ -247,26 +542,294 @@ function addStyles(){
 }
 
 
-function createEdges(){
+/* =====================================================
+   名称変更
+===================================================== */
+
+function renameBookingList(){
+
+  /*
+    bookings.html
+  */
+  if(
+    location.pathname
+      .endsWith(
+        '/bookings.html'
+      )
+  ){
+
+    document.title=
+      '整体なかの｜当日予約一覧';
+
+
+    const subtitle=
+      [...document.querySelectorAll('p')]
+        .find(
+          p=>
+            p.textContent
+              .includes(
+                '予約一覧・スケジュール'
+              )
+        );
+
+
+    if(subtitle){
+
+      subtitle.textContent=
+        '当日予約一覧・スケジュール';
+
+    }
+
+  }
+
+
+  /*
+    admin.html のボタン
+  */
+  document
+    .querySelectorAll(
+      'button'
+    )
+    .forEach(
+      button=>{
+
+        if(
+          button.textContent.trim()
+          ===
+          '予約一覧'
+        ){
+
+          button.textContent=
+            '当日予約一覧';
+
+        }
+
+      }
+    );
+
+}
+
+
+/* =====================================================
+   操作案内
+===================================================== */
+
+function createGuide(){
+
+  const scroll=
+    document.querySelector(
+      '.timelineScroll,.scheduleScroll'
+    );
+
+
+  if(!scroll){
+    return;
+  }
+
 
   if(
     document.getElementById(
-      'dragEdgeLeft'
+      'bookingOperationGuide'
     )
   ){
     return;
   }
+
+
+  const guide=
+    document.createElement(
+      'div'
+    );
+
+
+  guide.id=
+    'bookingOperationGuide';
+
+
+  guide.className=
+    'bookingOperationGuide';
+
+
+  guide.innerHTML=`
+
+    <div class="bookingOperationShort">
+
+      予約カード：
+      下へスライド →
+      そのまま左右で時間変更
+
+    </div>
+
+
+    <details>
+
+      <summary>
+
+        操作方法を詳しく見る ▼
+
+      </summary>
+
+
+      <div class="bookingOperationDetail">
+
+        予約カードに指を置き、
+        少し下へスライドすると
+        移動モードになります。<br>
+
+        指を離さず、
+        そのまま左右へ動かすと
+        30分単位で予約時間を変更できます。<br>
+
+        移動中は画面上部に
+        「変更先 10:30」のように
+        時間が表示されます。<br>
+
+        画面の左右端まで動かすと、
+        見えていない時間帯へ
+        自動でスクロールします。<br>
+
+        希望の時間で指を離すと、
+        最後に変更確認が表示されます。<br><br>
+
+        時間軸だけを見たい場合は、
+        予約カード以外の場所を
+        左右にスライドしてください。
+
+      </div>
+
+    </details>
+
+
+    <div class="bookingRefreshRow">
+
+      <span
+        id="bookingRefreshStatus"
+        class="bookingRefreshStatus"
+      >
+        自動更新 ON
+      </span>
+
+      <button
+        id="bookingManualRefresh"
+        class="bookingRefreshButton"
+        type="button"
+      >
+        ↻ 更新
+      </button>
+
+    </div>
+
+  `;
+
+
+  scroll.insertAdjacentElement(
+    'afterend',
+    guide
+  );
+
+
+  $('bookingManualRefresh')
+    ?.addEventListener(
+      'click',
+      ()=>{
+
+        location.reload();
+
+      }
+    );
+
+}
+
+
+/* =====================================================
+   ドラッグ上部表示
+===================================================== */
+
+function showDragHint(time){
+
+  let hint=
+    $('dragTopHint');
+
+
+  if(!hint){
+
+    hint=
+      document.createElement(
+        'div'
+      );
+
+
+    hint.id=
+      'dragTopHint';
+
+
+    hint.className=
+      'dragTopHint';
+
+
+    hint.innerHTML=`
+
+      <span class="dragTopHintSmall">
+        変更先
+      </span>
+
+      <span
+        class="dragTopHintTime"
+      ></span>
+
+    `;
+
+
+    document.body.appendChild(
+      hint
+    );
+
+  }
+
+
+  hint
+    .querySelector(
+      '.dragTopHintTime'
+    )
+    .textContent=
+      time;
+}
+
+
+function hideDragHint(){
+
+  $('dragTopHint')
+    ?.remove();
+
+}
+
+
+/* =====================================================
+   左右端表示
+===================================================== */
+
+function createEdges(){
+
+  if(
+    $('dragEdgeLeft')
+  ){
+    return;
+  }
+
 
   const left=
     document.createElement(
       'div'
     );
 
+
   left.id=
     'dragEdgeLeft';
 
+
   left.className=
     'dragEdge left';
+
 
   document.body.appendChild(
     left
@@ -278,91 +841,43 @@ function createEdges(){
       'div'
     );
 
+
   right.id=
     'dragEdgeRight';
+
 
   right.className=
     'dragEdge right';
 
+
   document.body.appendChild(
     right
   );
-}
 
-
-function showHint(time){
-
-  let hint=
-    document.getElementById(
-      'dragTopHint'
-    );
-
-  if(!hint){
-
-    hint=
-      document.createElement(
-        'div'
-      );
-
-    hint.id=
-      'dragTopHint';
-
-    hint.className=
-      'dragTopHint';
-
-    hint.innerHTML=`
-      <span class="small">
-        変更先
-      </span>
-
-      <span class="time"></span>
-    `;
-
-    document.body.appendChild(
-      hint
-    );
-  }
-
-  hint
-    .querySelector(
-      '.time'
-    )
-    .textContent=
-      time;
-}
-
-
-function hideHint(){
-
-  document
-    .getElementById(
-      'dragTopHint'
-    )
-    ?.remove();
 }
 
 
 function hideEdges(){
 
-  document
-    .getElementById(
-      'dragEdgeLeft'
-    )
+  $('dragEdgeLeft')
     ?.classList
     .remove(
       'show'
     );
 
-  document
-    .getElementById(
-      'dragEdgeRight'
-    )
+
+  $('dragEdgeRight')
     ?.classList
     .remove(
       'show'
     );
+
 }
 
+
+/* =====================================================
+   DB
+===================================================== */
 
 async function getBooking(id){
 
@@ -381,9 +896,13 @@ async function getBooking(id){
       )
       .single();
 
+
   if(error){
+
     throw error;
+
   }
+
 
   return data;
 }
@@ -402,10 +921,13 @@ async function getMenuMinutes(
     return Number(
       booking.minutes
     );
+
   }
 
+
   const {
-    data
+    data,
+    error
   }=
     await supabase
       .from(
@@ -420,13 +942,26 @@ async function getMenuMinutes(
       )
       .single();
 
+
+  if(error){
+
+    return 30;
+
+  }
+
+
   return Number(
     data?.minutes
     ||
     30
   );
+
 }
 
+
+/* =====================================================
+   予約時間保存
+===================================================== */
 
 async function saveNewTime(
   booking,
@@ -438,13 +973,16 @@ async function saveNewTime(
       newMinutes
     );
 
+
   const oldTime=
     String(
       booking.start_time
-    ).slice(
+    )
+    .slice(
       0,
       5
     );
+
 
   const nextTime=
     newTime.slice(
@@ -460,6 +998,7 @@ async function saveNewTime(
   ){
 
     return 'same';
+
   }
 
 
@@ -470,6 +1009,7 @@ async function saveNewTime(
   ){
 
     return false;
+
   }
 
 
@@ -513,32 +1053,26 @@ async function saveNewTime(
       error
     );
 
+
     alert(
       'その時間には移動できません。空き時間・予約不可時間・他の予約を確認してください。'
     );
 
+
     return false;
+
   }
-
-
-  window.dispatchEvent(
-    new CustomEvent(
-      'nakano:booking-updated',
-      {
-        detail:{
-          bookingId:
-            booking.id
-        }
-      }
-    )
-  );
 
 
   return true;
 }
 
 
-function restore(state){
+/* =====================================================
+   カード位置
+===================================================== */
+
+function restoreCard(state){
 
   state.element.style.left=
     `${state.originalLeft}px`;
@@ -554,56 +1088,22 @@ function restore(state){
 
     timeBox.textContent=
       state.originalTime;
-  }
-}
 
-
-function stopAuto(){
-
-  if(autoFrame){
-
-    cancelAnimationFrame(
-      autoFrame
-    );
-
-    autoFrame=null;
   }
 
-
-  hideEdges();
 }
 
 
-function cleanup(state){
-
-  state.element
-    .classList
-    .remove(
-      'dragging'
-    );
-
-
-  document.body
-    .classList
-    .remove(
-      'bookingDragging'
-    );
-
-
-  hideHint();
-
-  stopAuto();
-}
-
-
-function updatePosition(){
+function updateCardPosition(){
 
   if(
     !active
     ||
     !active.dragging
   ){
+
     return;
+
   }
 
 
@@ -666,7 +1166,9 @@ function updatePosition(){
   active.element.style.left=
     `${
       (
-        next-DAY_START
+        next
+        -
+        DAY_START
       )
       *
       PX_PER_MINUTE
@@ -676,7 +1178,8 @@ function updatePosition(){
   const label=
     minutesToTime(
       next
-    ).slice(
+    )
+    .slice(
       0,
       5
     );
@@ -692,16 +1195,41 @@ function updatePosition(){
 
     timeBox.textContent=
       label;
+
   }
 
 
-  showHint(
+  showDragHint(
     label
   );
+
 }
 
 
-function autoLoop(){
+/* =====================================================
+   自動横スクロール
+===================================================== */
+
+function stopAutoScroll(){
+
+  if(autoFrame){
+
+    cancelAnimationFrame(
+      autoFrame
+    );
+
+
+    autoFrame=null;
+
+  }
+
+
+  hideEdges();
+
+}
+
+
+function autoScrollLoop(){
 
   if(
     !active
@@ -709,9 +1237,10 @@ function autoLoop(){
     !active.dragging
   ){
 
-    stopAuto();
+    stopAutoScroll();
 
     return;
+
   }
 
 
@@ -740,30 +1269,17 @@ function autoLoop(){
     x;
 
 
-  let speed=
-    0;
+  let speed=0;
 
 
-  const left=
-    document.getElementById(
-      'dragEdgeLeft'
-    );
-
-
-  const right=
-    document.getElementById(
-      'dragEdgeRight'
-    );
-
-
-  left
+  $('dragEdgeLeft')
     ?.classList
     .remove(
       'show'
     );
 
 
-  right
+  $('dragEdgeRight')
     ?.classList
     .remove(
       'show'
@@ -803,7 +1319,7 @@ function autoLoop(){
       );
 
 
-    left
+    $('dragEdgeLeft')
       ?.classList
       .add(
         'show'
@@ -840,11 +1356,12 @@ function autoLoop(){
       MAX_AUTO_SPEED;
 
 
-    right
+    $('dragEdgeRight')
       ?.classList
       .add(
         'show'
       );
+
   }
 
 
@@ -864,19 +1381,26 @@ function autoLoop(){
       scroll.scrollLeft
     ){
 
-      updatePosition();
+      updateCardPosition();
+
     }
+
   }
 
 
   autoFrame=
     requestAnimationFrame(
-      autoLoop
+      autoScrollLoop
     );
+
 }
 
 
-function armDrag(
+/* =====================================================
+   ドラッグ開始
+===================================================== */
+
+function startDragging(
   state,
   event
 ){
@@ -927,20 +1451,25 @@ function armDrag(
   catch{}
 
 
-  showHint(
+  showDragHint(
     state.originalTime
   );
 
 
-  stopAuto();
+  stopAutoScroll();
 
 
   autoFrame=
     requestAnimationFrame(
-      autoLoop
+      autoScrollLoop
     );
+
 }
 
+
+/* =====================================================
+   Pointer操作
+===================================================== */
 
 async function pointerDown(
   event,
@@ -952,11 +1481,11 @@ async function pointerDown(
   }
 
 
-  const id=
+  const bookingId=
     element.dataset.bookingId;
 
 
-  if(!id){
+  if(!bookingId){
     return;
   }
 
@@ -979,7 +1508,7 @@ async function pointerDown(
 
     booking=
       await getBooking(
-        id
+        bookingId
       );
 
   }
@@ -990,6 +1519,7 @@ async function pointerDown(
     );
 
     return;
+
   }
 
 
@@ -1050,7 +1580,8 @@ async function pointerDown(
     originalTime:
       String(
         booking.start_time
-      ).slice(
+      )
+      .slice(
         0,
         5
       ),
@@ -1059,6 +1590,7 @@ async function pointerDown(
       false
 
   };
+
 }
 
 
@@ -1073,6 +1605,7 @@ function pointerMove(event){
   ){
 
     return;
+
   }
 
 
@@ -1097,8 +1630,8 @@ function pointerMove(event){
 
 
   /*
-    予約カードを少し下へ動かすと
-    移動モードに入る
+    下方向へ少し動かしたら
+    予約移動モード
   */
   if(
     !active.dragging
@@ -1113,44 +1646,75 @@ function pointerMove(event){
 
       Math.abs(dx)
       <=
-      28
+      32
     ){
 
       event.preventDefault();
 
 
-      armDrag(
+      startDragging(
         active,
         event
       );
 
 
       return;
+
     }
 
 
     /*
-      横へ動かした場合は
-      通常の横スクロール
+      先に横へ動かしたら
+      普通の横スクロール
     */
     if(
-      Math.abs(dx)>18
+      Math.abs(dx)
+      >
+      18
     ){
 
       active=null;
 
       return;
+
     }
 
 
     return;
+
   }
 
 
   event.preventDefault();
 
 
-  updatePosition();
+  updateCardPosition();
+
+}
+
+
+function cleanupDrag(
+  state
+){
+
+  state.element
+    .classList
+    .remove(
+      'dragging'
+    );
+
+
+  document.body
+    .classList
+    .remove(
+      'bookingDragging'
+    );
+
+
+  hideDragHint();
+
+  stopAutoScroll();
+
 }
 
 
@@ -1165,6 +1729,7 @@ async function pointerUp(event){
   ){
 
     return;
+
   }
 
 
@@ -1180,10 +1745,15 @@ async function pointerUp(event){
   ){
 
     return;
+
   }
 
 
-  cleanup(
+  suppressClickUntil=
+    Date.now()+700;
+
+
+  cleanupDrag(
     state
   );
 
@@ -1199,20 +1769,25 @@ async function pointerUp(event){
     result===true
   ){
 
-    window.dispatchEvent(
-      new Event(
-        'nakano:refresh-request'
-      )
+    setTimeout(
+      ()=>{
+
+        location.reload();
+
+      },
+      250
     );
 
 
     return;
+
   }
 
 
-  restore(
+  restoreCard(
     state
   );
+
 }
 
 
@@ -1234,28 +1809,69 @@ function pointerCancel(){
     state.dragging
   ){
 
-    restore(
+    restoreCard(
       state
     );
+
   }
 
 
-  cleanup(
+  cleanupDrag(
     state
   );
+
 }
 
+
+/* =====================================================
+   ドラッグ後の誤タップ防止
+===================================================== */
+
+document.addEventListener(
+  'click',
+  event=>{
+
+    if(
+      Date.now()
+      <
+      suppressClickUntil
+    ){
+
+      if(
+        event.target.closest(
+          '.bookingBlock'
+        )
+      ){
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+        event.stopImmediatePropagation();
+
+      }
+
+    }
+
+  },
+  true
+);
+
+
+/* =====================================================
+   予約カードへ機能付与
+===================================================== */
 
 function attachBlock(block){
 
   if(
-    block.dataset.dragEnhanced
+    block.dataset.dragUnified
   ){
     return;
   }
 
 
-  block.dataset.dragEnhanced=
+  block.dataset.dragUnified=
     '1';
 
 
@@ -1281,6 +1897,7 @@ function attachBlock(block){
     event=>
       event.preventDefault()
   );
+
 }
 
 
@@ -1293,18 +1910,522 @@ function scanBlocks(){
     .forEach(
       attachBlock
     );
+
 }
 
+
+/* =====================================================
+   現在時刻へ自動スクロール
+===================================================== */
+
+let lastAutoScrollDate=null;
+
+
+function scrollToCurrentTime(
+  force=false
+){
+
+  const scroll=
+    document.querySelector(
+      '.timelineScroll,.scheduleScroll'
+    );
+
+
+  if(!scroll){
+    return;
+  }
+
+
+  const date=
+    selectedDate();
+
+
+  if(!date){
+    return;
+  }
+
+
+  /*
+    今日以外は朝側から表示
+  */
+  if(
+    date
+    !==
+    todayJapan()
+  ){
+
+    if(
+      force
+      ||
+      lastAutoScrollDate
+      !==
+      date
+    ){
+
+      scroll.scrollLeft=0;
+
+
+      lastAutoScrollDate=
+        date;
+
+    }
+
+
+    return;
+
+  }
+
+
+  if(
+    !force
+    &&
+    lastAutoScrollDate
+    ===
+    date
+  ){
+
+    return;
+
+  }
+
+
+  const now=
+    currentJapanMinutes();
+
+
+  const position=
+    (
+      now
+      -
+      DAY_START
+    )
+    *
+    PX_PER_MINUTE;
+
+
+  /*
+    現在時刻が画面中央付近
+  */
+  const target=
+    Math.max(
+      0,
+      position
+      -
+      scroll.clientWidth/2
+    );
+
+
+  scroll.scrollLeft=
+    target;
+
+
+  lastAutoScrollDate=
+    date;
+
+}
+
+
+function setupDateScroll(){
+
+  const date=
+    $('date');
+
+
+  if(!date){
+    return;
+  }
+
+
+  date.addEventListener(
+    'change',
+    ()=>{
+
+      lastAutoScrollDate=null;
+
+
+      setTimeout(
+        ()=>{
+
+          scrollToCurrentTime(
+            true
+          );
+
+        },
+        200
+      );
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   リアルタイム自動更新
+===================================================== */
+
+function eventMatchesCurrentDate(
+  payload,
+  dateField
+){
+
+  const row=
+    payload.new
+    ||
+    payload.old
+    ||
+    {};
+
+
+  const date=
+    row[dateField];
+
+
+  /*
+    DELETEなどで日付が取れない時は
+    安全側で更新
+  */
+  if(!date){
+    return true;
+  }
+
+
+  return date
+    ===
+    selectedDate();
+}
+
+
+function editIsOpen(){
+
+  const card=
+    $('editCard');
+
+
+  if(!card){
+    return false;
+  }
+
+
+  return !card
+    .classList
+    .contains(
+      'hidden'
+    );
+
+}
+
+
+function showPendingBadge(){
+
+  if(
+    $('realtimePending')
+  ){
+    return;
+  }
+
+
+  const badge=
+    document.createElement(
+      'div'
+    );
+
+
+  badge.id=
+    'realtimePending';
+
+
+  badge.className=
+    'realtimePending';
+
+
+  badge.textContent=
+    '更新あり';
+
+
+  badge.onclick=
+    ()=>location.reload();
+
+
+  document.body.appendChild(
+    badge
+  );
+
+}
+
+
+function scheduleRealtimeReload(){
+
+  clearTimeout(
+    realtimeReloadTimer
+  );
+
+
+  realtimeReloadTimer=
+    setTimeout(
+      ()=>{
+
+        if(
+          active?.dragging
+          ||
+          editIsOpen()
+        ){
+
+          pendingRealtimeReload=
+            true;
+
+
+          showPendingBadge();
+
+
+          return;
+        }
+
+
+        location.reload();
+
+      },
+      650
+    );
+
+}
+
+
+function setupRealtime(){
+
+  const channel=
+    supabase.channel(
+      `nakano-admin-live-${Math.random()}`
+    );
+
+
+  channel.on(
+    'postgres_changes',
+    {
+      event:'*',
+      schema:'public',
+      table:'nakano_bookings'
+    },
+    payload=>{
+
+      if(
+        eventMatchesCurrentDate(
+          payload,
+          'booking_date'
+        )
+      ){
+
+        scheduleRealtimeReload();
+
+      }
+
+    }
+  );
+
+
+  channel.on(
+    'postgres_changes',
+    {
+      event:'*',
+      schema:'public',
+      table:'nakano_blocked_times'
+    },
+    payload=>{
+
+      if(
+        eventMatchesCurrentDate(
+          payload,
+          'blocked_date'
+        )
+      ){
+
+        scheduleRealtimeReload();
+
+      }
+
+    }
+  );
+
+
+  channel.on(
+    'postgres_changes',
+    {
+      event:'*',
+      schema:'public',
+      table:'nakano_open_slots'
+    },
+    payload=>{
+
+      if(
+        eventMatchesCurrentDate(
+          payload,
+          'slot_date'
+        )
+      ){
+
+        scheduleRealtimeReload();
+
+      }
+
+    }
+  );
+
+
+  channel.subscribe(
+    status=>{
+
+      const label=
+        $('bookingRefreshStatus');
+
+
+      if(!label){
+        return;
+      }
+
+
+      if(
+        status
+        ===
+        'SUBSCRIBED'
+      ){
+
+        label.textContent=
+          '自動更新 ON';
+
+      }
+      else if(
+        status
+        ===
+        'CHANNEL_ERROR'
+      ){
+
+        label.textContent=
+          '自動更新 接続確認中';
+
+      }
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   編集を閉じた後に保留更新
+===================================================== */
+
+function watchEditCard(){
+
+  const card=
+    $('editCard');
+
+
+  if(!card){
+    return;
+  }
+
+
+  new MutationObserver(
+    ()=>{
+
+      if(
+        pendingRealtimeReload
+
+        &&
+
+        card.classList
+          .contains(
+            'hidden'
+          )
+      ){
+
+        location.reload();
+
+      }
+
+    }
+  )
+  .observe(
+    card,
+    {
+      attributes:true,
+      attributeFilter:[
+        'class'
+      ]
+    }
+  );
+
+}
+
+
+/* =====================================================
+   DOM監視
+===================================================== */
+
+let enhanceTimer=null;
+
+
+function enhancePage(){
+
+  clearTimeout(
+    enhanceTimer
+  );
+
+
+  enhanceTimer=
+    setTimeout(
+      ()=>{
+
+        renameBookingList();
+
+        createGuide();
+
+        scanBlocks();
+
+        scrollToCurrentTime();
+
+      },
+      80
+    );
+
+}
+
+
+/* =====================================================
+   起動
+===================================================== */
 
 addStyles();
 
 createEdges();
 
+renameBookingList();
+
+createGuide();
+
 scanBlocks();
+
+setupDateScroll();
+
+setupRealtime();
+
+watchEditCard();
+
+
+setTimeout(
+  ()=>{
+
+    scrollToCurrentTime(
+      true
+    );
+
+  },
+  600
+);
 
 
 new MutationObserver(
-  scanBlocks
+  enhancePage
 )
 .observe(
   document.body,
@@ -1333,4 +2454,23 @@ window.addEventListener(
 window.addEventListener(
   'pointercancel',
   pointerCancel
+);
+
+
+window.addEventListener(
+  'pageshow',
+  ()=>{
+
+    setTimeout(
+      ()=>{
+
+        scrollToCurrentTime(
+          true
+        );
+
+      },
+      250
+    );
+
+  }
 );
