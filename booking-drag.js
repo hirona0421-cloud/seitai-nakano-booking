@@ -8,35 +8,16 @@ const supabase=createClient(
 
 const DAY_START=8*60;
 const DAY_END=22*60+30;
-
 const PX_PER_MINUTE=2;
 const SNAP_MINUTES=30;
 
-/*
-  長押し判定
-*/
-const LONG_PRESS_MS=350;
-
-/*
-  端から何px以内で
-  自動スクロールを始めるか
-*/
-const EDGE_ZONE=70;
-
-/*
-  自動スクロール最大速度
-  1フレームあたりpx
-*/
-const MAX_AUTO_SPEED=12;
-
+const DOWN_TRIGGER=24;
+const EDGE_ZONE=72;
+const MAX_AUTO_SPEED=13;
 
 let active=null;
-let autoScrollFrame=null;
+let autoFrame=null;
 
-
-/* =====================================================
-   共通
-===================================================== */
 
 function timeToMinutes(time){
 
@@ -52,17 +33,10 @@ function timeToMinutes(time){
 
 function minutesToTime(minutes){
 
-  const h=
-    Math.floor(minutes/60);
+  const h=Math.floor(minutes/60);
+  const m=minutes%60;
 
-  const m=
-    minutes%60;
-
-  return `${
-    String(h).padStart(2,'0')
-  }:${
-    String(m).padStart(2,'0')
-  }:00`;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`;
 }
 
 
@@ -74,10 +48,6 @@ function snapMinutes(value){
 }
 
 
-/* =====================================================
-   CSS追加
-===================================================== */
-
 function addStyles(){
 
   if(
@@ -88,45 +58,26 @@ function addStyles(){
     return;
   }
 
-
   const style=
     document.createElement(
       'style'
     );
 
-
   style.id=
     'nakanoDragStyle';
-
 
   style.textContent=`
 
     .bookingBlock{
-
       user-select:none;
       -webkit-user-select:none;
-
       -webkit-touch-callout:none;
 
-    }
-
-
-    .bookingBlock.dragArmed{
-
-      z-index:100!important;
-
-      transform:scale(1.035);
-
-      opacity:.96;
-
-      box-shadow:
-        0 0 0 3px rgba(97,87,77,.20),
-        0 8px 24px rgba(0,0,0,.22);
-
-      transition:
-        transform .12s ease,
-        box-shadow .12s ease;
-
+      /*
+        横方向は通常の
+        スケジュールスクロールを許可
+      */
+      touch-action:pan-x;
     }
 
 
@@ -134,7 +85,19 @@ function addStyles(){
 
       z-index:100!important;
 
+      opacity:.96;
+
+      transform:
+        translateY(12px)
+        scale(1.035);
+
+      box-shadow:
+        0 0 0 3px rgba(97,87,77,.20),
+        0 8px 24px rgba(0,0,0,.22);
+
       transition:none!important;
+
+      touch-action:none!important;
 
       cursor:grabbing;
 
@@ -142,13 +105,12 @@ function addStyles(){
 
 
     body.bookingDragging{
-
       overscroll-behavior:none;
-
     }
 
 
-    body.bookingDragging .timelineScroll{
+    body.bookingDragging .timelineScroll,
+    body.bookingDragging .scheduleScroll{
 
       touch-action:none!important;
 
@@ -157,45 +119,68 @@ function addStyles(){
     }
 
 
-    .dragHint{
+    .dragTopHint{
 
       position:fixed;
 
-      left:50%;
-
-      bottom:
+      top:
         calc(
-          24px
+          10px
           +
-          env(safe-area-inset-bottom)
+          env(safe-area-inset-top)
         );
+
+      left:50%;
 
       transform:
         translateX(-50%);
 
       z-index:99999;
 
+      min-width:190px;
+
+      text-align:center;
+
       background:#2f2d2a;
 
       color:#fff;
 
       padding:
-        11px 16px;
+        11px 18px;
 
-      border-radius:
-        999px;
-
-      font-size:13px;
-
-      font-weight:700;
-
-      white-space:nowrap;
+      border-radius:14px;
 
       box-shadow:
-        0 5px 20px
-        rgba(0,0,0,.25);
+        0 6px 22px
+        rgba(0,0,0,.24);
 
       pointer-events:none;
+
+    }
+
+
+    .dragTopHint .small{
+
+      display:block;
+
+      font-size:11px;
+
+      opacity:.78;
+
+      margin-bottom:2px;
+
+    }
+
+
+    .dragTopHint .time{
+
+      display:block;
+
+      font-size:24px;
+
+      font-weight:800;
+
+      letter-spacing:.03em;
 
     }
 
@@ -208,7 +193,7 @@ function addStyles(){
 
       bottom:0;
 
-      width:52px;
+      width:54px;
 
       z-index:9998;
 
@@ -216,7 +201,8 @@ function addStyles(){
 
       opacity:0;
 
-      transition:opacity .15s ease;
+      transition:
+        opacity .12s ease;
 
     }
 
@@ -228,7 +214,7 @@ function addStyles(){
       background:
         linear-gradient(
           to right,
-          rgba(97,87,77,.16),
+          rgba(97,87,77,.18),
           rgba(97,87,77,0)
         );
 
@@ -242,7 +228,7 @@ function addStyles(){
       background:
         linear-gradient(
           to left,
-          rgba(97,87,77,.16),
+          rgba(97,87,77,.18),
           rgba(97,87,77,0)
         );
 
@@ -250,73 +236,16 @@ function addStyles(){
 
 
     .dragEdge.show{
-
       opacity:1;
-
     }
 
   `;
-
 
   document.head.appendChild(
     style
   );
 }
 
-
-/* =====================================================
-   ヒント
-===================================================== */
-
-function showHint(text){
-
-  let hint=
-    document.getElementById(
-      'dragHint'
-    );
-
-
-  if(!hint){
-
-    hint=
-      document.createElement(
-        'div'
-      );
-
-
-    hint.id=
-      'dragHint';
-
-
-    hint.className=
-      'dragHint';
-
-
-    document.body.appendChild(
-      hint
-    );
-
-  }
-
-
-  hint.textContent=
-    text;
-}
-
-
-function hideHint(){
-
-  document
-    .getElementById(
-      'dragHint'
-    )
-    ?.remove();
-}
-
-
-/* =====================================================
-   端の表示
-===================================================== */
 
 function createEdges(){
 
@@ -328,20 +257,16 @@ function createEdges(){
     return;
   }
 
-
   const left=
     document.createElement(
       'div'
     );
 
-
   left.id=
     'dragEdgeLeft';
 
-
   left.className=
     'dragEdge left';
-
 
   document.body.appendChild(
     left
@@ -353,18 +278,67 @@ function createEdges(){
       'div'
     );
 
-
   right.id=
     'dragEdgeRight';
-
 
   right.className=
     'dragEdge right';
 
-
   document.body.appendChild(
     right
   );
+}
+
+
+function showHint(time){
+
+  let hint=
+    document.getElementById(
+      'dragTopHint'
+    );
+
+  if(!hint){
+
+    hint=
+      document.createElement(
+        'div'
+      );
+
+    hint.id=
+      'dragTopHint';
+
+    hint.className=
+      'dragTopHint';
+
+    hint.innerHTML=`
+      <span class="small">
+        変更先
+      </span>
+
+      <span class="time"></span>
+    `;
+
+    document.body.appendChild(
+      hint
+    );
+  }
+
+  hint
+    .querySelector(
+      '.time'
+    )
+    .textContent=
+      time;
+}
+
+
+function hideHint(){
+
+  document
+    .getElementById(
+      'dragTopHint'
+    )
+    ?.remove();
 }
 
 
@@ -379,7 +353,6 @@ function hideEdges(){
       'show'
     );
 
-
   document
     .getElementById(
       'dragEdgeRight'
@@ -391,11 +364,7 @@ function hideEdges(){
 }
 
 
-/* =====================================================
-   DB
-===================================================== */
-
-async function getBooking(bookingId){
+async function getBooking(id){
 
   const {
     data,
@@ -408,15 +377,13 @@ async function getBooking(bookingId){
       .select('*')
       .eq(
         'id',
-        bookingId
+        id
       )
       .single();
-
 
   if(error){
     throw error;
   }
-
 
   return data;
 }
@@ -437,10 +404,8 @@ async function getMenuMinutes(
     );
   }
 
-
   const {
-    data,
-    error
+    data
   }=
     await supabase
       .from(
@@ -455,13 +420,6 @@ async function getMenuMinutes(
       )
       .single();
 
-
-  if(error){
-
-    return 30;
-  }
-
-
   return Number(
     data?.minutes
     ||
@@ -469,10 +427,6 @@ async function getMenuMinutes(
   );
 }
 
-
-/* =====================================================
-   時刻保存
-===================================================== */
 
 async function saveNewTime(
   booking,
@@ -484,7 +438,6 @@ async function saveNewTime(
       newMinutes
     );
 
-
   const oldTime=
     String(
       booking.start_time
@@ -493,8 +446,7 @@ async function saveNewTime(
       5
     );
 
-
-  const displayNew=
+  const nextTime=
     newTime.slice(
       0,
       5
@@ -504,16 +456,16 @@ async function saveNewTime(
   if(
     oldTime
     ===
-    displayNew
+    nextTime
   ){
 
-    return true;
+    return 'same';
   }
 
 
   if(
     !confirm(
-      `${oldTime} → ${displayNew} に予約時間を変更しますか？`
+      `${oldTime} → ${nextTime} に予約時間を変更しますか？`
     )
   ){
 
@@ -521,7 +473,9 @@ async function saveNewTime(
   }
 
 
-  const {error}=
+  const {
+    error
+  }=
     await supabase.rpc(
       'nakano_admin_change_booking',
       {
@@ -559,25 +513,90 @@ async function saveNewTime(
       error
     );
 
-
     alert(
       'その時間には移動できません。空き時間・予約不可時間・他の予約を確認してください。'
     );
 
-
     return false;
   }
+
+
+  window.dispatchEvent(
+    new CustomEvent(
+      'nakano:booking-updated',
+      {
+        detail:{
+          bookingId:
+            booking.id
+        }
+      }
+    )
+  );
 
 
   return true;
 }
 
 
-/* =====================================================
-   カード位置更新
-===================================================== */
+function restore(state){
 
-function updateCardPosition(){
+  state.element.style.left=
+    `${state.originalLeft}px`;
+
+
+  const timeBox=
+    state.element.querySelector(
+      '.bookingTime'
+    );
+
+
+  if(timeBox){
+
+    timeBox.textContent=
+      state.originalTime;
+  }
+}
+
+
+function stopAuto(){
+
+  if(autoFrame){
+
+    cancelAnimationFrame(
+      autoFrame
+    );
+
+    autoFrame=null;
+  }
+
+
+  hideEdges();
+}
+
+
+function cleanup(state){
+
+  state.element
+    .classList
+    .remove(
+      'dragging'
+    );
+
+
+  document.body
+    .classList
+    .remove(
+      'bookingDragging'
+    );
+
+
+  hideHint();
+
+  stopAuto();
+}
+
+
+function updatePosition(){
 
   if(
     !active
@@ -592,42 +611,29 @@ function updateCardPosition(){
     active.scrollElement;
 
 
-  /*
-    指の移動量
-  */
-  const pointerDifference=
+  const pointerDx=
     active.currentX
     -
     active.startX;
 
 
-  /*
-    ドラッグ開始後に
-    スクロールした量
-  */
-  const scrollDifference=
+  const scrollDx=
     scroll.scrollLeft
     -
     active.startScrollLeft;
 
 
-  /*
-    指移動＋自動スクロール
-    の両方を時間に反映
-  */
-  const totalPixels=
-    pointerDifference
-    +
-    scrollDifference;
-
-
   const movedMinutes=
-    totalPixels
+    (
+      pointerDx
+      +
+      scrollDx
+    )
     /
     PX_PER_MINUTE;
 
 
-  let newMinutes=
+  let next=
     snapMinutes(
       active.originalMinutes
       +
@@ -635,11 +641,7 @@ function updateCardPosition(){
     );
 
 
-  /*
-    予約が営業時間外に
-    はみ出さないようにする
-  */
-  const latestStart=
+  const latest=
     DAY_END
     -
     active.duration
@@ -647,37 +649,33 @@ function updateCardPosition(){
     30;
 
 
-  newMinutes=
+  next=
     Math.max(
       DAY_START,
       Math.min(
-        latestStart,
-        newMinutes
+        latest,
+        next
       )
     );
 
 
   active.newMinutes=
-    newMinutes;
-
-
-  const newLeft=
-    (
-      newMinutes
-      -
-      DAY_START
-    )
-    *
-    PX_PER_MINUTE;
+    next;
 
 
   active.element.style.left=
-    `${newLeft}px`;
+    `${
+      (
+        next-DAY_START
+      )
+      *
+      PX_PER_MINUTE
+    }px`;
 
 
-  const text=
+  const label=
     minutesToTime(
-      newMinutes
+      next
     ).slice(
       0,
       5
@@ -693,41 +691,17 @@ function updateCardPosition(){
   if(timeBox){
 
     timeBox.textContent=
-      text;
+      label;
   }
 
 
   showHint(
-    `変更先 ${text}`
+    label
   );
 }
 
 
-/* =====================================================
-   自動スクロール
-===================================================== */
-
-function stopAutoScroll(){
-
-  if(
-    autoScrollFrame
-  ){
-
-    cancelAnimationFrame(
-      autoScrollFrame
-    );
-
-
-    autoScrollFrame=
-      null;
-  }
-
-
-  hideEdges();
-}
-
-
-function autoScrollLoop(){
+function autoLoop(){
 
   if(
     !active
@@ -735,7 +709,7 @@ function autoScrollLoop(){
     !active.dragging
   ){
 
-    stopAutoScroll();
+    stopAuto();
 
     return;
   }
@@ -746,15 +720,12 @@ function autoScrollLoop(){
 
 
   const rect=
-    scroll.getBoundingClientRect();
+    scroll
+      .getBoundingClientRect();
 
 
   const x=
     active.currentX;
-
-
-  let speed=
-    0;
 
 
   const leftDistance=
@@ -769,35 +740,36 @@ function autoScrollLoop(){
     x;
 
 
-  const leftEdge=
+  let speed=
+    0;
+
+
+  const left=
     document.getElementById(
       'dragEdgeLeft'
     );
 
 
-  const rightEdge=
+  const right=
     document.getElementById(
       'dragEdgeRight'
     );
 
 
-  leftEdge
+  left
     ?.classList
     .remove(
       'show'
     );
 
 
-  rightEdge
+  right
     ?.classList
     .remove(
       'show'
     );
 
 
-  /*
-    左端
-  */
   if(
     leftDistance
     <
@@ -831,18 +803,13 @@ function autoScrollLoop(){
       );
 
 
-    leftEdge
+    left
       ?.classList
       .add(
         'show'
       );
 
   }
-
-
-  /*
-    右端
-  */
   else if(
     rightDistance
     <
@@ -873,18 +840,15 @@ function autoScrollLoop(){
       MAX_AUTO_SPEED;
 
 
-    rightEdge
+    right
       ?.classList
       .add(
         'show'
       );
-
   }
 
 
-  if(
-    speed!==0
-  ){
+  if(speed){
 
     const before=
       scroll.scrollLeft;
@@ -894,173 +858,89 @@ function autoScrollLoop(){
       speed;
 
 
-    /*
-      実際にスクロールしたら
-      カード位置も更新
-    */
     if(
-      scroll.scrollLeft
-      !==
       before
+      !==
+      scroll.scrollLeft
     ){
 
-      updateCardPosition();
+      updatePosition();
     }
-
   }
 
 
-  autoScrollFrame=
+  autoFrame=
     requestAnimationFrame(
-      autoScrollLoop
+      autoLoop
     );
 }
 
 
-/* =====================================================
-   元位置へ戻す
-===================================================== */
-
-function restoreOriginal(
-  state
+function armDrag(
+  state,
+  event
 ){
 
-  state.element.style.left=
-    `${state.originalLeft}px`;
-
-
-  const timeBox=
-    state.element.querySelector(
-      '.bookingTime'
-    );
-
-
-  if(timeBox){
-
-    timeBox.textContent=
-      state.originalTime;
+  if(
+    state.dragging
+  ){
+    return;
   }
-}
 
 
-/* =====================================================
-   状態解除
-===================================================== */
-
-function cleanupState(
-  state
-){
-
-  clearTimeout(
-    state.timer
-  );
+  state.dragging=
+    true;
 
 
   state.element
     .classList
-    .remove(
-      'dragArmed',
+    .add(
       'dragging'
     );
 
 
   document.body
     .classList
-    .remove(
+    .add(
       'bookingDragging'
     );
 
 
-  hideHint();
+  try{
 
-  stopAutoScroll();
-}
+    state.element
+      .setPointerCapture(
+        event.pointerId
+      );
 
-
-/* =====================================================
-   キャンセル
-===================================================== */
-
-function cancelDrag(){
-
-  if(!active){
-    return;
   }
+  catch{}
 
 
-  const state=
-    active;
+  try{
 
-
-  active=null;
-
-
-  restoreOriginal(
-    state
-  );
-
-
-  cleanupState(
-    state
-  );
-}
-
-
-/* =====================================================
-   ドラッグ完了
-===================================================== */
-
-async function finishDrag(){
-
-  if(!active){
-    return;
-  }
-
-
-  const state=
-    active;
-
-
-  active=null;
-
-
-  cleanupState(
-    state
-  );
-
-
-  if(
-    !state.dragging
-  ){
-
-    return;
-  }
-
-
-  const success=
-    await saveNewTime(
-      state.booking,
-      state.newMinutes
+    navigator.vibrate?.(
+      25
     );
 
-
-  if(success){
-
-    location.reload();
-
-    return;
   }
+  catch{}
 
 
-  restoreOriginal(
-    state
+  showHint(
+    state.originalTime
   );
+
+
+  stopAuto();
+
+
+  autoFrame=
+    requestAnimationFrame(
+      autoLoop
+    );
 }
 
-
-/* =====================================================
-   長押し開始
-===================================================== */
 
 async function pointerDown(
   event,
@@ -1072,18 +952,18 @@ async function pointerDown(
   }
 
 
-  const bookingId=
+  const id=
     element.dataset.bookingId;
 
 
-  if(!bookingId){
+  if(!id){
     return;
   }
 
 
   const scrollElement=
     element.closest(
-      '.timelineScroll'
+      '.timelineScroll,.scheduleScroll'
     );
 
 
@@ -1099,7 +979,7 @@ async function pointerDown(
 
     booking=
       await getBooking(
-        bookingId
+        id
       );
 
   }
@@ -1125,17 +1005,7 @@ async function pointerDown(
     );
 
 
-  const originalLeft=
-    (
-      originalMinutes
-      -
-      DAY_START
-    )
-    *
-    PX_PER_MINUTE;
-
-
-  const state={
+  active={
 
     element,
 
@@ -1163,12 +1033,19 @@ async function pointerDown(
     startScrollLeft:
       scrollElement.scrollLeft,
 
-    originalLeft,
-
     originalMinutes,
 
     newMinutes:
       originalMinutes,
+
+    originalLeft:
+      (
+        originalMinutes
+        -
+        DAY_START
+      )
+      *
+      PX_PER_MINUTE,
 
     originalTime:
       String(
@@ -1179,105 +1056,13 @@ async function pointerDown(
       ),
 
     dragging:
-      false,
-
-    timer:
-      null
+      false
 
   };
-
-
-  active=
-    state;
-
-
-  /*
-    長押し判定
-  */
-  state.timer=
-    setTimeout(
-      ()=>{
-
-        if(
-          active
-          !==
-          state
-        ){
-          return;
-        }
-
-
-        state.dragging=
-          true;
-
-
-        element
-          .classList
-          .add(
-            'dragArmed',
-            'dragging'
-          );
-
-
-        document.body
-          .classList
-          .add(
-            'bookingDragging'
-          );
-
-
-        /*
-          指をカードに固定
-        */
-        try{
-
-          element.setPointerCapture(
-            state.pointerId
-          );
-
-        }
-        catch{}
-
-
-        /*
-          対応端末では軽く振動
-        */
-        try{
-
-          navigator.vibrate?.(
-            25
-          );
-
-        }
-        catch{}
-
-
-        showHint(
-          `${state.originalTime}　そのまま左右へ移動`
-        );
-
-
-        stopAutoScroll();
-
-
-        autoScrollFrame=
-          requestAnimationFrame(
-            autoScrollLoop
-          );
-
-      },
-      LONG_PRESS_MS
-    );
 }
 
 
-/* =====================================================
-   指移動
-===================================================== */
-
-function pointerMove(
-  event
-){
+function pointerMove(event){
 
   if(
     !active
@@ -1312,27 +1097,49 @@ function pointerMove(
 
 
   /*
-    長押し成立前
-
-    大きく動いたら
-    普通の横スクロールとして扱う
+    予約カードを少し下へ動かすと
+    移動モードに入る
   */
   if(
     !active.dragging
   ){
 
     if(
-      Math.abs(dx)>18
-      ||
-      Math.abs(dy)>18
+      dy
+      >=
+      DOWN_TRIGGER
+
+      &&
+
+      Math.abs(dx)
+      <=
+      28
     ){
 
-      clearTimeout(
-        active.timer
+      event.preventDefault();
+
+
+      armDrag(
+        active,
+        event
       );
 
 
+      return;
+    }
+
+
+    /*
+      横へ動かした場合は
+      通常の横スクロール
+    */
+    if(
+      Math.abs(dx)>18
+    ){
+
       active=null;
+
+      return;
     }
 
 
@@ -1340,24 +1147,14 @@ function pointerMove(
   }
 
 
-  /*
-    長押し成立後は
-    ブラウザのスクロールを止める
-  */
   event.preventDefault();
 
 
-  updateCardPosition();
+  updatePosition();
 }
 
 
-/* =====================================================
-   指を離した
-===================================================== */
-
-function pointerUp(
-  event
-){
+async function pointerUp(event){
 
   if(
     !active
@@ -1371,17 +1168,85 @@ function pointerUp(
   }
 
 
-  finishDrag();
+  const state=
+    active;
+
+
+  active=null;
+
+
+  if(
+    !state.dragging
+  ){
+
+    return;
+  }
+
+
+  cleanup(
+    state
+  );
+
+
+  const result=
+    await saveNewTime(
+      state.booking,
+      state.newMinutes
+    );
+
+
+  if(
+    result===true
+  ){
+
+    window.dispatchEvent(
+      new Event(
+        'nakano:refresh-request'
+      )
+    );
+
+
+    return;
+  }
+
+
+  restore(
+    state
+  );
 }
 
 
-/* =====================================================
-   予約カードへ機能追加
-===================================================== */
+function pointerCancel(){
 
-function attachBlock(
-  block
-){
+  if(!active){
+    return;
+  }
+
+
+  const state=
+    active;
+
+
+  active=null;
+
+
+  if(
+    state.dragging
+  ){
+
+    restore(
+      state
+    );
+  }
+
+
+  cleanup(
+    state
+  );
+}
+
+
+function attachBlock(block){
 
   if(
     block.dataset.dragEnhanced
@@ -1396,44 +1261,28 @@ function attachBlock(
 
   block.addEventListener(
     'pointerdown',
-    event=>{
-
+    event=>
       pointerDown(
         event,
         block
-      );
-
-    }
+      )
   );
 
 
-  /*
-    iPhone長押しメニュー防止
-  */
   block.addEventListener(
     'contextmenu',
-    event=>{
-
-      event.preventDefault();
-
-    }
+    event=>
+      event.preventDefault()
   );
 
 
   block.addEventListener(
     'dragstart',
-    event=>{
-
-      event.preventDefault();
-
-    }
+    event=>
+      event.preventDefault()
   );
 }
 
-
-/* =====================================================
-   予約カード監視
-===================================================== */
 
 function scanBlocks(){
 
@@ -1447,10 +1296,6 @@ function scanBlocks(){
 }
 
 
-/* =====================================================
-   起動
-===================================================== */
-
 addStyles();
 
 createEdges();
@@ -1458,24 +1303,14 @@ createEdges();
 scanBlocks();
 
 
-const observer=
-  new MutationObserver(
-    ()=>{
-
-      scanBlocks();
-
-    }
-  );
-
-
-observer.observe(
+new MutationObserver(
+  scanBlocks
+)
+.observe(
   document.body,
   {
-
     childList:true,
-
     subtree:true
-
   }
 );
 
@@ -1497,13 +1332,5 @@ window.addEventListener(
 
 window.addEventListener(
   'pointercancel',
-  ()=>{
-
-    /*
-      iPhone側で操作が
-      キャンセルされた場合
-    */
-    cancelDrag();
-
-  }
+  pointerCancel
 );
