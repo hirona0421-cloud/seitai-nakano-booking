@@ -1,14 +1,96 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>整体なかの｜身体の状態</title><style>*{box-sizing:border-box}body{margin:0;background:#f6f3ee;color:#2f2d2a;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Yu Gothic",Meiryo,sans-serif}.wrap{max-width:900px;margin:auto;padding:14px}.bar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px}.bar h1{font-size:20px;margin:0}.btn{border:1px solid #d8d0c7;background:#fff;color:#4d4843;border-radius:12px;padding:10px 12px;font-weight:700}.primary{background:#61574d;color:#fff;border-color:#61574d}.card{background:#fff;border:1px solid #e7e0d7;border-radius:18px;padding:12px}.meta{font-size:13px;color:#77716a;margin:0 0 8px}.stage{position:relative;width:100%;aspect-ratio:4/3;min-height:430px;background:#fff;border:1px solid #eee7df;border-radius:14px;overflow:hidden;touch-action:none}#base,#draw{position:absolute;inset:0;width:100%;height:100%}#base{object-fit:contain;padding:10px;pointer-events:none}#draw{touch-action:none}.tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}.color{width:38px;height:38px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #d8d0c7}.color.active{box-shadow:0 0 0 3px #61574d}.red{background:#d9413a}.blue{background:#3478d4}.green{background:#4a9d55}.purple{background:#8a55b5}.orange{background:#e68a28}.black{background:#333}.hint{font-size:13px;color:#77716a;line-height:1.6;margin:8px 0}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}@media(max-width:600px){.stage{aspect-ratio:3/4;min-height:520px}.bar h1{font-size:18px}.btn{padding:9px 10px}}</style></head><body><div class="wrap"><div class="bar"><button class="btn" onclick="history.back()">← 戻る</button><h1>身体の状態</h1><button class="btn" id="fullscreen">拡大</button></div><div class="card"><p id="meta" class="meta"></p><p class="hint">図に直接書き込めます。お客様への説明では「拡大」を押すと図だけ大きく表示できます。</p><div class="stage" id="stage"><img id="base" alt="身体図"><canvas id="draw"></canvas></div><div class="tools"><button class="color red active" data-c="#d9413a" aria-label="赤"></button><button class="color blue" data-c="#3478d4" aria-label="青"></button><button class="color green" data-c="#4a9d55" aria-label="緑"></button><button class="color purple" data-c="#8a55b5" aria-label="紫"></button><button class="color orange" data-c="#e68a28" aria-label="橙"></button><button class="color black" data-c="#333333" aria-label="黒"></button><button class="btn" id="eraser">消しゴム</button><button class="btn" id="undo">元に戻す</button><button class="btn" id="clear">全消去</button></div><div class="actions"><button class="btn" id="close">閉じる</button><button class="btn primary" id="save">保存</button></div><div id="msg" class="hint"></div></div></div><script>
-const params=new URLSearchParams(location.search),customer=params.get('customer')||'draft',date=params.get('date')||'undated',name=params.get('name')||'';const KEY=`nakano_body_chart_${customer}_${date}`;document.getElementById('meta').textContent=[name,date&&date!=='undated'?date:''].filter(Boolean).join('　');
-const base=document.getElementById('base');base.src='./body-chart-base.png';base.onerror=()=>{document.getElementById('msg').textContent='身体図画像を準備中です。';};
-const canvas=document.getElementById('draw'),ctx=canvas.getContext('2d'),stage=document.getElementById('stage');let color='#d9413a',erase=false,drawing=false,last=null,historyStack=[];
-function resize(){const old=canvas.width?canvas.toDataURL():null;const r=stage.getBoundingClientRect(),d=devicePixelRatio||1;canvas.width=Math.round(r.width*d);canvas.height=Math.round(r.height*d);ctx.setTransform(d,0,0,d,0,0);ctx.lineCap='round';ctx.lineJoin='round';if(old){const im=new Image();im.onload=()=>ctx.drawImage(im,0,0,r.width,r.height);im.src=old}else load();}
-function load(){const s=localStorage.getItem(KEY);if(!s)return;const im=new Image();im.onload=()=>ctx.drawImage(im,0,0,stage.clientWidth,stage.clientHeight);im.src=s}
-function pos(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
-function snapshot(){historyStack.push(canvas.toDataURL());if(historyStack.length>20)historyStack.shift()}
-function start(e){e.preventDefault();snapshot();drawing=true;last=pos(e)}function move(e){if(!drawing)return;e.preventDefault();const p=pos(e);ctx.globalCompositeOperation=erase?'destination-out':'source-over';ctx.strokeStyle=color;ctx.lineWidth=erase?24:4;ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(p.x,p.y);ctx.stroke();last=p}function end(){drawing=false;last=null}
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>整体なかの｜身体の状態</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f6f3ee;color:#2f2d2a;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Yu Gothic",Meiryo,sans-serif}.wrap{max-width:900px;margin:auto;padding:14px}.bar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px}.bar h1{font-size:20px;margin:0}.btn{border:1px solid #d8d0c7;background:#fff;color:#4d4843;border-radius:12px;padding:10px 12px;font-weight:700}.primary{background:#61574d;color:#fff;border-color:#61574d}.card{background:#fff;border:1px solid #e7e0d7;border-radius:18px;padding:12px}.meta{font-size:13px;color:#77716a;margin:0 0 8px}.stage{position:relative;width:100%;aspect-ratio:4/3;min-height:430px;background:#fff;border:1px solid #eee7df;border-radius:14px;overflow:hidden;touch-action:none}.baseSvg,#draw{position:absolute;inset:0;width:100%;height:100%}.baseSvg{padding:8px;pointer-events:none}.baseSvg svg{display:block;width:100%;height:100%}#draw{touch-action:none}.tools,.markers{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}.toolTitle{width:100%;font-size:12px;font-weight:700;color:#6f6862;margin-top:4px}.color{width:38px;height:38px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #d8d0c7}.color.active{box-shadow:0 0 0 3px #61574d}.red{background:#d9413a}.blue{background:#3478d4}.green{background:#4a9d55}.purple{background:#8a55b5}.orange{background:#e68a28}.black{background:#333}.marker{border-radius:10px;padding:9px 14px;font-weight:800;border:1px solid transparent;background:#fff}.marker[data-text="痛み"]{color:#c83f38;background:#fff0ee;border-color:#efd2cf}.marker[data-text="こり"]{color:#3d8848;background:#eff7ef;border-color:#d6ead8}.marker[data-text="しびれ"]{color:#7a4da4;background:#f4eff8;border-color:#e2d5eb}.marker[data-text="むくみ"]{color:#2f70c9;background:#eef4fc;border-color:#d7e3f5}.marker.active{box-shadow:0 0 0 2px #61574d}.hint{font-size:13px;color:#77716a;line-height:1.6;margin:8px 0}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}@media(max-width:600px){.stage{aspect-ratio:3/4;min-height:520px}.bar h1{font-size:18px}.btn{padding:9px 10px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar"><button class="btn" onclick="history.back()">← 戻る</button><h1>身体の状態</h1><button class="btn" id="fullscreen">拡大</button></div>
+  <div class="card">
+    <p id="meta" class="meta"></p>
+    <p class="hint">指で直接書き込めます。「痛み・こり・しびれ・むくみ」を押した後、身体図の場所をタップすると文字が入ります。</p>
+    <div class="stage" id="stage">
+      <div class="baseSvg" aria-label="身体図 正面・背面">
+        <svg viewBox="0 0 760 560" xmlns="http://www.w3.org/2000/svg">
+          <rect width="760" height="560" fill="#fff"/>
+          <g fill="none" stroke="#222" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <!-- front -->
+            <circle cx="235" cy="70" r="38"/>
+            <path d="M213 105 L205 127 L178 143 L154 210 L118 273 M257 105 L265 127 L292 143 L316 210 L352 273"/>
+            <path d="M118 273 L101 302 L90 318 M352 273 L369 302 L380 318"/>
+            <path d="M101 302 L88 325 M101 302 L96 329 M101 302 L105 329 M101 302 L114 325"/>
+            <path d="M369 302 L382 325 M369 302 L374 329 M369 302 L365 329 M369 302 L356 325"/>
+            <path d="M178 143 Q235 166 292 143 M205 127 L204 228 Q202 260 190 303 L180 388 L174 503 M265 127 L266 228 Q268 260 280 303 L290 388 L296 503"/>
+            <path d="M204 228 Q235 245 266 228 M190 303 Q235 323 280 303"/>
+            <path d="M190 303 L218 315 L225 390 L218 500 M280 303 L252 315 L245 390 L252 500"/>
+            <path d="M174 503 Q188 520 218 500 M296 503 Q282 520 252 500"/>
+            <path d="M213 175 Q235 187 257 175 M205 246 Q235 254 266 246" opacity=".65"/>
+            <!-- back -->
+            <circle cx="525" cy="70" r="38"/>
+            <path d="M503 105 L495 127 L468 143 L444 210 L408 273 M547 105 L555 127 L582 143 L606 210 L642 273"/>
+            <path d="M408 273 L391 302 L380 318 M642 273 L659 302 L670 318"/>
+            <path d="M391 302 L378 325 M391 302 L386 329 M391 302 L395 329 M391 302 L404 325"/>
+            <path d="M659 302 L672 325 M659 302 L664 329 M659 302 L655 329 M659 302 L646 325"/>
+            <path d="M468 143 Q525 166 582 143 M495 127 L494 228 Q492 260 480 303 L470 388 L464 503 M555 127 L556 228 Q558 260 570 303 L580 388 L586 503"/>
+            <path d="M494 228 Q525 245 556 228 M480 303 Q525 323 570 303"/>
+            <path d="M480 303 L508 315 L515 390 L508 500 M570 303 L542 315 L535 390 L542 500"/>
+            <path d="M464 503 Q478 520 508 500 M586 503 Q572 520 542 500"/>
+            <path d="M525 135 L525 267 M495 155 Q525 180 555 155 M497 287 Q525 305 553 287" opacity=".65"/>
+          </g>
+          <text x="235" y="548" text-anchor="middle" font-size="18" fill="#777">正面</text>
+          <text x="525" y="548" text-anchor="middle" font-size="18" fill="#777">背面</text>
+        </svg>
+      </div>
+      <canvas id="draw"></canvas>
+    </div>
+
+    <div class="markers">
+      <div class="toolTitle">症状マーカー（選んでから図をタップ）</div>
+      <button class="marker" data-text="痛み" data-c="#d9413a">痛み</button>
+      <button class="marker" data-text="こり" data-c="#4a9d55">こり</button>
+      <button class="marker" data-text="しびれ" data-c="#8a55b5">しびれ</button>
+      <button class="marker" data-text="むくみ" data-c="#3478d4">むくみ</button>
+    </div>
+
+    <div class="tools">
+      <div class="toolTitle">手書き</div>
+      <button class="color red active" data-c="#d9413a" aria-label="赤"></button><button class="color blue" data-c="#3478d4" aria-label="青"></button><button class="color green" data-c="#4a9d55" aria-label="緑"></button><button class="color purple" data-c="#8a55b5" aria-label="紫"></button><button class="color orange" data-c="#e68a28" aria-label="橙"></button><button class="color black" data-c="#333333" aria-label="黒"></button>
+      <button class="btn" id="eraser">消しゴム</button><button class="btn" id="undo">元に戻す</button><button class="btn" id="clear">全消去</button>
+    </div>
+    <div class="actions"><button class="btn" id="close">閉じる</button><button class="btn primary" id="save">保存</button></div>
+    <div id="msg" class="hint"></div>
+  </div>
+</div>
+<script>
+const params=new URLSearchParams(location.search),customer=params.get('customer')||'draft',date=params.get('date')||'undated',name=params.get('name')||'';
+const KEY=`nakano_body_chart_${customer}_${date}`;
+document.getElementById('meta').textContent=[name,date&&date!=='undated'?date:''].filter(Boolean).join('　');
+const canvas=document.getElementById('draw'),ctx=canvas.getContext('2d'),stage=document.getElementById('stage');
+let color='#d9413a',erase=false,drawing=false,last=null,historyStack=[],markerText='';
+function resize(){const old=canvas.width?canvas.toDataURL():null;const r=stage.getBoundingClientRect(),d=devicePixelRatio||1;canvas.width=Math.round(r.width*d);canvas.height=Math.round(r.height*d);canvas.style.width=r.width+'px';canvas.style.height=r.height+'px';ctx.setTransform(d,0,0,d,0,0);ctx.lineCap='round';ctx.lineJoin='round';if(old){const im=new Image();im.onload=()=>ctx.drawImage(im,0,0,r.width,r.height);im.src=old}else load();}
+function load(){const s=localStorage.getItem(KEY);if(!s)return;const im=new Image();im.onload=()=>ctx.drawImage(im,0,0,stage.clientWidth,stage.clientHeight);im.src=s;}
+function pos(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+function snapshot(){historyStack.push(canvas.toDataURL());if(historyStack.length>30)historyStack.shift();}
+function clearModes(){erase=false;markerText='';document.querySelectorAll('.marker').forEach(x=>x.classList.remove('active'));document.getElementById('eraser').classList.remove('primary');}
+function placeMarker(p){snapshot();ctx.globalCompositeOperation='source-over';ctx.fillStyle=color;ctx.font='800 22px -apple-system,BlinkMacSystemFont,"Yu Gothic",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(markerText,p.x,p.y);markerText='';document.querySelectorAll('.marker').forEach(x=>x.classList.remove('active'));document.getElementById('msg').textContent='文字を追加しました。必要なら「保存」を押してください。';}
+function start(e){e.preventDefault();const p=pos(e);if(markerText){placeMarker(p);return;}snapshot();drawing=true;last=p;}
+function move(e){if(!drawing)return;e.preventDefault();const p=pos(e);ctx.globalCompositeOperation=erase?'destination-out':'source-over';ctx.strokeStyle=color;ctx.lineWidth=erase?24:4;ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(p.x,p.y);ctx.stroke();last=p;}
+function end(){drawing=false;last=null;}
 canvas.addEventListener('pointerdown',start);canvas.addEventListener('pointermove',move);window.addEventListener('pointerup',end);window.addEventListener('pointercancel',end);
-document.querySelectorAll('.color').forEach(b=>b.onclick=()=>{color=b.dataset.c;erase=false;document.querySelectorAll('.color').forEach(x=>x.classList.toggle('active',x===b));document.getElementById('eraser').classList.remove('primary')});
-document.getElementById('eraser').onclick=e=>{erase=!erase;e.currentTarget.classList.toggle('primary',erase)};document.getElementById('clear').onclick=()=>{snapshot();ctx.clearRect(0,0,canvas.width,canvas.height)};document.getElementById('undo').onclick=()=>{const s=historyStack.pop();if(!s)return;const im=new Image();im.onload=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(im,0,0,stage.clientWidth,stage.clientHeight)};im.src=s};document.getElementById('save').onclick=()=>{localStorage.setItem(KEY,canvas.toDataURL('image/png'));document.getElementById('msg').textContent='身体図を保存しました。';};document.getElementById('close').onclick=()=>history.back();document.getElementById('fullscreen').onclick=async()=>{if(!document.fullscreenElement){try{await stage.requestFullscreen()}catch(e){stage.scrollIntoView({behavior:'smooth',block:'center'})}}else document.exitFullscreen()};window.addEventListener('resize',()=>setTimeout(resize,80));resize();
-</script></body></html>
+document.querySelectorAll('.marker').forEach(b=>b.onclick=()=>{erase=false;markerText=b.dataset.text;color=b.dataset.c;document.querySelectorAll('.marker').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.color').forEach(x=>x.classList.remove('active'));document.getElementById('eraser').classList.remove('primary');document.getElementById('msg').textContent=`「${markerText}」を入れたい場所を身体図でタップしてください。`;});
+document.querySelectorAll('.color').forEach(b=>b.onclick=()=>{clearModes();color=b.dataset.c;document.querySelectorAll('.color').forEach(x=>x.classList.toggle('active',x===b));});
+document.getElementById('eraser').onclick=e=>{markerText='';document.querySelectorAll('.marker').forEach(x=>x.classList.remove('active'));erase=!erase;e.currentTarget.classList.toggle('primary',erase);};
+document.getElementById('clear').onclick=()=>{if(!confirm('身体図の書き込みをすべて消しますか？'))return;snapshot();ctx.clearRect(0,0,stage.clientWidth,stage.clientHeight);};
+document.getElementById('undo').onclick=()=>{const s=historyStack.pop();if(!s)return;const im=new Image();im.onload=()=>{ctx.clearRect(0,0,stage.clientWidth,stage.clientHeight);ctx.drawImage(im,0,0,stage.clientWidth,stage.clientHeight);};im.src=s;};
+document.getElementById('save').onclick=()=>{localStorage.setItem(KEY,canvas.toDataURL('image/png'));document.getElementById('msg').textContent='身体図を保存しました。';};
+document.getElementById('close').onclick=()=>history.back();
+document.getElementById('fullscreen').onclick=async()=>{if(!document.fullscreenElement){try{await stage.requestFullscreen();}catch(e){stage.scrollIntoView({behavior:'smooth',block:'center'});}}else document.exitFullscreen();};
+window.addEventListener('resize',()=>setTimeout(resize,80));resize();
+</script>
+</body>
+</html>
