@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>整体なかの｜管理</title>
+<meta name="robots" content="noindex,nofollow">
+<title>整体なかの｜管理トップ</title>
 
 <style>
 *{box-sizing:border-box}
@@ -23,16 +24,7 @@ body{
 main{
   max-width:760px;
   margin:auto;
-  padding:18px 14px 80px
-}
-
-.card{
-  background:#fff;
-  border:1px solid #e7e0d7;
-  border-radius:18px;
-  padding:18px;
-  margin-bottom:14px;
-  overflow:hidden
+  padding:18px 12px 80px
 }
 
 h1{
@@ -41,13 +33,21 @@ h1{
 }
 
 h2{
-  font-size:19px;
-  margin:0 0 10px
+  margin:0 0 10px;
+  font-size:19px
 }
 
 h3{
-  font-size:16px;
-  margin:18px 0 8px
+  margin:18px 0 8px;
+  font-size:16px
+}
+
+a{
+  text-decoration:none
+}
+
+.hidden{
+  display:none!important
 }
 
 .muted{
@@ -56,15 +56,13 @@ h3{
   line-height:1.6
 }
 
-.hidden{
-  display:none!important
-}
-
-label{
-  display:block;
-  font-size:13px;
-  font-weight:700;
-  margin-top:8px
+.card{
+  background:#fff;
+  border:1px solid #e7e0d7;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:14px;
+  overflow:hidden
 }
 
 input,
@@ -85,11 +83,12 @@ textarea{
   border:1px solid #e7e0d7;
   border-radius:12px;
   margin:6px 0 10px;
-  background:#fff
+  background:#fff;
+  color:#2f2d2a
 }
 
 textarea{
-  min-height:80px;
+  min-height:82px;
   resize:vertical
 }
 
@@ -99,6 +98,13 @@ input[type="month"]{
   -webkit-appearance:none;
   appearance:none;
   height:48px
+}
+
+label{
+  display:block;
+  margin-top:8px;
+  font-size:13px;
+  font-weight:700
 }
 
 .primary,
@@ -112,21 +118,21 @@ input[type="month"]{
 
 .primary{
   background:#61574d;
-  color:#fff;
-  border:0
+  border:1px solid #61574d;
+  color:#fff
 }
 
 .secondary{
   background:#fff;
-  color:#4a4642;
   border:1px solid #ddd5cc;
+  color:#49443f;
   margin-top:8px
 }
 
 .danger{
   background:#fff;
-  color:#9b4138;
   border:1px solid #d8aaa5;
+  color:#9b4138;
   margin-top:8px
 }
 
@@ -136,28 +142,23 @@ button:disabled{
 
 .row{
   display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  grid-template-columns:1fr 1fr;
   gap:8px
 }
 
-.field{
-  min-width:0
+.msg{
+  margin-top:8px;
+  font-size:13px;
+  line-height:1.6
 }
 
 
-/* =========================
-   管理トップ
-========================= */
+/* 管理メニュー */
 
 .adminLinks{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:8px;
-  margin-top:12px
-}
-
-.adminLinks a{
-  text-decoration:none
+  gap:8px
 }
 
 .adminLinks button{
@@ -165,22 +166,23 @@ button:disabled{
 }
 
 
-/* =========================
-   横型タイムライン
-========================= */
+/* ==========================
+   横型スケジュール
+========================== */
 
 .scheduleHeader{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  gap:8px;
-  margin-bottom:10px
+  gap:10px
 }
 
 .scheduleScroll{
+  position:relative;
   overflow-x:auto;
   overflow-y:hidden;
   -webkit-overflow-scrolling:touch;
+  margin-top:10px;
   padding-bottom:6px
 }
 
@@ -198,8 +200,8 @@ button:disabled{
   position:absolute;
   left:0;
   top:0;
-  height:34px;
-  width:100%
+  width:100%;
+  height:34px
 }
 
 .timeMark{
@@ -207,9 +209,9 @@ button:disabled{
   top:0;
   height:34px;
   border-left:1px solid #ded7cf;
-  padding-left:4px;
-  font-size:11px;
+  padding:4px 0 0 4px;
   color:#77716a;
+  font-size:11px;
   white-space:nowrap
 }
 
@@ -240,59 +242,59 @@ button:disabled{
   position:absolute;
   top:8px;
   height:82px;
-  background:#f4dfdc;
+  z-index:3;
+  overflow:hidden;
+  padding:8px;
   border:1px solid #dda8a1;
   border-radius:10px;
-  padding:8px;
-  overflow:hidden;
-  z-index:3;
-  font-size:11px;
-  color:#8a4a42
+  background:#f4dfdc;
+  color:#8a4a42;
+  font-size:11px
 }
 
 .bookingBlock{
   position:absolute;
   top:8px;
   height:82px;
-  background:#fff;
+  z-index:5;
+  overflow:hidden;
+  padding:7px;
   border:2px solid #9c8d7d;
   border-radius:10px;
-  padding:8px;
-  overflow:hidden;
-  z-index:5;
-  cursor:pointer;
-  box-shadow:0 2px 7px rgba(0,0,0,.08)
+  background:#fff;
+  box-shadow:0 2px 7px rgba(0,0,0,.08);
+  cursor:pointer
 }
 
 .bookingTime{
-  font-size:11px;
   color:#77716a;
+  font-size:11px;
   white-space:nowrap
 }
 
 .bookingName{
   margin-top:3px;
-  font-weight:800;
-  font-size:14px;
-  white-space:nowrap;
   overflow:hidden;
+  font-size:14px;
+  font-weight:800;
+  white-space:nowrap;
   text-overflow:ellipsis
 }
 
 .bookingMenu{
   margin-top:3px;
+  overflow:hidden;
   font-size:11px;
-  line-height:1.35;
-  overflow:hidden
+  line-height:1.3
 }
 
-.scheduleLegend{
+.legend{
   display:flex;
   flex-wrap:wrap;
   gap:12px;
-  margin-top:10px;
-  font-size:12px;
-  color:#6e6862
+  margin-top:9px;
+  color:#6e6862;
+  font-size:12px
 }
 
 .legendItem{
@@ -304,31 +306,22 @@ button:disabled{
 .legendDot{
   width:13px;
   height:13px;
-  border-radius:4px;
-  border:1px solid #ddd
+  border:1px solid #ddd;
+  border-radius:4px
 }
 
-.legendOpen{
-  background:#f1f7f2
-}
+.legendOpen{background:#f1f7f2}
 
 .legendBooking{
   background:#fff;
   border:2px solid #9c8d7d
 }
 
-.legendBlocked{
-  background:#f4dfdc
-}
-
-.legendClosed{
-  background:#f1f0ee
-}
+.legendBlocked{background:#f4dfdc}
+.legendClosed{background:#f1f0ee}
 
 
-/* =========================
-   OPEN CLOSE
-========================= */
+/* OPEN / CLOSE */
 
 .slots{
   display:grid;
@@ -338,56 +331,64 @@ button:disabled{
 
 .slot{
   min-width:0;
+  min-height:57px;
+  padding:10px 4px;
   border:1px solid #e7e0d7;
   border-radius:12px;
-  padding:12px 5px;
-  font-weight:700;
-  min-height:58px;
-  line-height:1.25
+  font-weight:700
 }
 
 .slotTime{
   display:block;
-  font-size:16px
+  font-size:15px
 }
 
 .slotLabel{
   display:block;
-  font-size:10px;
-  margin-top:3px
+  margin-top:2px;
+  font-size:10px
 }
 
-.open{
+.slot.open{
   background:#eaf3ec;
   color:#168047
 }
 
-.closed{
+.slot.closed{
   background:#eeeeec;
   color:#8a8580
 }
 
-.busy{
+.slot.busy{
   background:#f6dddd;
   color:#9b4138
 }
 
 
-/* =========================
-   複数日選択
-========================= */
+/* 複数日選択 */
 
+.weekHeader,
 .daySelector{
   display:grid;
   grid-template-columns:repeat(7,1fr);
-  gap:6px;
-  margin-top:10px
+  gap:5px
+}
+
+.weekHeader{
+  margin-top:10px;
+  text-align:center;
+  color:#77716a;
+  font-size:11px
+}
+
+.daySelector{
+  margin-top:6px
 }
 
 .dayButton{
   min-width:0;
-  min-height:43px;
-  padding:6px 2px;
+  min-height:41px;
+  padding:5px 2px;
   border:1px solid #ddd5cc;
   border-radius:9px;
   background:#fff;
@@ -396,38 +397,22 @@ button:disabled{
 }
 
 .dayButton.selected{
-  background:#61574d;
   border-color:#61574d;
+  background:#61574d;
   color:#fff
 }
 
-.dayButton.other{
-  opacity:.35
-}
-
-.weekHeader{
-  display:grid;
-  grid-template-columns:repeat(7,1fr);
-  gap:6px;
-  margin-top:10px;
-  text-align:center;
-  font-size:11px;
-  color:#77716a
-}
-
 .selectedDatesBox{
-  background:#faf8f5;
-  border-radius:11px;
-  padding:10px;
   margin:10px 0;
+  padding:10px;
+  border-radius:11px;
+  background:#faf8f5;
   font-size:12px;
   line-height:1.6
 }
 
 
-/* =========================
-   一覧系
-========================= */
+/* 一覧 */
 
 .blockedItem,
 .notificationItem{
@@ -455,56 +440,48 @@ button:disabled{
 }
 
 .editBtn{
-  background:#fff;
-  border:1px solid #b7aea5
+  border:1px solid #b7aea5;
+  background:#fff
 }
 
 .cancelBtn{
+  border:1px solid #d8aaa5;
   background:#fff;
-  color:#9b4138;
-  border:1px solid #d8aaa5
+  color:#9b4138
 }
 
 .badge{
   display:inline-block;
+  margin-left:5px;
   padding:3px 8px;
   border-radius:999px;
   background:#f4ece9;
   color:#705f58;
-  font-size:12px;
-  font-weight:700;
-  margin-left:6px
-}
-
-.msg{
-  font-size:13px;
-  line-height:1.5;
-  margin-top:8px
+  font-size:11px;
+  font-weight:700
 }
 
 .customerBox{
-  background:#faf8f5;
-  border-radius:13px;
+  margin-bottom:12px;
   padding:12px;
-  margin-bottom:12px
+  border-radius:13px;
+  background:#faf8f5
 }
 
 
-/* =========================
-   折りたたみ
-========================= */
+/* 通知折りたたみ */
 
 details.settingsDetails{
+  overflow:hidden;
   border:1px solid #e7e0d7;
-  border-radius:14px;
-  overflow:hidden
+  border-radius:14px
 }
 
 details.settingsDetails summary{
   padding:15px;
+  background:#faf8f5;
   cursor:pointer;
   font-weight:700;
-  background:#faf8f5;
   list-style:none
 }
 
@@ -513,7 +490,7 @@ details.settingsDetails summary::-webkit-details-marker{
 }
 
 .settingsInner{
-  padding:16px
+  padding:15px
 }
 
 .checkRow{
@@ -532,8 +509,8 @@ details.settingsDetails summary::-webkit-details-marker{
 @media(max-width:500px){
 
   main{
-    padding-left:10px;
-    padding-right:10px
+    padding-left:9px;
+    padding-right:9px
   }
 
   .row{
@@ -544,24 +521,15 @@ details.settingsDetails summary::-webkit-details-marker{
     grid-template-columns:1fr 1fr
   }
 
-  .scheduleCanvas{
-    min-width:1740px
-  }
-
-  .slots{
-    grid-template-columns:repeat(3,minmax(0,1fr))
-  }
-
 }
 </style>
 </head>
 
 <body>
-
 <main>
 
 <h1>整体なかの</h1>
-<p class="muted">管理画面</p>
+<p class="muted">管理トップ</p>
 
 
 <section class="card" id="loginCard">
@@ -602,7 +570,7 @@ details.settingsDetails summary::-webkit-details-marker{
 
 <a href="./bookings.html">
 <button class="primary" type="button">
-予約一覧
+当日予約一覧
 </button>
 </a>
 
@@ -636,9 +604,15 @@ details.settingsDetails summary::-webkit-details-marker{
 
 <input type="date" id="date">
 
-<div class="scheduleScroll" id="scheduleScroll">
+<div
+  class="scheduleScroll"
+  id="scheduleScroll"
+>
 
-<div class="scheduleCanvas" id="scheduleCanvas">
+<div
+  class="scheduleCanvas"
+  id="scheduleCanvas"
+>
 
 <div
   id="timeHeader"
@@ -654,7 +628,7 @@ details.settingsDetails summary::-webkit-details-marker{
 
 </div>
 
-<div class="scheduleLegend">
+<div class="legend">
 
 <div class="legendItem">
 <span class="legendDot legendOpen"></span>
@@ -678,7 +652,7 @@ CLOSE
 
 </div>
 
-<div id="scheduleMsg" class="msg muted"></div>
+<div id="scheduleMsg" class="msg"></div>
 
 </section>
 
@@ -712,7 +686,6 @@ CLOSE
 
 <hr style="border:0;border-top:1px solid #eee7df;margin:20px 0">
 
-
 <h3>月単位で一括変更</h3>
 
 <input type="month" id="month">
@@ -729,7 +702,7 @@ CLOSE
 
 </div>
 
-<div id="monthMsg" class="msg muted"></div>
+<div id="monthMsg" class="msg"></div>
 
 </section>
 
@@ -741,7 +714,6 @@ CLOSE
 <p class="muted">
 複数の日付を選択して、同じ時間帯をまとめて予約不可にできます。
 </p>
-
 
 <div class="weekHeader">
 <div>日</div>
@@ -758,7 +730,6 @@ CLOSE
   class="daySelector"
 ></div>
 
-
 <div
   id="selectedDatesBox"
   class="selectedDatesBox"
@@ -766,21 +737,27 @@ CLOSE
 日付を選択してください。
 </div>
 
-
 <div class="row">
 
-<div class="field">
+<div>
 <label>開始時間</label>
-<input type="time" id="blockedStart" step="1800">
+<input
+  type="time"
+  id="blockedStart"
+  step="1800"
+>
 </div>
 
-<div class="field">
+<div>
 <label>終了時間</label>
-<input type="time" id="blockedEnd" step="1800">
+<input
+  type="time"
+  id="blockedEnd"
+  step="1800"
+>
 </div>
 
 </div>
-
 
 <label>メモ</label>
 
@@ -789,20 +766,17 @@ CLOSE
   placeholder="例：外出・私用・店休日"
 >
 
-
 <button class="primary" id="addBlockedTime">
-選択した日をこの時間だけ予約不可
+選択した日をこの時間帯で予約不可
 </button>
 
 <button class="secondary" id="addBlockedDay">
 選択した日を終日予約不可
 </button>
 
-<div id="blockedMsg" class="msg muted"></div>
-
+<div id="blockedMsg" class="msg"></div>
 
 <hr style="border:0;border-top:1px solid #eee7df;margin:20px 0">
-
 
 <h3>この月の予約不可一覧</h3>
 
@@ -816,132 +790,109 @@ CLOSE
 <h2>店側から予約を追加</h2>
 
 <p class="muted">
-電話・LINE・口頭で受けた予約を登録できます。
+電話・LINE・口頭で入った予約はこちらから追加できます。
 </p>
-
 
 <div class="customerBox">
 
-<label>既存のお客様</label>
+<label>既存のお客様から選択</label>
 
 <select id="customerSelect">
-<option value="">新規のお客様 / 直接入力</option>
+<option value="">
+新規のお客様 / 直接入力
+</option>
 </select>
 
 </div>
 
-
 <label>予約日</label>
-
 <input
   type="date"
   id="adminBookingDate"
 >
 
-
 <label>メニュー</label>
 
 <select id="menu">
-<option value="">メニューを選択</option>
+<option value="">
+メニューを選択
+</option>
 </select>
 
-
-<label>時間</label>
+<label>予約時間</label>
 
 <select id="adminTime">
-<option value="">空き時間を選択</option>
+<option value="">
+空き時間を選択
+</option>
 </select>
 
-
 <label>お客様名</label>
-
-<input
-  id="customerName"
-  placeholder="お客様名"
->
-
+<input id="customerName">
 
 <label>電話番号</label>
-
 <input
   id="phone"
   inputmode="tel"
-  placeholder="電話番号"
 >
 
-
 <label>症状・メモ</label>
-
-<textarea
-  id="memo"
-  placeholder="症状・メモ"
-></textarea>
-
+<textarea id="memo"></textarea>
 
 <button class="primary" id="addBooking">
 予約を追加
 </button>
 
-<div id="addMsg" class="msg muted"></div>
+<div id="addMsg" class="msg"></div>
 
 </section>
 
 
 <section
-  class="card hidden"
   id="editCard"
+  class="card hidden"
 >
 
-<h2>予約を変更</h2>
+<h2>予約詳細・変更</h2>
 
 <p
-  class="muted"
   id="editCurrent"
+  class="muted"
 ></p>
 
-
 <label>予約日</label>
-
 <input
   type="date"
   id="editDate"
 >
 
-
 <label>メニュー</label>
 
 <select id="editMenu">
-<option value="">メニューを選択</option>
+<option value="">
+メニューを選択
+</option>
 </select>
-
 
 <label>時間</label>
 
 <select id="editTime">
-<option value="">時間を選択</option>
+<option value="">
+時間を選択
+</option>
 </select>
 
-
 <label>お客様名</label>
-
-<input
-  id="editName"
-  placeholder="お客様名"
->
-
+<input id="editName">
 
 <label>電話番号</label>
-
 <input
   id="editPhone"
   inputmode="tel"
 >
 
-
 <label>症状・メモ</label>
-
 <textarea id="editMemo"></textarea>
-
 
 <button class="primary" id="saveEdit">
 変更を保存
@@ -951,7 +902,10 @@ CLOSE
 変更をやめる
 </button>
 
-<button class="danger" id="cancelBookingFromEdit">
+<button
+  class="danger"
+  id="cancelBookingFromEdit"
+>
 この予約をキャンセル
 </button>
 
@@ -974,7 +928,6 @@ CLOSE
 通常は触らなくて大丈夫です。
 </p>
 
-
 <input
   id="notifyName"
   placeholder="通知先名"
@@ -985,7 +938,6 @@ CLOSE
   type="email"
   placeholder="メールアドレス"
 >
-
 
 <label class="checkRow">
 
@@ -998,7 +950,6 @@ CLOSE
 
 </label>
 
-
 <label class="checkRow">
 
 <input
@@ -1009,7 +960,6 @@ CLOSE
 LINE通知を使う
 
 </label>
-
 
 <button class="primary" id="addNotification">
 通知先を追加
@@ -1034,7 +984,6 @@ LINE通知を使う
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
-
 <script type="module">
 
 import {createClient}
@@ -1056,10 +1005,6 @@ const $=
 id=>document.getElementById(id);
 
 
-/* =========================
-   時間設定
-========================= */
-
 const DAY_START=
   8*60;
 
@@ -1069,11 +1014,9 @@ const DAY_END=
 const PX_PER_MINUTE=
   2;
 
-const CELL_MINUTES=
-  30;
-
 
 const times=[];
+
 
 for(
   let minutes=DAY_START;
@@ -1089,6 +1032,7 @@ for(
   const m=
     minutes%60;
 
+
   times.push(
     `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`
   );
@@ -1098,19 +1042,16 @@ for(
 
 let menus=[];
 let customers=[];
-let editingBooking=null;
 
 let currentBookings=[];
 let currentBlocked=[];
 let currentSlots=[];
 
+let editingBooking=null;
+
 let selectedBlockedDates=
   new Set();
 
-
-/* =========================
-   共通
-========================= */
 
 function esc(value){
 
@@ -1120,7 +1061,6 @@ function esc(value){
     .replaceAll('>','&gt;')
     .replaceAll('"','&quot;')
     .replaceAll("'","&#039;");
-
 }
 
 
@@ -1135,7 +1075,8 @@ function todayJapan(){
         month:'2-digit',
         day:'2-digit'
       }
-    ).formatToParts(
+    )
+    .formatToParts(
       new Date()
     );
 
@@ -1147,14 +1088,7 @@ function todayJapan(){
       )?.value;
 
 
-  return `${
-    get('year')
-  }-${
-    get('month')
-  }-${
-    get('day')
-  }`;
-
+  return `${get('year')}-${get('month')}-${get('day')}`;
 }
 
 
@@ -1165,11 +1099,15 @@ function monthFromDate(date){
     date.slice(0,7)
     :
     '';
-
 }
 
 
 function datesInMonth(month){
+
+  if(!month){
+    return [];
+  }
+
 
   const [year,mon]=
     month
@@ -1182,27 +1120,26 @@ function datesInMonth(month){
       year,
       mon,
       0
-    ).getDate();
+    )
+    .getDate();
 
 
   const dates=[];
 
 
   for(
-    let d=1;
-    d<=last;
-    d++
+    let day=1;
+    day<=last;
+    day++
   ){
 
     dates.push(
-      `${year}-${String(mon).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+      `${year}-${String(mon).padStart(2,'0')}-${String(day).padStart(2,'0')}`
     );
-
   }
 
 
   return dates;
-
 }
 
 
@@ -1224,14 +1161,7 @@ function nextMonthStart(month){
     );
 
 
-  return `${
-    next.getUTCFullYear()
-  }-${
-    String(
-      next.getUTCMonth()+1
-    ).padStart(2,'0')
-  }-01`;
-
+  return `${next.getUTCFullYear()}-${String(next.getUTCMonth()+1).padStart(2,'0')}-01`;
 }
 
 
@@ -1245,42 +1175,6 @@ function timeToMinutes(time){
 
 
   return h*60+m;
-
-}
-
-
-function menuMinutes(booking){
-
-  if(
-    Number(
-      booking.minutes
-    )>0
-  ){
-
-    return Number(
-      booking.minutes
-    );
-
-  }
-
-
-  const menu=
-    menus.find(
-      m=>
-        String(m.id)
-        ===
-        String(
-          booking.menu_id
-        )
-    );
-
-
-  return Number(
-    menu?.minutes
-    ||
-    30
-  );
-
 }
 
 
@@ -1296,13 +1190,43 @@ function overlaps(
     &&
     aEnd>bStart
   );
-
 }
 
 
-/* =========================
+function menuMinutes(booking){
+
+  if(
+    Number(
+      booking.minutes
+    )>0
+  ){
+
+    return Number(
+      booking.minutes
+    );
+  }
+
+
+  const menu=
+    menus.find(
+      item=>
+        String(item.id)
+        ===
+        String(
+          booking.menu_id
+        )
+    );
+
+
+  return Number(
+    menu?.minutes||30
+  );
+}
+
+
+/* ==========================
    認証
-========================= */
+========================== */
 
 async function syncAuth(){
 
@@ -1340,7 +1264,6 @@ async function syncAuth(){
 
     $('date').value=
       todayJapan();
-
   }
 
 
@@ -1352,7 +1275,6 @@ async function syncAuth(){
       monthFromDate(
         $('date').value
       );
-
   }
 
 
@@ -1362,7 +1284,6 @@ async function syncAuth(){
 
     $('adminBookingDate').value=
       $('date').value;
-
   }
 
 
@@ -1379,7 +1300,6 @@ async function syncAuth(){
   await loadNotifications();
 
   await resumePendingLineLink();
-
 }
 
 
@@ -1396,8 +1316,7 @@ async()=>{
             .trim(),
 
         password:
-          $('password')
-            .value
+          $('password').value
 
       });
 
@@ -1408,14 +1327,12 @@ async()=>{
       'ログインできませんでした。';
 
     return;
-
   }
 
 
   $('loginMsg').textContent='';
 
   await syncAuth();
-
 };
 
 
@@ -1426,13 +1343,12 @@ async()=>{
     .signOut();
 
   await syncAuth();
-
 };
 
 
-/* =========================
+/* ==========================
    メニュー
-========================= */
+========================== */
 
 async function loadMenus(){
 
@@ -1453,10 +1369,11 @@ async function loadMenus(){
 
   if(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
 
     return;
-
   }
 
 
@@ -1484,16 +1401,14 @@ async function loadMenus(){
   $('menu').innerHTML=
     html;
 
-
   $('editMenu').innerHTML=
     html;
-
 }
 
 
-/* =========================
+/* ==========================
    顧客
-========================= */
+========================== */
 
 async function loadCustomers(){
 
@@ -1511,10 +1426,11 @@ async function loadCustomers(){
 
   if(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
 
     return;
-
   }
 
 
@@ -1531,8 +1447,8 @@ async function loadCustomers(){
         a.customer_name
         ||
         ''
-      ).localeCompare(
-
+      )
+      .localeCompare(
         String(
           b.customer_name_kana
           ||
@@ -1540,11 +1456,8 @@ async function loadCustomers(){
           ||
           ''
         ),
-
         'ja'
-
       )
-
   );
 
 
@@ -1573,7 +1486,6 @@ async function loadCustomers(){
 
       `
     ).join('');
-
 }
 
 
@@ -1582,8 +1494,8 @@ $('customerSelect').onchange=
 
   const customer=
     customers.find(
-      c=>
-        String(c.id)
+      item=>
+        String(item.id)
         ===
         String(
           $('customerSelect').value
@@ -1597,22 +1509,17 @@ $('customerSelect').onchange=
 
 
   $('customerName').value=
-    customer.customer_name
-    ||
-    '';
+    customer.customer_name||'';
 
 
   $('phone').value=
-    customer.phone
-    ||
-    '';
-
+    customer.phone||'';
 };
 
 
-/* =========================
-   日付変更
-========================= */
+/* ==========================
+   日付
+========================== */
 
 $('date').onchange=
 async()=>{
@@ -1633,14 +1540,11 @@ async()=>{
 
   renderDaySelector();
 
-
   closeEdit();
-
 
   await loadDay();
 
   await loadMonthBlockedTimes();
-
 };
 
 
@@ -1653,15 +1557,13 @@ async()=>{
 
   renderDaySelector();
 
-
   await loadMonthBlockedTimes();
-
 };
 
 
-/* =========================
+/* ==========================
    タイムライン
-========================= */
+========================== */
 
 function renderTimeHeader(){
 
@@ -1689,41 +1591,21 @@ function renderTimeHeader(){
 
 
     mark.style.left=
-      `${
-        (
-          min-DAY_START
-        )
-        *
-        PX_PER_MINUTE
-      }px`;
+      `${(min-DAY_START)*PX_PER_MINUTE}px`;
 
 
     mark.style.width=
-      `${
-        30
-        *
-        PX_PER_MINUTE
-      }px`;
+      `${30*PX_PER_MINUTE}px`;
 
 
     mark.textContent=
-      `${
-        String(
-          Math.floor(min/60)
-        ).padStart(2,'0')
-      }:${
-        String(
-          min%60
-        ).padStart(2,'0')
-      }`;
+      `${String(Math.floor(min/60)).padStart(2,'0')}:${String(min%60).padStart(2,'0')}`;
 
 
     box.appendChild(
       mark
     );
-
   }
-
 }
 
 
@@ -1741,7 +1623,6 @@ function renderTimeline(){
 
   const slotMap=
     new Map(
-
       currentSlots.map(
         row=>[
           String(
@@ -1750,7 +1631,6 @@ function renderTimeline(){
           row
         ]
       )
-
     );
 
 
@@ -1761,15 +1641,7 @@ function renderTimeline(){
   ){
 
     const time=
-      `${
-        String(
-          Math.floor(min/60)
-        ).padStart(2,'0')
-      }:${
-        String(
-          min%60
-        ).padStart(2,'0')
-      }:00`;
+      `${String(Math.floor(min/60)).padStart(2,'0')}:${String(min%60).padStart(2,'0')}:00`;
 
 
     const row=
@@ -1797,34 +1669,23 @@ function renderTimeline(){
 
 
     cell.style.left=
-      `${
-        (
-          min-DAY_START
-        )
-        *
-        PX_PER_MINUTE
-      }px`;
+      `${(min-DAY_START)*PX_PER_MINUTE}px`;
 
 
     cell.style.width=
-      `${
-        30
-        *
-        PX_PER_MINUTE
-      }px`;
+      `${30*PX_PER_MINUTE}px`;
 
 
     lane.appendChild(
       cell
     );
-
   }
 
 
   currentBlocked.forEach(
     item=>{
 
-      const start=
+      let start=
         timeToMinutes(
           item.start_time
         );
@@ -1846,18 +1707,17 @@ function renderTimeline(){
 
         end=
           DAY_END+30;
-
       }
 
 
-      const visibleStart=
+      start=
         Math.max(
           start,
           DAY_START
         );
 
 
-      const visibleEnd=
+      end=
         Math.min(
           end,
           DAY_END+30
@@ -1865,7 +1725,7 @@ function renderTimeline(){
 
 
       if(
-        visibleEnd<=visibleStart
+        end<=start
       ){
         return;
       }
@@ -1882,30 +1742,11 @@ function renderTimeline(){
 
 
       block.style.left=
-        `${
-          (
-            visibleStart
-            -
-            DAY_START
-          )
-          *
-          PX_PER_MINUTE
-        }px`;
+        `${(start-DAY_START)*PX_PER_MINUTE}px`;
 
 
       block.style.width=
-        `${
-          Math.max(
-            36,
-            (
-              visibleEnd
-              -
-              visibleStart
-            )
-            *
-            PX_PER_MINUTE
-          )
-        }px`;
+        `${Math.max(36,(end-start)*PX_PER_MINUTE)}px`;
 
 
       block.innerHTML=`
@@ -1916,13 +1757,7 @@ function renderTimeline(){
 
         <br>
 
-        ${
-          esc(
-            item.memo
-            ||
-            ''
-          )
-        }
+        ${esc(item.memo||'')}
 
       `;
 
@@ -1930,7 +1765,6 @@ function renderTimeline(){
       lane.appendChild(
         block
       );
-
     }
   );
 
@@ -1960,86 +1794,58 @@ function renderTimeline(){
         'bookingBlock';
 
 
+      /*
+        ドラッグ操作で使う予約ID
+      */
+      block.dataset.bookingId=
+        booking.id;
+
+
       block.style.left=
-        `${
-          (
-            start-DAY_START
-          )
-          *
-          PX_PER_MINUTE
-        }px`;
+        `${(start-DAY_START)*PX_PER_MINUTE}px`;
 
 
       block.style.width=
-        `${
-          Math.max(
-            72,
-            duration
-            *
-            PX_PER_MINUTE
-          )
-        }px`;
+        `${Math.max(72,duration*PX_PER_MINUTE)}px`;
 
 
       block.innerHTML=`
 
         <div class="bookingTime">
-
-          ${
-            esc(
-              String(
-                booking.start_time
-              ).slice(
-                0,
-                5
-              )
-            )
-          }
-
+          ${esc(String(booking.start_time).slice(0,5))}
         </div>
 
         <div class="bookingName">
-
-          ${
-            esc(
-              booking.customer_name
-            )
-          }
-
+          ${esc(booking.customer_name||'')}
         </div>
 
         <div class="bookingMenu">
-
-          ${
-            esc(
-              booking.menu_name
-            )
-          }
-
+          ${esc(booking.menu_name||'')}
         </div>
 
       `;
 
 
       block.onclick=
-        ()=>openEdit(
+      ()=>{
+
+        openEdit(
           booking
         );
+      };
 
 
       lane.appendChild(
         block
       );
-
     }
   );
-
 }
 
 
-/* =========================
-   当日データ
-========================= */
+/* ==========================
+   当日のデータ
+========================== */
 
 async function loadDay(){
 
@@ -2052,22 +1858,16 @@ async function loadDay(){
   }
 
 
+  $('scheduleMsg').textContent=
+    '読み込んでいます…';
+
+
   const [
-    slotResult,
     bookingResult,
-    blockedResult
+    blockedResult,
+    slotResult
   ]=
     await Promise.all([
-
-      supabase
-        .from(
-          'nakano_open_slots'
-        )
-        .select('*')
-        .eq(
-          'slot_date',
-          date
-        ),
 
       supabase
         .from(
@@ -2097,37 +1897,41 @@ async function loadDay(){
         )
         .order(
           'start_time'
+        ),
+
+      supabase
+        .from(
+          'nakano_open_slots'
+        )
+        .select('*')
+        .eq(
+          'slot_date',
+          date
         )
 
     ]);
 
 
   if(
-    slotResult.error
-    ||
     bookingResult.error
     ||
     blockedResult.error
+    ||
+    slotResult.error
   ){
 
     console.error(
-      slotResult.error,
       bookingResult.error,
-      blockedResult.error
+      blockedResult.error,
+      slotResult.error
     );
 
 
     $('scheduleMsg').textContent=
-      '予定を読み込めませんでした。';
-
+      '読み込めませんでした。';
 
     return;
-
   }
-
-
-  currentSlots=
-    slotResult.data||[];
 
 
   currentBookings=
@@ -2138,20 +1942,26 @@ async function loadDay(){
     blockedResult.data||[];
 
 
+  currentSlots=
+    slotResult.data||[];
+
+
+  $('scheduleMsg').textContent='';
+
+
   renderTimeline();
 
-  renderSlots();
+  renderSlotButtons();
 
   await loadAdminTimes();
-
 }
 
 
-/* =========================
-   30分OPEN CLOSE表示
-========================= */
+/* ==========================
+   OPEN CLOSE
+========================== */
 
-function renderSlots(){
+function renderSlotButtons(){
 
   const box=
     $('slots');
@@ -2162,7 +1972,6 @@ function renderSlots(){
 
   const map=
     new Map(
-
       currentSlots.map(
         row=>[
           String(
@@ -2171,7 +1980,6 @@ function renderSlots(){
           row
         ]
       )
-
     );
 
 
@@ -2188,76 +1996,83 @@ function renderSlots(){
         !!row?.is_open;
 
 
-      const start=
+      const slotStart=
         timeToMinutes(
           time
         );
 
 
-      const end=
-        start+30;
+      const slotEnd=
+        slotStart+30;
 
 
       const booking=
         currentBookings.find(
-          b=>{
+          item=>{
 
-            const bs=
+            const start=
               timeToMinutes(
-                b.start_time
+                item.start_time
+              );
+
+
+            const duration=
+              menuMinutes(
+                item
               );
 
 
             return overlaps(
+              slotStart,
+              slotEnd,
               start,
-              end,
-              bs,
-              bs+menuMinutes(b)
+              start+duration
             );
-
           }
         );
 
 
       const blocked=
         currentBlocked.find(
-          b=>{
+          item=>{
 
-            const bs=
+            const start=
               timeToMinutes(
-                b.start_time
+                item.start_time
               );
 
 
-            let be=
+            let end=
               timeToMinutes(
-                b.end_time
+                item.end_time
               );
 
 
             if(
               String(
-                b.end_time
+                item.end_time
               ).startsWith(
                 '23:59'
               )
             ){
 
-              be=
+              end=
                 24*60;
-
             }
 
 
             return overlaps(
+              slotStart,
+              slotEnd,
               start,
-              end,
-              bs,
-              be
+              end
             );
-
           }
         );
+
+
+      const busy=
+        booking||blocked;
 
 
       const button=
@@ -2266,161 +2081,111 @@ function renderSlots(){
         );
 
 
-      if(
-        booking
-        ||
-        blocked
-      ){
-
-        button.className=
-          'slot busy';
-
-
-        button.innerHTML=`
-
-          <span class="slotTime">
-
-            ${
-              esc(
-                time.slice(
-                  0,
-                  5
-                )
-              )
-            }
-
-          </span>
-
-          <span class="slotLabel">
-
-            ${
-              booking
-              ?
-              '予約'
-              :
-              '予定'
-            }
-
-          </span>
-
-        `;
+      button.className=
+        'slot '
+        +
+        (
+          busy
+          ?
+          'busy'
+          :
+          isOpen
+          ?
+          'open'
+          :
+          'closed'
+        );
 
 
-        button.onclick=
-        ()=>{
+      button.innerHTML=`
+
+        <span class="slotTime">
+          ${time.slice(0,5)}
+        </span>
+
+        <span class="slotLabel">
+
+          ${
+            booking
+            ?
+            '予約'
+            :
+            blocked
+            ?
+            '予定'
+            :
+            isOpen
+            ?
+            '空き'
+            :
+            'CLOSE'
+          }
+
+        </span>
+
+      `;
+
+
+      button.onclick=
+      async()=>{
+
+        if(busy){
 
           if(booking){
 
             openEdit(
               booking
             );
-
           }
 
-        };
-
-      }
-      else{
-
-        button.className=
-          `slot ${
-            isOpen
-            ?
-            'open'
-            :
-            'closed'
-          }`;
+          return;
+        }
 
 
-        button.innerHTML=`
+        const {error}=
+          await supabase
+            .from(
+              'nakano_open_slots'
+            )
+            .upsert(
+              {
+                slot_date:
+                  $('date').value,
 
-          <span class="slotTime">
+                start_time:
+                  time,
 
-            ${
-              esc(
-                time.slice(
-                  0,
-                  5
-                )
-              )
-            }
-
-          </span>
-
-          <span class="slotLabel">
-
-            ${
-              isOpen
-              ?
-              '空き'
-              :
-              'CLOSE'
-            }
-
-          </span>
-
-        `;
-
-
-        button.onclick=
-        async()=>{
-
-          const {error}=
-            await supabase
-              .from(
-                'nakano_open_slots'
-              )
-              .upsert(
-                {
-
-                  slot_date:
-                    $('date').value,
-
-                  start_time:
-                    time,
-
-                  is_open:
-                    !isOpen
-
-                },
-                {
-                  onConflict:
-                    'slot_date,start_time'
-                }
-              );
-
-
-          if(error){
-
-            alert(
-              '変更できませんでした。'
+                is_open:
+                  !isOpen
+              },
+              {
+                onConflict:
+                  'slot_date,start_time'
+              }
             );
 
-            return;
 
-          }
+        if(error){
+
+          alert(
+            '変更できませんでした。'
+          );
+
+          return;
+        }
 
 
-          await loadDay();
-
-        };
-
-      }
+        await loadDay();
+      };
 
 
       box.appendChild(
         button
       );
-
     }
   );
-
 }
 
-
-/* =========================
-   OPEN CLOSE
-========================= */
 
 async function setAll(open){
 
@@ -2428,19 +2193,20 @@ async function setAll(open){
     $('date').value;
 
 
+  if(!date){
+    return;
+  }
+
+
   const rows=
     times.map(
       time=>({
-
         slot_date:
           date,
-
         start_time:
           time,
-
         is_open:
           open
-
       })
     );
 
@@ -2466,12 +2232,10 @@ async function setAll(open){
     );
 
     return;
-
   }
 
 
   await loadDay();
-
 }
 
 
@@ -2490,18 +2254,21 @@ async function setMonth(open){
 
 
   if(!month){
-
-    $('monthMsg').textContent=
-      '月を選択してください。';
-
     return;
-
   }
+
+
+  const label=
+    open
+    ?
+    'OPEN'
+    :
+    'CLOSE';
 
 
   if(
     !confirm(
-      `${month} を全部${open?'OPEN':'CLOSE'}にしますか？`
+      `${month} を全部${label}にしますか？`
     )
   ){
     return;
@@ -2512,38 +2279,32 @@ async function setMonth(open){
     '変更しています…';
 
 
-  const rows=[];
+  try{
 
+    const rows=[];
 
-  for(
-    const date
-    of datesInMonth(month)
-  ){
 
     for(
-      const time
-      of times
+      const date
+      of datesInMonth(month)
     ){
 
-      rows.push({
+      for(
+        const time
+        of times
+      ){
 
-        slot_date:
-          date,
-
-        start_time:
-          time,
-
-        is_open:
-          open
-
-      });
-
+        rows.push({
+          slot_date:
+            date,
+          start_time:
+            time,
+          is_open:
+            open
+        });
+      }
     }
 
-  }
-
-
-  try{
 
     for(
       let i=0;
@@ -2571,37 +2332,34 @@ async function setMonth(open){
       if(error){
         throw error;
       }
-
     }
 
 
     $('monthMsg').textContent=
-      '変更しました。';
+      `${month} を全部${label}にしました。`;
 
 
     if(
-      $('date')
-        .value
+      $('date').value
         .startsWith(
           month
         )
     ){
 
       await loadDay();
-
     }
 
   }
   catch(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
 
 
     $('monthMsg').textContent=
-      '変更できませんでした。';
-
+      '一括変更できませんでした。';
   }
-
 }
 
 
@@ -2613,41 +2371,14 @@ $('closeMonth').onclick=
 ()=>setMonth(false);
 
 
-/* =========================
-   複数日カレンダー
-========================= */
+/* ==========================
+   複数日予約不可
+========================== */
 
 function renderDaySelector(){
 
   const month=
     $('month').value;
-
-
-  if(!month){
-    return;
-  }
-
-
-  const [year,mon]=
-    month
-      .split('-')
-      .map(Number);
-
-
-  const firstWeekday=
-    new Date(
-      year,
-      mon-1,
-      1
-    ).getDay();
-
-
-  const days=
-    new Date(
-      year,
-      mon,
-      0
-    ).getDate();
 
 
   const box=
@@ -2657,154 +2388,159 @@ function renderDaySelector(){
   box.innerHTML='';
 
 
+  if(!month){
+    return;
+  }
+
+
+  const dates=
+    datesInMonth(
+      month
+    );
+
+
+  if(!dates.length){
+    return;
+  }
+
+
+  const first=
+    new Date(
+      `${dates[0]}T00:00:00`
+    )
+    .getDay();
+
+
   for(
     let i=0;
-    i<firstWeekday;
+    i<first;
     i++
   ){
 
-    const empty=
+    const blank=
       document.createElement(
-        'div'
+        'span'
       );
 
 
     box.appendChild(
-      empty
+      blank
     );
-
   }
 
 
-  for(
-    let day=1;
-    day<=days;
-    day++
-  ){
+  dates.forEach(
+    date=>{
 
-    const date=
-      `${year}-${String(mon).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-
-
-    const button=
-      document.createElement(
-        'button'
-      );
-
-
-    button.type=
-      'button';
-
-
-    button.className=
-      'dayButton';
-
-
-    if(
-      selectedBlockedDates.has(
-        date
-      )
-    ){
-
-      button.classList
-        .add(
-          'selected'
+      const button=
+        document.createElement(
+          'button'
         );
 
-    }
+
+      button.type=
+        'button';
 
 
-    button.textContent=
-      day;
+      button.className=
+        'dayButton';
 
 
-    button.onclick=
-    ()=>{
+      button.textContent=
+        String(
+          Number(
+            date.slice(-2)
+          )
+        );
+
 
       if(
-        selectedBlockedDates.has(
-          date
-        )
+        selectedBlockedDates
+          .has(
+            date
+          )
       ){
 
-        selectedBlockedDates.delete(
-          date
-        );
-
-      }
-      else{
-
-        selectedBlockedDates.add(
-          date
-        );
-
+        button.classList
+          .add(
+            'selected'
+          );
       }
 
 
-      renderDaySelector();
+      button.onclick=
+      ()=>{
 
-      renderSelectedDates();
+        if(
+          selectedBlockedDates
+            .has(
+              date
+            )
+        ){
 
-    };
+          selectedBlockedDates
+            .delete(
+              date
+            );
+        }
+        else{
+
+          selectedBlockedDates
+            .add(
+              date
+            );
+        }
 
 
-    box.appendChild(
-      button
-    );
+        renderDaySelector();
 
-  }
+        renderSelectedDates();
+      };
+
+
+      box.appendChild(
+        button
+      );
+    }
+  );
 
 
   renderSelectedDates();
-
 }
 
 
 function renderSelectedDates(){
 
   const dates=
-    [
-      ...selectedBlockedDates
-    ].sort();
-
-
-  if(!dates.length){
-
-    $('selectedDatesBox').textContent=
-      '日付を選択してください。';
-
-    return;
-
-  }
+    [...selectedBlockedDates]
+      .sort();
 
 
   $('selectedDatesBox').textContent=
-    `選択中：${dates.map(d=>Number(d.slice(8))).join('日・')}日`;
 
+    dates.length
+    ?
+    `選択中：${dates.map(x=>Number(x.slice(-2))+'日').join('・')}`
+    :
+    '日付を選択してください。';
 }
 
 
-/* =========================
-   複数日予約不可
-========================= */
-
-async function saveBlockedMultiple(
+async function saveBlocked(
   wholeDay=false
 ){
 
   const dates=
-    [
-      ...selectedBlockedDates
-    ];
+    [...selectedBlockedDates]
+      .sort();
 
 
   if(!dates.length){
 
     $('blockedMsg').textContent=
-      '日付を1日以上選択してください。';
+      '予約不可にする日を選択してください。';
 
     return;
-
   }
 
 
@@ -2816,6 +2552,12 @@ async function saveBlockedMultiple(
     $('blockedEnd').value;
 
 
+  const memo=
+    $('blockedMemo')
+      .value
+      .trim();
+
+
   if(wholeDay){
 
     start=
@@ -2823,7 +2565,6 @@ async function saveBlockedMultiple(
 
     end=
       '23:59:59';
-
   }
   else{
 
@@ -2837,26 +2578,19 @@ async function saveBlockedMultiple(
         '開始時間と終了時間を入力してください。';
 
       return;
-
     }
 
 
-    if(end<=start){
+    if(
+      end<=start
+    ){
 
       $('blockedMsg').textContent=
-        '終了時間を開始時間より後にしてください。';
+        '終了時間は開始時間より後にしてください。';
 
       return;
-
     }
-
   }
-
-
-  const memo=
-    $('blockedMemo')
-      .value
-      .trim();
 
 
   const rows=
@@ -2884,9 +2618,7 @@ async function saveBlockedMultiple(
           )
           :
           (
-            memo
-            ||
-            null
+            memo||null
           )
 
       })
@@ -2905,14 +2637,15 @@ async function saveBlockedMultiple(
 
   if(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
 
 
     $('blockedMsg').textContent=
       '登録できませんでした。';
 
     return;
-
   }
 
 
@@ -2925,35 +2658,27 @@ async function saveBlockedMultiple(
 
 
   $('blockedStart').value='';
-
   $('blockedEnd').value='';
-
   $('blockedMemo').value='';
 
 
   renderDaySelector();
-
 
   await loadMonthBlockedTimes();
 
   await loadDay();
 
   await loadAdminTimes();
-
 }
 
 
 $('addBlockedTime').onclick=
-()=>saveBlockedMultiple(false);
+()=>saveBlocked(false);
 
 
 $('addBlockedDay').onclick=
-()=>saveBlockedMultiple(true);
+()=>saveBlocked(true);
 
-
-/* =========================
-   予約不可一覧
-========================= */
 
 async function loadMonthBlockedTimes(){
 
@@ -2966,7 +2691,10 @@ async function loadMonthBlockedTimes(){
   }
 
 
-  const {data,error}=
+  const {
+    data,
+    error
+  }=
     await supabase
       .from(
         'nakano_blocked_times'
@@ -2992,35 +2720,31 @@ async function loadMonthBlockedTimes(){
 
   if(error){
 
-    console.error(error);
+    $('blockedList').innerHTML=
+      '<span class="muted">読み込めませんでした。</span>';
 
     return;
-
   }
-
-
-  const box=
-    $('blockedList');
 
 
   if(!data?.length){
 
-    box.innerHTML=
+    $('blockedList').innerHTML=
       '<span class="muted">この月の設定はありません。</span>';
 
     return;
-
   }
 
 
-  box.innerHTML=
+  $('blockedList').innerHTML=
     data.map(
       item=>{
 
         const start=
           String(
             item.start_time
-          ).slice(
+          )
+          .slice(
             0,
             5
           );
@@ -3029,13 +2753,14 @@ async function loadMonthBlockedTimes(){
         const end=
           String(
             item.end_time
-          ).slice(
+          )
+          .slice(
             0,
             5
           );
 
 
-        const wholeDay=
+        const whole=
           start==='00:00'
           &&
           end.startsWith(
@@ -3052,7 +2777,7 @@ async function loadMonthBlockedTimes(){
               ${esc(item.blocked_date)}
 
               ${
-                wholeDay
+                whole
                 ?
                 '<span class="badge">終日</span>'
                 :
@@ -3064,7 +2789,7 @@ async function loadMonthBlockedTimes(){
             <br>
 
             ${
-              wholeDay
+              whole
               ?
               '終日予約不可'
               :
@@ -3093,9 +2818,9 @@ async function loadMonthBlockedTimes(){
           </div>
 
         `;
-
       }
-    ).join('');
+    )
+    .join('');
 
 
   document
@@ -3136,7 +2861,6 @@ async function loadMonthBlockedTimes(){
             );
 
             return;
-
           }
 
 
@@ -3145,18 +2869,15 @@ async function loadMonthBlockedTimes(){
           await loadDay();
 
           await loadAdminTimes();
-
         };
-
       }
     );
-
 }
 
 
-/* =========================
+/* ==========================
    空き時間
-========================= */
+========================== */
 
 async function getAvailableTimes(
   menuId,
@@ -3176,38 +2897,35 @@ async function getAvailableTimes(
     await supabase.rpc(
       'nakano_available_slots',
       {
-
         p_date:
           date,
-
         p_menu_id:
           menuId
-
       }
     );
 
 
   if(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
 
     return [];
-
   }
 
 
   return data||[];
-
 }
 
 
 async function loadAdminTimes(){
 
-  const select=
+  const box=
     $('adminTime');
 
 
-  select.innerHTML=
+  box.innerHTML=
     '<option value="">空き時間を選択</option>';
 
 
@@ -3234,33 +2952,32 @@ async function loadAdminTimes(){
       option.textContent=
         String(
           slot.start_time
-        ).slice(
+        )
+        .slice(
           0,
           5
         );
 
 
-      select.appendChild(
+      box.appendChild(
         option
       );
-
     }
   );
-
 }
 
 
 $('menu').onchange=
-  loadAdminTimes;
+loadAdminTimes;
 
 
 $('adminBookingDate').onchange=
-  loadAdminTimes;
+loadAdminTimes;
 
 
-/* =========================
+/* ==========================
    店側予約追加
-========================= */
+========================== */
 
 $('addBooking').onclick=
 async()=>{
@@ -3312,7 +3029,6 @@ async()=>{
       '日付・時間・メニュー・お名前・電話番号を入力してください。';
 
     return;
-
   }
 
 
@@ -3325,14 +3041,17 @@ async()=>{
 
   if(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
 
 
     $('addMsg').textContent=
       '予約を追加できませんでした。';
 
-    return;
+    await loadAdminTimes();
 
+    return;
   }
 
 
@@ -3340,10 +3059,9 @@ async()=>{
     '予約を追加しました。';
 
 
+  $('customerSelect').value='';
   $('customerName').value='';
-
   $('phone').value='';
-
   $('memo').value='';
 
 
@@ -3352,17 +3070,14 @@ async()=>{
   await loadDay();
 
   await loadAdminTimes();
-
 };
 
 
-/* =========================
-   予約編集
-========================= */
+/* ==========================
+   編集
+========================== */
 
-function openEdit(
-  booking
-){
+function openEdit(booking){
 
   editingBooking=
     booking;
@@ -3376,7 +3091,7 @@ function openEdit(
 
 
   $('editCurrent').textContent=
-    `${booking.customer_name}　${booking.menu_name}`;
+    `${String(booking.start_time).slice(0,5)}　${booking.customer_name}　${booking.menu_name}`;
 
 
   $('editDate').value=
@@ -3388,21 +3103,15 @@ function openEdit(
 
 
   $('editName').value=
-    booking.customer_name
-    ||
-    '';
+    booking.customer_name||'';
 
 
   $('editPhone').value=
-    booking.phone
-    ||
-    '';
+    booking.phone||'';
 
 
   $('editMemo').value=
-    booking.memo
-    ||
-    '';
+    booking.memo||'';
 
 
   $('editMsg').textContent='';
@@ -3416,14 +3125,12 @@ function openEdit(
       behavior:'smooth',
       block:'start'
     });
-
 }
 
 
 function closeEdit(){
 
-  editingBooking=
-    null;
+  editingBooking=null;
 
 
   $('editCard')
@@ -3431,88 +3138,83 @@ function closeEdit(){
     .add(
       'hidden'
     );
-
 }
 
 
 $('cancelEdit').onclick=
-  closeEdit;
-
-
-$('editMenu').onchange=
-  loadEditTimes;
+closeEdit;
 
 
 $('editDate').onchange=
-  loadEditTimes;
+loadEditTimes;
+
+
+$('editMenu').onchange=
+loadEditTimes;
 
 
 async function loadEditTimes(){
 
-  if(
-    !editingBooking
-  ){
+  if(!editingBooking){
     return;
   }
 
 
-  const select=
+  const date=
+    $('editDate').value;
+
+
+  const menuId=
+    $('editMenu').value;
+
+
+  const box=
     $('editTime');
 
 
-  select.innerHTML=
+  box.innerHTML=
     '<option value="">時間を選択</option>';
 
 
-  let data=
+  const data=
     await getAvailableTimes(
-      $('editMenu').value,
-      $('editDate').value
+      menuId,
+      date
     );
 
 
-  const originalTime=
+  const current=
     String(
       editingBooking.start_time
     );
 
 
-  const originalDate=
-    $('editDate').value
-    ===
-    editingBooking.booking_date;
-
-
   if(
-    originalDate
+    date===editingBooking.booking_date
+    &&
+    String(menuId)===String(editingBooking.menu_id)
     &&
     !data.some(
-      slot=>
-        String(
-          slot.start_time
-        )
+      item=>
+        String(item.start_time)
         ===
-        originalTime
+        current
     )
   ){
 
     data.push({
       start_time:
-        originalTime
+        current
     });
-
   }
 
 
   data.sort(
     (a,b)=>
-      String(
-        a.start_time
-      ).localeCompare(
-        String(
-          b.start_time
+      String(a.start_time)
+        .localeCompare(
+          String(b.start_time)
         )
-      )
   );
 
 
@@ -3532,44 +3234,35 @@ async function loadEditTimes(){
       option.textContent=
         String(
           slot.start_time
-        ).slice(
+        )
+        .slice(
           0,
           5
         );
 
 
       if(
-        originalDate
+        date===editingBooking.booking_date
         &&
-        String(
-          slot.start_time
-        )
-        ===
-        originalTime
+        String(slot.start_time)===current
       ){
 
-        option.selected=
-          true;
-
+        option.selected=true;
       }
 
 
-      select.appendChild(
+      box.appendChild(
         option
       );
-
     }
   );
-
 }
 
 
 $('saveEdit').onclick=
 async()=>{
 
-  if(
-    !editingBooking
-  ){
+  if(!editingBooking){
     return;
   }
 
@@ -3608,6 +3301,25 @@ async()=>{
   };
 
 
+  if(
+    !payload.p_date
+    ||
+    !payload.p_start_time
+    ||
+    !payload.p_menu_id
+    ||
+    !payload.p_customer_name
+    ||
+    !payload.p_phone
+  ){
+
+    $('editMsg').textContent=
+      '入力内容を確認してください。';
+
+    return;
+  }
+
+
   const {error}=
     await supabase.rpc(
       'nakano_admin_change_booking',
@@ -3617,15 +3329,15 @@ async()=>{
 
   if(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
 
 
     $('editMsg').textContent=
-      '変更できませんでした。';
-
+      '変更できませんでした。空き時間を確認してください。';
 
     return;
-
   }
 
 
@@ -3642,29 +3354,25 @@ async()=>{
   closeEdit();
 
 
-  renderDaySelector();
-
-
   await loadDay();
 
   await loadMonthBlockedTimes();
 
+  await loadCustomers();
 };
 
 
 $('cancelBookingFromEdit').onclick=
 async()=>{
 
-  if(
-    !editingBooking
-  ){
+  if(!editingBooking){
     return;
   }
 
 
   if(
     !confirm(
-      'この予約をキャンセルしますか？'
+      `${String(editingBooking.start_time).slice(0,5)} ${editingBooking.customer_name} 様の予約をキャンセルしますか？`
     )
   ){
     return;
@@ -3683,30 +3391,28 @@ async()=>{
 
   if(error){
 
-    alert(
-      'キャンセルできませんでした。'
-    );
+    $('editMsg').textContent=
+      'キャンセルできませんでした。';
 
     return;
-
   }
 
 
   closeEdit();
 
   await loadDay();
-
 };
 
 
-/* =========================
-   通知設定
-========================= */
+/* ==========================
+   通知
+========================== */
 
 async function getLineProfileForAdmin(){
 
   await liff.init({
-    liffId:LIFF_ID
+    liffId:
+      LIFF_ID
   });
 
 
@@ -3719,13 +3425,10 @@ async function getLineProfileForAdmin(){
 
   return await liff
     .getProfile();
-
 }
 
 
-async function attachCurrentLineToNotification(
-  id
-){
+async function attachCurrentLineToNotification(id){
 
   localStorage.setItem(
     'nakano_pending_notification_line',
@@ -3734,7 +3437,8 @@ async function attachCurrentLineToNotification(
 
 
   await liff.init({
-    liffId:LIFF_ID
+    liffId:
+      LIFF_ID
   });
 
 
@@ -3747,9 +3451,7 @@ async function attachCurrentLineToNotification(
         window.location.href
     });
 
-
     return;
-
   }
 
 
@@ -3770,9 +3472,7 @@ async function attachCurrentLineToNotification(
           profile.userId,
 
         p_line_display_name:
-          profile.displayName
-          ||
-          null
+          profile.displayName||null
 
       }
     );
@@ -3785,7 +3485,6 @@ async function attachCurrentLineToNotification(
     );
 
     return;
-
   }
 
 
@@ -3800,7 +3499,6 @@ async function attachCurrentLineToNotification(
   alert(
     'LINE連携できました。'
   );
-
 }
 
 
@@ -3839,9 +3537,7 @@ async function resumePendingLineLink(){
           profile.userId,
 
         p_line_display_name:
-          profile.displayName
-          ||
-          null
+          profile.displayName||null
 
       }
     );
@@ -3857,10 +3553,10 @@ async function resumePendingLineLink(){
   }
   catch(error){
 
-    console.error(error);
-
+    console.error(
+      error
+    );
   }
-
 }
 
 
@@ -3886,21 +3582,16 @@ async function loadNotifications(){
   }
 
 
-  const box=
-    $('notificationList');
-
-
   if(!data?.length){
 
-    box.innerHTML=
+    $('notificationList').innerHTML=
       '<span class="muted">通知先はありません。</span>';
 
     return;
-
   }
 
 
-  box.innerHTML=
+  $('notificationList').innerHTML=
     data.map(
       item=>`
 
@@ -3910,18 +3601,25 @@ async function loadNotifications(){
             ${esc(item.name)}
           </strong>
 
+          ${
+            item.email
+            ?
+            `<br>${esc(item.email)}`
+            :
+            ''
+          }
+
           <br>
 
           <span class="muted">
 
+            メール：
+            ${item.email_enabled?'ON':'OFF'}
+
+            <br>
+
             LINE：
-            ${
-              item.line_enabled
-              ?
-              'ON'
-              :
-              'OFF'
-            }
+            ${item.line_enabled?'ON':'OFF'}
 
             <br>
 
@@ -3956,7 +3654,8 @@ async function loadNotifications(){
         </div>
 
       `
-    ).join('');
+    )
+    .join('');
 
 
   document
@@ -3970,7 +3669,6 @@ async function loadNotifications(){
         ()=>attachCurrentLineToNotification(
           button.dataset.id
         );
-
       }
     );
 
@@ -4008,12 +3706,9 @@ async function loadNotifications(){
 
 
           await loadNotifications();
-
         };
-
       }
     );
-
 }
 
 
@@ -4032,7 +3727,25 @@ async()=>{
       '通知先名を入力してください。';
 
     return;
+  }
 
+
+  const email=
+    $('notifyEmail')
+      .value
+      .trim();
+
+
+  if(
+    $('emailEnabled').checked
+    &&
+    !email
+  ){
+
+    $('notificationMsg').textContent=
+      'メール通知を使う場合はメールアドレスを入力してください。';
+
+    return;
   }
 
 
@@ -4046,11 +3759,7 @@ async()=>{
         name,
 
         email:
-          $('notifyEmail')
-            .value
-            .trim()
-          ||
-          null,
+          email||null,
 
         email_enabled:
           $('emailEnabled').checked,
@@ -4070,7 +3779,6 @@ async()=>{
       '登録できませんでした。';
 
     return;
-
   }
 
 
@@ -4079,22 +3787,18 @@ async()=>{
 
 
   $('notifyName').value='';
-
   $('notifyEmail').value='';
-
   $('emailEnabled').checked=false;
-
   $('lineEnabled').checked=false;
 
 
   await loadNotifications();
+}
 
-};
 
-
-/* =========================
+/* ==========================
    起動
-========================= */
+========================== */
 
 supabase.auth
   .onAuthStateChange(
@@ -4106,7 +3810,16 @@ syncAuth();
 
 </script>
 
-<script type="module" src="./booking-drag.js"></script>
+
+<!--
+  共通ドラッグ・現在時刻表示
+  自動更新・ホーム画面復帰対応
+-->
+<script
+  type="module"
+  src="./booking-drag.js"
+></script>
+
 
 </main>
 </body>
