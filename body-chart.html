@@ -29,6 +29,7 @@ const params=new URLSearchParams(location.search);
 const customer=params.get('customer')||'draft';
 const date=params.get('date')||'undated';
 const KEY=`nakano_body_chart_${customer}_${date}`;
+const OBJECT_KEY=`${KEY}_objects`;
 const CLOUD_TABLE='nakano_body_charts';
 const frame=document.getElementById('chartFrame');
 const boot=document.getElementById('boot');
@@ -44,27 +45,48 @@ function legacyUrl(){
 }
 function localData(){try{return localStorage.getItem(KEY)||''}catch{return''}}
 function setLocalData(v){if(!v)return;try{localStorage.setItem(KEY,v)}catch{}}
+function localObjects(){try{const v=JSON.parse(localStorage.getItem(OBJECT_KEY)||'[]');return Array.isArray(v)?v:[]}catch{return[]}}
+function setLocalObjects(v){try{localStorage.setItem(OBJECT_KEY,JSON.stringify(Array.isArray(v)?v:[]))}catch{}}
 function setLegacyMessage(text){try{const el=frame.contentDocument?.getElementById('msg');if(el)el.textContent=text}catch{}}
 
 async function sessionExists(){try{const{data:{session}}=await supabase.auth.getSession();return!!session}catch{return false}}
 async function fetchCloud(){
   if(customer==='draft'||date==='undated')return null;
   try{
-    const{data,error}=await supabase.from(CLOUD_TABLE).select('image_data,updated_at').eq('customer_id',customer).eq('visit_date',date).maybeSingle();
+    const{data,error}=await supabase.from(CLOUD_TABLE).select('image_data,base_image_data,overlay_data,updated_at').eq('customer_id',customer).eq('visit_date',date).maybeSingle();
     if(error){cloudDisabled=true;console.warn('Body chart cloud read unavailable:',error.message);return null}
     cloudReady=true;return data||null;
   }catch(e){cloudDisabled=true;console.warn('Body chart cloud read failed:',e);return null}
 }
-async function saveCloud(imageData,{migration=false}={}){
-  if(!imageData||cloudDisabled||customer==='draft'||date==='undated')return false;
+async function saveCloud(baseImageData,overlayData,compositeImageData,{migration=false}={}){
+  if(!baseImageData||cloudDisabled||customer==='draft'||date==='undated')return false;
   try{
     const{data:{user}}=await supabase.auth.getUser();if(!user)return false;
-    const{error}=await supabase.from(CLOUD_TABLE).upsert({customer_id:customer,visit_date:date,image_data:imageData,updated_at:new Date().toISOString(),updated_by:user.id},{onConflict:'customer_id,visit_date'});
+    const payload={
+      customer_id:customer,
+      visit_date:date,
+      image_data:compositeImageData||baseImageData,
+      base_image_data:baseImageData,
+      overlay_data:Array.isArray(overlayData)?overlayData:[],
+      updated_at:new Date().toISOString(),
+      updated_by:user.id
+    };
+    const{error}=await supabase.from(CLOUD_TABLE).upsert(payload,{onConflict:'customer_id,visit_date'});
     if(error){cloudDisabled=true;console.warn('Body chart cloud save unavailable:',error.message);return false}
     cloudReady=true;if(!migration)setLegacyMessage('身体図をクラウドにも保存しました。');return true;
   }catch(e){cloudDisabled=true;console.warn('Body chart cloud save failed:',e);return false}
 }
-async function syncAfterSave(){await new Promise(r=>setTimeout(r,20));const v=localData();if(v)await saveCloud(v)}
+async function syncAfterSave(){
+  await new Promise(r=>setTimeout(r,30));
+  const base=localData();if(!base)return;
+  let objects=localObjects(),composite=base;
+  try{
+    const w=frame.contentWindow;
+    if(w?.__nakanoBodyGetObjects){objects=w.__nakanoBodyGetObjects();setLocalObjects(objects)}
+    if(w?.__nakanoBodyExportComposite)composite=w.__nakanoBodyExportComposite();
+  }catch(e){console.warn('Body chart composite export unavailable:',e)}
+  await saveCloud(base,objects,composite);
+}
 
 function normalizeBaseImageData(doc){
   const base=doc?.getElementById('base');
@@ -81,58 +103,30 @@ function normalizeBaseImageData(doc){
     canvas.width=originalWidth+padX*2;
     canvas.height=originalHeight+padY*2;
     const ctx=canvas.getContext('2d');
-    ctx.fillStyle='#fff';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.drawImage(base,padX,padY,originalWidth,originalHeight);
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(base,padX,padY,originalWidth,originalHeight);
 
-    base.dataset.sourceNormalized='1';
-    base.src=canvas.toDataURL('image/png');
-    base.style.transform='none';
-    base.style.transformOrigin='center center';
-    base.style.objectFit='contain';
-
-    stage.style.aspectRatio=`${canvas.width}/${canvas.height}`;
-    stage.style.height='auto';
-    stage.style.minHeight='0';
-    stage.style.maxWidth='820px';
-    stage.style.margin='0 auto';
+    base.dataset.sourceNormalized='1';base.src=canvas.toDataURL('image/png');base.style.transform='none';base.style.transformOrigin='center center';base.style.objectFit='contain';
+    stage.style.aspectRatio=`${canvas.width}/${canvas.height}`;stage.style.height='auto';stage.style.minHeight='0';stage.style.maxWidth='820px';stage.style.margin='0 auto';
 
     const style=doc.createElement('style');
-    style.textContent='#base{transform:none!important;object-fit:contain!important}#draw{transform:none!important}.stage{height:auto!important;min-height:0!important}@media(max-width:600px){#base{transform:none!important}.stage{height:auto!important;min-height:0!important;max-width:100%!important}}';
+    style.textContent='#base{transform:none!important;object-fit:contain!important}#draw,#bodyObjectLayer{transform:none!important}.stage{height:auto!important;min-height:0!important}@media(max-width:600px){#base{transform:none!important}.stage{height:auto!important;min-height:0!important;max-width:100%!important}}';
     doc.head.appendChild(style);
 
-    const resizeLegacy=()=>{
-      try{
-        const w=frame.contentWindow;
-        if(w)w.dispatchEvent(new w.Event('resize'));
-      }catch{}
-    };
+    const resizeLegacy=()=>{try{const w=frame.contentWindow;if(w)w.dispatchEvent(new w.Event('resize'))}catch{}};
     requestAnimationFrame(()=>{resizeLegacy();setTimeout(resizeLegacy,120)});
   };
-
-  if(base.complete&&base.naturalWidth)rebuild();
-  else base.addEventListener('load',rebuild,{once:true});
+  if(base.complete&&base.naturalWidth)rebuild();else base.addEventListener('load',rebuild,{once:true});
 }
 
 function hookLegacy(){
   boot.classList.add('hidden');
   try{
-    const doc=frame.contentDocument;
-    normalizeBaseImageData(doc);
-
+    const doc=frame.contentDocument;normalizeBaseImageData(doc);
     if(doc&&!doc.getElementById('nakanoEllipseScript')){
-      const ellipseScript=doc.createElement('script');
-      ellipseScript.id='nakanoEllipseScript';
-      ellipseScript.src=`./body-ellipse.js?_v=${Date.now()}`;
-      doc.body.appendChild(ellipseScript);
+      const ellipseScript=doc.createElement('script');ellipseScript.id='nakanoEllipseScript';ellipseScript.src=`./body-ellipse.js?_v=${Date.now()}`;doc.body.appendChild(ellipseScript);
     }
-
-    const save=doc?.getElementById('save');
-    if(save)save.addEventListener('click',()=>{syncAfterSave()});
-
-    const back=doc?.querySelector('.bar button[onclick]');
-    const close=doc?.getElementById('close');
-    const goBack=e=>{e?.preventDefault();window.history.back()};
+    const save=doc?.getElementById('save');if(save)save.addEventListener('click',()=>{syncAfterSave()});
+    const back=doc?.querySelector('.bar button[onclick]');const close=doc?.getElementById('close');const goBack=e=>{e?.preventDefault();window.history.back()};
     if(back){back.removeAttribute('onclick');back.addEventListener('click',goBack)}
     if(close){close.onclick=null;close.addEventListener('click',goBack)}
   }catch(e){console.warn('Body chart sync hook failed:',e)}
@@ -140,38 +134,25 @@ function hookLegacy(){
 
 async function start(){
   const hasSession=await sessionExists();
-  let cloud=null;
-  const local=localData();
-  if(hasSession)cloud=await fetchCloud();
-  if(cloud?.image_data)setLocalData(cloud.image_data);
+  const localBase=localData();const localOverlay=localObjects();
+  let cloud=null;if(hasSession)cloud=await fetchCloud();
+  if(cloud){setLocalData(cloud.base_image_data||cloud.image_data);setLocalObjects(cloud.overlay_data||[])}
 
   frame.addEventListener('load',async()=>{
     hookLegacy();
-    if(hasSession&&!cloud?.image_data&&local&&!cloudDisabled){
-      const migrated=await saveCloud(local,{migration:true});
+    if(hasSession&&!cloud?.image_data&&localBase&&!cloudDisabled){
+      const migrated=await saveCloud(localBase,localOverlay,localBase,{migration:true});
       if(migrated)setLegacyMessage('この端末に保存されていた身体図をクラウドへ引き継ぎました。');
     }
   },{once:true});
-
   frame.src=legacyUrl();
 }
 start();
 </script>
-
-<!-- local navigation cache refresh -->
 <script>
 document.addEventListener('click',function(e){
-  const a=e.target.closest?.('a[href]');
-  if(!a)return;
-  const raw=a.getAttribute('href')||'';
-  if(!raw||raw.startsWith('#')||raw.startsWith('javascript:'))return;
-  try{
-    const u=new URL(a.href,location.href);
-    if(u.origin===location.origin&&u.pathname.startsWith('/seitai-nakano-booking/')){
-      u.searchParams.set('_v',String(Date.now()));
-      a.href=u.href;
-    }
-  }catch{}
+  const a=e.target.closest?.('a[href]');if(!a)return;const raw=a.getAttribute('href')||'';if(!raw||raw.startsWith('#')||raw.startsWith('javascript:'))return;
+  try{const u=new URL(a.href,location.href);if(u.origin===location.origin&&u.pathname.startsWith('/seitai-nakano-booking/')){u.searchParams.set('_v',String(Date.now()));a.href=u.href}}catch{}
 },true);
 </script>
 </body>
