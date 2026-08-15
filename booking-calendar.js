@@ -41,18 +41,17 @@ function addStyles(){
 .bookingCalendarWeek,.bookingCalendarGrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;padding-left:8px;padding-right:8px}
 .bookingCalendarWeek{padding-top:9px;text-align:center;color:#8a837d;font-size:10px}
 .bookingCalendarGrid{padding-top:6px;padding-bottom:10px}
-.bookingCalendarBlank{min-height:58px}
-.bookingCalendarDay{min-width:0;min-height:58px;padding:5px 2px;border:1px solid #e2dbd3;border-radius:10px;background:#fff;color:#3f3a35;text-align:center}
+.bookingCalendarBlank{min-height:54px}
+.bookingCalendarDay{min-width:0;min-height:54px;padding:6px 2px;border:1px solid #e2dbd3;border-radius:10px;background:#fff;color:#3f3a35;text-align:center}
 .bookingCalendarDay:disabled{opacity:.42;background:#f1efec}
 .bookingCalendarDay.selected{border-color:#61574d;box-shadow:0 0 0 1px #61574d inset;background:#eee7df}
 .bookingCalendarDate{display:block;font-size:13px;font-weight:800;line-height:1.1}
-.bookingCalendarMark{display:block;margin-top:4px;font-size:16px;font-weight:900;line-height:1}
-.bookingCalendarCount{display:block;margin-top:2px;font-size:8px;color:#8c847d;line-height:1.1}
+.bookingCalendarMark{display:block;margin-top:6px;font-size:18px;font-weight:900;line-height:1}
 .bookingCalendarDay.good .bookingCalendarMark{color:#26734b}.bookingCalendarDay.few .bookingCalendarMark{color:#9a711b}.bookingCalendarDay.none .bookingCalendarMark{color:#9a6a64}
 .bookingCalendarStatus{padding:0 10px 10px;color:#77716a;font-size:11px;line-height:1.6}
 .bookingCalendarNearest{margin:0 10px 10px;padding:9px 10px;border-radius:10px;background:#fff;color:#5b544d;font-size:12px;line-height:1.5}
 .bookingCalendarNativeHint{margin-top:8px;color:#8a837d;font-size:11px}
-@media(max-width:380px){.bookingCalendarDay{min-height:54px}.bookingCalendarGrid,.bookingCalendarWeek{gap:4px;padding-left:6px;padding-right:6px}}
+@media(max-width:380px){.bookingCalendarDay{min-height:50px}.bookingCalendarGrid,.bookingCalendarWeek{gap:4px;padding-left:6px;padding-right:6px}}
 `;
   document.head.appendChild(s);
 }
@@ -180,9 +179,9 @@ function renderCalendar(){
     b.className='bookingCalendarDay';
     if(iso===selected)b.classList.add('selected');
     let mark='×',kind='none';
-    if(count>=4){mark='○';kind='good'}else if(count>=1){mark='△';kind='few'}
+    if(count>=6){mark='○';kind='good'}else if(count>=1){mark='△';kind='few'}
     b.classList.add(kind);
-    b.innerHTML=`<span class="bookingCalendarDate">${day}</span><span class="bookingCalendarMark">${past?'':mark}</span><span class="bookingCalendarCount">${past?'':count?`${count}枠`:'空きなし'}</span>`;
+    b.innerHTML=`<span class="bookingCalendarDate">${day}</span><span class="bookingCalendarMark">${past?'':mark}</span>`;
     b.disabled=past||!activeMenuId||count===0;
     b.onclick=()=>{
       const date=$('date');
