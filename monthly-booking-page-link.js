@@ -17,15 +17,6 @@
     openRow(row);
   },true);
 
-  function refreshHints(){
-    document.querySelectorAll('.monthlyBookingRow[data-booking-id]').forEach(row=>{
-      row.setAttribute('role','button');
-      row.tabIndex=0;
-      const hint=row.querySelector('.monthlyBookingEditHint');
-      if(hint)hint.textContent='タップして別ページで予約を編集';
-    });
-  }
-
   document.addEventListener('keydown',e=>{
     if(e.key!=='Enter'&&e.key!==' ')return;
     const row=e.target.closest?.('.monthlyBookingRow[data-booking-id]');
@@ -34,6 +25,18 @@
     openRow(row);
   });
 
-  refreshHints();
-  new MutationObserver(refreshHints).observe(document.body,{childList:true,subtree:true});
+  function refreshHintsOnce(){
+    document.querySelectorAll('.monthlyBookingRow[data-booking-id]').forEach(row=>{
+      row.setAttribute('role','button');
+      row.tabIndex=0;
+      const hint=row.querySelector('.monthlyBookingEditHint');
+      if(hint&&hint.textContent!=='タップして別ページで予約を編集'){
+        hint.textContent='タップして別ページで予約を編集';
+      }
+    });
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',refreshHintsOnce,{once:true});
+  else refreshHintsOnce();
+  setTimeout(refreshHintsOnce,800);
 })();
