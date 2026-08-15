@@ -1,0 +1,33 @@
+name: Stabilize body object undo once
+on:
+  push:
+    branches: [main]
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Keep undo order predictable after freehand drawing
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('body-ellipse.js')
+          s=p.read_text()
+          old="""    }else if(selectedId){selectedId=null;updateDeleteButton();render()}\n  }\n"""
+          new="""    }else{\n      if(selectedId){selectedId=null;updateDeleteButton();render()}\n      objectHistory=[];\n    }\n  }\n"""
+          if old not in s:
+              raise SystemExit('target block not found')
+          p.write_text(s.replace(old,new,1))
+          PY
+          node --check body-ellipse.js
+      - name: Commit and remove workflow
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git rm .github/workflows/stabilize-body-object-undo-once.yml
+          git add body-ellipse.js
+          git commit -m "Stabilize movable body chart undo behavior"
+          git push
