@@ -73,8 +73,9 @@
         <input id="ellipseOpacity" type="range" min="10" max="55" step="5" value="25">
         <span id="ellipseOpacityValue" class="shapeOpacityValue">25%</span>
       </label>
+      <button class="shapeBtn" id="duplicateBodyObject" type="button" disabled>選択を複製</button>
       <button class="shapeBtn" id="deleteBodyObject" type="button" disabled>選択した図形を削除</button>
-      <div class="shapeMoveHint">楕円と症状文字は、置いたあとに直接タップしてそのままスワイプすると移動できます。選択中は点線で囲まれます。</div>`;
+      <div class="shapeMoveHint">楕円と症状文字は、置いたあとに直接タップしてスワイプ移動できます。選択中は点線で囲まれます。「選択を複製」で同じ楕円・文字を少しずらしてコピーできます。</div>`;
     penTitle.parentNode.insertBefore(title,penTitle);
     penTitle.parentNode.insertBefore(tools,penTitle);
 
@@ -103,6 +104,24 @@
       fillOpacity=Number(opacity.value)/100;
       opacityValue.textContent=`${opacity.value}%`;
     });
+    document.getElementById('duplicateBodyObject').addEventListener('click',()=>{
+      if(!selectedId)return;
+      const original=objects.find(o=>o.id===selectedId);
+      if(!original)return;
+      pushObjectHistory();
+      const copy=JSON.parse(JSON.stringify(original));
+      copy.id=uid();
+      if(copy.type==='ellipse'){
+        copy.cx=clamp((copy.cx||0)+.025,copy.rx||.001,1-(copy.rx||.001));
+        copy.cy=clamp((copy.cy||0)+.025,copy.ry||.001,1-(copy.ry||.001));
+      }else{
+        copy.x=clamp((copy.x||0)+.025,0,1);
+        copy.y=clamp((copy.y||0)+.025,.02,1);
+      }
+      objects.push(copy);
+      selectedId=copy.id;
+      saveObjects();updateDeleteButton();render();
+    });
     document.getElementById('deleteBodyObject').addEventListener('click',()=>{
       if(!selectedId)return;
       pushObjectHistory();
@@ -114,7 +133,7 @@
   }
 
   function deactivateEllipse(){ellipseMode=false;document.getElementById('ellipseTool')?.classList.remove('primary')}
-  function updateDeleteButton(){const b=document.getElementById('deleteBodyObject');if(b)b.disabled=!selectedId}
+  function updateDeleteButton(){const disabled=!selectedId;const d=document.getElementById('deleteBodyObject');if(d)d.disabled=disabled;const c=document.getElementById('duplicateBodyObject');if(c)c.disabled=disabled}
   function currentColor(){return document.querySelector('.color.active')?.dataset.c||'#d9413a'}
   function rgba(hex,alpha){const v=String(hex||'#d9413a').replace('#','');const full=v.length===3?v.split('').map(ch=>ch+ch).join(''):v.padEnd(6,'0');const n=parseInt(full,16);return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${alpha})`}
   function cssSize(){const r=baseCanvas.getBoundingClientRect();return{w:r.width||1,h:r.height||1}}
