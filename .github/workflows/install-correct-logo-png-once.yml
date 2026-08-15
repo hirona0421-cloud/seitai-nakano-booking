@@ -14,16 +14,17 @@ jobs:
           fetch-depth: 0
       - name: Rebuild verified PNG and switch customer pages
         run: |
-          cat tmp/logo-part1.b64 tmp/logo-part2.b64 tmp/logo-part3.b64 tmp/logo-part4.b64 tmp/logo-part5.b64 > /tmp/nakano-logo.b64
-          base64 -d /tmp/nakano-logo.b64 > assets/nakano-logo.png
+          cat tmp/logo-part1a.b64 tmp/logo-part1b.b64 tmp/logo-part2.b64 tmp/logo-part3a.b64 tmp/logo-part3b.b64 tmp/logo-part4.b64 tmp/logo-part5.b64 > /tmp/nakano-logo.b64
           python - <<'PY'
           from pathlib import Path
-          import hashlib,re
-          p=Path('assets/nakano-logo.png')
-          data=p.read_bytes()
+          import base64,hashlib,re
+          raw=''.join(Path('/tmp/nakano-logo.b64').read_text().split())
+          assert len(raw) == 12876, len(raw)
+          data=base64.b64decode(raw, validate=True)
           assert data[:8] == b'\x89PNG\r\n\x1a\n', data[:8]
           assert len(data) == 9656, len(data)
           assert hashlib.sha256(data).hexdigest() == '12c2eb1a68479f7af87781ef2950ada93d15be514f2c90994525298378af7eed'
+          Path('assets/nakano-logo.png').write_bytes(data)
           p=Path('customer-brand.js')
           s=p.read_text()
           s=re.sub(r"\./assets/nakano-logo\.(?:webp|png)\?v=[^']+", './assets/nakano-logo.png?v=20260816-1', s)
@@ -40,7 +41,7 @@ jobs:
           node --check customer-brand.js
       - name: Commit verified PNG and clean staging files
         run: |
-          rm -f tmp/logo-part1.b64 tmp/logo-part2.b64 tmp/logo-part3.b64 tmp/logo-part4.b64 tmp/logo-part5.b64
+          rm -f tmp/logo-part1.b64 tmp/logo-part1a.b64 tmp/logo-part1b.b64 tmp/logo-part2.b64 tmp/logo-part3.b64 tmp/logo-part3a.b64 tmp/logo-part3b.b64 tmp/logo-part4.b64 tmp/logo-part5.b64
           rm -f .github/workflows/install-correct-logo-png-once.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
