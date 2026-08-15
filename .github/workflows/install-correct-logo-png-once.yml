@@ -14,7 +14,7 @@ jobs:
           fetch-depth: 0
       - name: Rebuild verified PNG and switch customer pages
         run: |
-          cat tmp/logo-part1a.b64 tmp/logo-part1b.b64 tmp/logo-part2.b64 tmp/logo-part3a.b64 tmp/logo-part3b.b64 tmp/logo-part4.b64 tmp/logo-part5.b64 > /tmp/nakano-logo.b64
+          cat tmp/logo-part1a1.b64 tmp/logo-part1a2.b64 tmp/logo-part1b.b64 tmp/logo-part2.b64 tmp/logo-part3a.b64 tmp/logo-part3b1.b64 tmp/logo-part3b2.b64 tmp/logo-part4.b64 tmp/logo-part5.b64 > /tmp/nakano-logo.b64
           python - <<'PY'
           from pathlib import Path
           import base64,hashlib,re
@@ -27,21 +27,21 @@ jobs:
           Path('assets/nakano-logo.png').write_bytes(data)
           p=Path('customer-brand.js')
           s=p.read_text()
-          s=re.sub(r"\./assets/nakano-logo\.(?:webp|png)\?v=[^']+", './assets/nakano-logo.png?v=20260816-1', s)
-          assert './assets/nakano-logo.png?v=20260816-1' in s
+          s=re.sub(r"\./assets/nakano-logo\.(?:webp|png)\?v=[^']+", './assets/nakano-logo.png?v=20260816-2', s)
+          assert './assets/nakano-logo.png?v=20260816-2' in s
           p.write_text(s)
           for name in ['index.html','cancel.html','karte.html']:
               q=Path(name)
               if not q.exists():
                   continue
               t=q.read_text()
-              t=re.sub(r'customer-brand\.js\?v=[^"\']+', 'customer-brand.js?v=png-20260816-1', t)
+              t=re.sub(r'customer-brand\.js\?v=[^"\']+', 'customer-brand.js?v=png-20260816-2', t)
               q.write_text(t)
           PY
           node --check customer-brand.js
       - name: Commit verified PNG and clean staging files
         run: |
-          rm -f tmp/logo-part1.b64 tmp/logo-part1a.b64 tmp/logo-part1b.b64 tmp/logo-part2.b64 tmp/logo-part3.b64 tmp/logo-part3a.b64 tmp/logo-part3b.b64 tmp/logo-part4.b64 tmp/logo-part5.b64
+          rm -f tmp/logo-part*.b64
           rm -f .github/workflows/install-correct-logo-png-once.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
