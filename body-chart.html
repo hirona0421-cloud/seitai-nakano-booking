@@ -38,126 +38,96 @@ function legacyUrl(){
   for(const [k,v] of params.entries())u.searchParams.set(k,v);
   return u.href;
 }
+function localData(){try{return localStorage.getItem(KEY)||''}catch{return''}}
+function setLocalData(v){if(!v)return;try{localStorage.setItem(KEY,v)}catch{}}
+function setLegacyMessage(text){try{const el=frame.contentDocument?.getElementById('msg');if(el)el.textContent=text}catch{}}
 
-function localData(){
-  try{return localStorage.getItem(KEY)||''}catch{return''}
-}
-
-function setLocalData(v){
-  if(!v)return;
-  try{localStorage.setItem(KEY,v)}catch{}
-}
-
-function setLegacyMessage(text){
-  try{
-    const el=frame.contentDocument?.getElementById('msg');
-    if(el)el.textContent=text;
-  }catch{}
-}
-
-async function sessionExists(){
-  try{
-    const {data:{session}}=await supabase.auth.getSession();
-    return !!session;
-  }catch{
-    return false;
-  }
-}
-
+async function sessionExists(){try{const{data:{session}}=await supabase.auth.getSession();return!!session}catch{return false}}
 async function fetchCloud(){
   if(customer==='draft'||date==='undated')return null;
   try{
-    const {data,error}=await supabase
-      .from(CLOUD_TABLE)
-      .select('image_data,updated_at')
-      .eq('customer_id',customer)
-      .eq('visit_date',date)
-      .maybeSingle();
-    if(error){
-      cloudDisabled=true;
-      console.warn('Body chart cloud read unavailable:',error.message);
-      return null;
-    }
-    cloudReady=true;
-    return data||null;
-  }catch(e){
-    cloudDisabled=true;
-    console.warn('Body chart cloud read failed:',e);
-    return null;
-  }
+    const{data,error}=await supabase.from(CLOUD_TABLE).select('image_data,updated_at').eq('customer_id',customer).eq('visit_date',date).maybeSingle();
+    if(error){cloudDisabled=true;console.warn('Body chart cloud read unavailable:',error.message);return null}
+    cloudReady=true;return data||null;
+  }catch(e){cloudDisabled=true;console.warn('Body chart cloud read failed:',e);return null}
 }
-
 async function saveCloud(imageData,{migration=false}={}){
   if(!imageData||cloudDisabled||customer==='draft'||date==='undated')return false;
   try{
-    const {data:{user}}=await supabase.auth.getUser();
-    if(!user)return false;
-    const {error}=await supabase.from(CLOUD_TABLE).upsert({
-      customer_id:customer,
-      visit_date:date,
-      image_data:imageData,
-      updated_at:new Date().toISOString(),
-      updated_by:user.id
-    },{onConflict:'customer_id,visit_date'});
-    if(error){
-      cloudDisabled=true;
-      console.warn('Body chart cloud save unavailable:',error.message);
-      return false;
-    }
-    cloudReady=true;
-    if(!migration)setLegacyMessage('身体図をクラウドにも保存しました。');
-    return true;
-  }catch(e){
-    cloudDisabled=true;
-    console.warn('Body chart cloud save failed:',e);
-    return false;
-  }
+    const{data:{user}}=await supabase.auth.getUser();if(!user)return false;
+    const{error}=await supabase.from(CLOUD_TABLE).upsert({customer_id:customer,visit_date:date,image_data:imageData,updated_at:new Date().toISOString(),updated_by:user.id},{onConflict:'customer_id,visit_date'});
+    if(error){cloudDisabled=true;console.warn('Body chart cloud save unavailable:',error.message);return false}
+    cloudReady=true;if(!migration)setLegacyMessage('身体図をクラウドにも保存しました。');return true;
+  }catch(e){cloudDisabled=true;console.warn('Body chart cloud save failed:',e);return false}
 }
+async function syncAfterSave(){await new Promise(r=>setTimeout(r,20));const v=localData();if(v)await saveCloud(v)}
 
-async function syncAfterSave(){
-  await new Promise(r=>setTimeout(r,20));
-  const v=localData();
-  if(!v)return;
-  await saveCloud(v);
+function normalizeBaseImageData(doc){
+  const base=doc?.getElementById('base');
+  const stage=doc?.getElementById('stage');
+  if(!base||!stage||base.dataset.sourceNormalized==='1')return;
+
+  const rebuild=()=>{
+    if(base.dataset.sourceNormalized==='1'||!base.naturalWidth||!base.naturalHeight)return;
+    const originalWidth=base.naturalWidth;
+    const originalHeight=base.naturalHeight;
+    const padX=Math.max(12,Math.round(originalWidth*0.045));
+    const padY=Math.max(7,Math.round(originalHeight*0.025));
+    const canvas=doc.createElement('canvas');
+    canvas.width=originalWidth+padX*2;
+    canvas.height=originalHeight+padY*2;
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle='#fff';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(base,padX,padY,originalWidth,originalHeight);
+
+    base.dataset.sourceNormalized='1';
+    base.src=canvas.toDataURL('image/png');
+    base.style.transform='none';
+    base.style.transformOrigin='center center';
+    base.style.objectFit='contain';
+
+    stage.style.aspectRatio=`${canvas.width}/${canvas.height}`;
+    stage.style.height='auto';
+    stage.style.minHeight='0';
+    stage.style.maxWidth='820px';
+    stage.style.margin='0 auto';
+
+    const style=doc.createElement('style');
+    style.textContent='#base{transform:none!important;object-fit:contain!important}#draw{transform:none!important}.stage{height:auto!important;min-height:0!important}@media(max-width:600px){#base{transform:none!important}.stage{height:auto!important;min-height:0!important;max-width:100%!important}}';
+    doc.head.appendChild(style);
+
+    const resizeLegacy=()=>{try{frame.contentWindow?.dispatchEvent(new Event('resize'))}catch{}};
+    requestAnimationFrame(()=>{resizeLegacy();setTimeout(resizeLegacy,120)});
+  };
+
+  if(base.complete&&base.naturalWidth)rebuild();
+  else base.addEventListener('load',rebuild,{once:true});
 }
 
 function hookLegacy(){
   boot.classList.add('hidden');
   try{
     const doc=frame.contentDocument;
-
-    // Keep the body figures readable on desktop, while showing the full figure on phones.
-    const zoomStyle=doc?.createElement('style');
-    if(zoomStyle){
-      zoomStyle.textContent='#base{transform:scale(1.04)!important}@media(max-width:600px){#base{transform:scale(1.00)!important}}';
-      doc.head.appendChild(zoomStyle);
-    }
+    normalizeBaseImageData(doc);
 
     const save=doc?.getElementById('save');
     if(save)save.addEventListener('click',()=>{syncAfterSave()});
 
-    // The legacy chart used history.back() directly. Inside an iframe that would
-    // only navigate the iframe, so route Back/Close through the parent page.
     const back=doc?.querySelector('.bar button[onclick]');
     const close=doc?.getElementById('close');
     const goBack=e=>{e?.preventDefault();window.history.back()};
     if(back){back.removeAttribute('onclick');back.addEventListener('click',goBack)}
     if(close){close.onclick=null;close.addEventListener('click',goBack)}
-  }catch(e){
-    console.warn('Body chart sync hook failed:',e);
-  }
+  }catch(e){console.warn('Body chart sync hook failed:',e)}
 }
 
 async function start(){
   const hasSession=await sessionExists();
   let cloud=null;
   const local=localData();
-
   if(hasSession)cloud=await fetchCloud();
-
-  if(cloud?.image_data){
-    setLocalData(cloud.image_data);
-  }
+  if(cloud?.image_data)setLocalData(cloud.image_data);
 
   frame.addEventListener('load',async()=>{
     hookLegacy();
@@ -169,7 +139,6 @@ async function start(){
 
   frame.src=legacyUrl();
 }
-
 start();
 </script>
 </body>
