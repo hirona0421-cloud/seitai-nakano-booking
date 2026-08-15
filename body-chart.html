@@ -39,6 +39,7 @@ let cloudDisabled=false;
 function legacyUrl(){
   const u=new URL('./body-chart-legacy.html',location.href);
   for(const [k,v] of params.entries())u.searchParams.set(k,v);
+  u.searchParams.set('_framev',String(Date.now()));
   return u.href;
 }
 function localData(){try{return localStorage.getItem(KEY)||''}catch{return''}}
