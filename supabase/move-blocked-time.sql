@@ -5,7 +5,7 @@ create or replace function public.nakano_admin_move_blocked_time(
 )
 returns void
 language plpgsql
-security definer
+security invoker
 set search_path to 'public'
 as $$
 declare
