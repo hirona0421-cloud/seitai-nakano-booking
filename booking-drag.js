@@ -167,3 +167,5 @@ addStyles();createEdges();renamePages();ensureDestinationSlot();createGuide();en
 setTimeout(()=>{scrollToCurrentTime(true);improveAdminLayout();enhanceQuarterTimes();addQuarterGuides();installQuarterBulkControls();refreshQuarterUI();loadMonthlyBookings();hydrateBlockedBlocks(true)},520);
 new MutationObserver(enhance).observe(document.body,{childList:true,subtree:true});
 window.addEventListener('pointermove',pointerMove,{passive:false});window.addEventListener('pointerup',pointerUp);window.addEventListener('pointercancel',pointerCancel);
+
+import(`./blocked-drag.js?_v=${Date.now()}`);
