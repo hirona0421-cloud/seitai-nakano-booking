@@ -62,5 +62,5 @@ $('saveManageEdit').onclick=async()=>{if(!manageBooking)return;const menuId=$('m
 async function cancelBooking(b){const time=String(b.start_time).slice(0,5);if(!confirm(`${formatDate(b.booking_date)} ${time}の予約をキャンセルしますか？`))return;const token=b.manage_token;if(!token){$('manageError').textContent='この予約をキャンセルできませんでした。店舗までご連絡ください。';return}const{error}=await supabase.rpc('nakano_customer_cancel_booking',{p_token:token});if(error){$('manageError').textContent='キャンセルできませんでした。店舗までご連絡ください。';return}await invokeNotification({action:'booking_cancelled',token});$('manageResultMsg').textContent='ご予約をキャンセルしました。';$('manageResultMsg').classList.remove('hidden');$('manageEditCard').classList.add('hidden');manageBooking=null;await loadManageBooking();scrollTo({top:0,behavior:'smooth'})}
 async function start(){loadLatestManage();await loadMenus();if(manageToken)await loadManageBooking()}start();
 </script>
-<script type="module" src="./booking-calendar.js"></script>
+<script type="module" src="./booking-calendar.js?v=20260815-2046"></script>
 </main></body></html>
