@@ -1,0 +1,119 @@
+name: One-time cache refresh normalization
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cache-refresh-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Normalize cache refresh behavior
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          html_files = [
+              'index.html',
+              'admin.html',
+              'bookings.html',
+              'customers.html',
+              'karte.html',
+              'cancel.html',
+              'body-chart.html',
+              'body-chart-legacy.html',
+          ]
+
+          cache_meta = (
+              '<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">\n'
+              '<meta http-equiv="Pragma" content="no-cache">\n'
+              '<meta http-equiv="Expires" content="0">\n'
+          )
+
+          fresh_nav = '''\n<!-- local navigation cache refresh -->\n<script>\ndocument.addEventListener('click',function(e){\n  const a=e.target.closest?.('a[href]');\n  if(!a)return;\n  const raw=a.getAttribute('href')||'';\n  if(!raw||raw.startsWith('#')||raw.startsWith('javascript:'))return;\n  try{\n    const u=new URL(a.href,location.href);\n    if(u.origin===location.origin&&u.pathname.startsWith('/seitai-nakano-booking/')){\n      u.searchParams.set('_v',String(Date.now()));\n      a.href=u.href;\n    }\n  }catch{}\n},true);\n</script>\n'''
+
+          for name in html_files:
+              p = Path(name)
+              if not p.exists():
+                  continue
+              s = p.read_text(encoding='utf-8')
+
+              if 'http-equiv="Cache-Control"' not in s:
+                  if '<meta name="robots"' in s:
+                      s = re.sub(r'(<meta name="robots"[^>]*>\n?)', r'\1' + cache_meta, s, count=1)
+                  elif '<meta name="viewport"' in s:
+                      s = re.sub(r'(<meta name="viewport"[^>]*>\n?)', r'\1' + cache_meta, s, count=1)
+
+              if 'local navigation cache refresh' not in s and '</body>' in s:
+                  s = s.replace('</body>', fresh_nav + '</body>', 1)
+
+              p.write_text(s, encoding='utf-8')
+
+          # Always fetch shared local modules with a unique URL on each page load.
+          for name in ['admin.html', 'bookings.html']:
+              p = Path(name)
+              s = p.read_text(encoding='utf-8')
+              s = re.sub(
+                  r'<script\s+type="module"\s+src="\./booking-drag\.js(?:\?[^\"]*)?"\s*>\s*</script>',
+                  '<script type="module">import(`./booking-drag.js?_v=${Date.now()}`);</script>',
+                  s,
+                  flags=re.S,
+              )
+              p.write_text(s, encoding='utf-8')
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          s = re.sub(
+              r'<script\s+type="module"\s+src="\./booking-calendar(?:-v2)?\.js(?:\?[^\"]*)?"\s*>\s*</script>',
+              '<script type="module">import(`./booking-calendar-v2.js?_v=${Date.now()}`);</script>',
+              s,
+              flags=re.S,
+          )
+          p.write_text(s, encoding='utf-8')
+
+          # The body-chart wrapper must also bypass cache for its legacy iframe document.
+          p = Path('body-chart.html')
+          s = p.read_text(encoding='utf-8')
+          if "u.searchParams.set('_v',String(Date.now()))" not in s:
+              s = s.replace(
+                  "for(const [k,v] of params.entries())u.searchParams.set(k,v);\n  return u.href;",
+                  "for(const [k,v] of params.entries())u.searchParams.set(k,v);\n  u.searchParams.set('_v',String(Date.now()));\n  return u.href;",
+                  1,
+              )
+          p.write_text(s, encoding='utf-8')
+
+          # Programmatic body-chart navigation from the customer page should be fresh too.
+          p = Path('customers.html')
+          s = p.read_text(encoding='utf-8')
+          if "u.searchParams.set('_v',String(Date.now()))" not in s:
+              s = s.replace(
+                  "u.searchParams.set('name',selectedCustomer.customer_name||'');location.href=u.href",
+                  "u.searchParams.set('name',selectedCustomer.customer_name||'');u.searchParams.set('_v',String(Date.now()));location.href=u.href",
+                  1,
+              )
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Commit normalized files and remove one-time workflow
+        shell: bash
+        run: |
+          rm -f .github/workflows/cache-refresh-once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Normalize cache refresh across booking app"
+          git push
