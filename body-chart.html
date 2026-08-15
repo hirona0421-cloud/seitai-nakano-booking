@@ -30,6 +30,7 @@ const CLOUD_TABLE='nakano_body_charts';
 const frame=document.getElementById('chartFrame');
 const boot=document.getElementById('boot');
 
+let cloudReady=false;
 let cloudDisabled=false;
 
 function legacyUrl(){
@@ -77,6 +78,7 @@ async function fetchCloud(){
       console.warn('Body chart cloud read unavailable:',error.message);
       return null;
     }
+    cloudReady=true;
     return data||null;
   }catch(e){
     cloudDisabled=true;
@@ -102,6 +104,7 @@ async function saveCloud(imageData,{migration=false}={}){
       console.warn('Body chart cloud save unavailable:',error.message);
       return false;
     }
+    cloudReady=true;
     if(!migration)setLegacyMessage('身体図をクラウドにも保存しました。');
     return true;
   }catch(e){
@@ -124,6 +127,14 @@ function hookLegacy(){
     const doc=frame.contentDocument;
     const save=doc?.getElementById('save');
     if(save)save.addEventListener('click',()=>{syncAfterSave()});
+
+    // The legacy chart used history.back() directly. Inside an iframe that would
+    // only navigate the iframe, so route Back/Close through the parent page.
+    const back=doc?.querySelector('.bar button[onclick]');
+    const close=doc?.getElementById('close');
+    const goBack=e=>{e?.preventDefault();window.history.back()};
+    if(back){back.removeAttribute('onclick');back.addEventListener('click',goBack)}
+    if(close){close.onclick=null;close.addEventListener('click',goBack)}
   }catch(e){
     console.warn('Body chart sync hook failed:',e);
   }
