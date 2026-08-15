@@ -120,6 +120,13 @@ function hookLegacy(){
     const doc=frame.contentDocument;
     normalizeBaseImageData(doc);
 
+    if(doc&&!doc.getElementById('nakanoEllipseScript')){
+      const ellipseScript=doc.createElement('script');
+      ellipseScript.id='nakanoEllipseScript';
+      ellipseScript.src=`./body-ellipse.js?_v=${Date.now()}`;
+      doc.body.appendChild(ellipseScript);
+    }
+
     const save=doc?.getElementById('save');
     if(save)save.addEventListener('click',()=>{syncAfterSave()});
 
