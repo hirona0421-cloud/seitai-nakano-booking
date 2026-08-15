@@ -125,6 +125,15 @@ function hookLegacy(){
   boot.classList.add('hidden');
   try{
     const doc=frame.contentDocument;
+
+    // Keep the body figures large enough to annotate, while leaving room around
+    // hands and feet on phones. The legacy page itself is kept untouched.
+    const zoomStyle=doc?.createElement('style');
+    if(zoomStyle){
+      zoomStyle.textContent='#base{transform:scale(1.10)!important}@media(max-width:600px){#base{transform:scale(1.12)!important}}';
+      doc.head.appendChild(zoomStyle);
+    }
+
     const save=doc?.getElementById('save');
     if(save)save.addEventListener('click',()=>{syncAfterSave()});
 
