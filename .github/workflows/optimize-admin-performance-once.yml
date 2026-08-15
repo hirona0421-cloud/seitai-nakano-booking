@@ -1,0 +1,39 @@
+name: Optimize admin performance once
+on:
+  push:
+    paths:
+      - '.github/workflows/optimize-admin-performance-once.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Remove heavy mutation refresh loop
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('booking-drag.js')
+          s=p.read_text()
+          old="function enhance(){clearTimeout(enhanceTimer);enhanceTimer=setTimeout(()=>{renamePages();ensureDestinationSlot();createGuide();ensureBlockedEditor();scanBlocks();hydrateBlockedBlocks();scrollToCurrentTime();improveAdminLayout();enhanceQuarterTimes();addQuarterGuides();installQuarterBulkControls();refreshQuarterUI()},100)}"
+          new="function enhance(){clearTimeout(enhanceTimer);enhanceTimer=setTimeout(()=>{scanBlocks();addQuarterGuides();hydrateBlockedBlocks()},260)}"
+          assert old in s, 'enhance function not found'
+          s=s.replace(old,new,1)
+          old2="setTimeout(()=>{scrollToCurrentTime(true);addQuarterGuides();refreshQuarterUI();loadMonthlyBookings();hydrateBlockedBlocks(true)},240)"
+          new2="setTimeout(()=>{scrollToCurrentTime(true);scanBlocks();addQuarterGuides();refreshQuarterUI();loadMonthlyBookings();hydrateBlockedBlocks(true)},260)"
+          assert old2 in s, 'date watch block not found'
+          s=s.replace(old2,new2,1)
+          p.write_text(s)
+          PY
+          node --check booking-drag.js
+      - name: Commit and self-remove
+        run: |
+          rm -f .github/workflows/optimize-admin-performance-once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Reduce admin mutation observer workload'
+          git push
