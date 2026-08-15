@@ -197,7 +197,10 @@
       pushObjectHistory();
       gesture={type:'move',pointerId:e.pointerId,id:hit.id,start:n,original:JSON.parse(JSON.stringify(hit)),moved:false};
       try{stage.setPointerCapture(e.pointerId)}catch{}
-    }else if(selectedId){selectedId=null;updateDeleteButton();render()}
+    }else{
+      if(selectedId){selectedId=null;updateDeleteButton();render()}
+      objectHistory=[];
+    }
   }
 
   function onPointerMove(e){
