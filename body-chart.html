@@ -97,7 +97,12 @@ function normalizeBaseImageData(doc){
     style.textContent='#base{transform:none!important;object-fit:contain!important}#draw{transform:none!important}.stage{height:auto!important;min-height:0!important}@media(max-width:600px){#base{transform:none!important}.stage{height:auto!important;min-height:0!important;max-width:100%!important}}';
     doc.head.appendChild(style);
 
-    const resizeLegacy=()=>{try{frame.contentWindow?.dispatchEvent(new Event('resize'))}catch{}};
+    const resizeLegacy=()=>{
+      try{
+        const w=frame.contentWindow;
+        if(w)w.dispatchEvent(new w.Event('resize'));
+      }catch{}
+    };
     requestAnimationFrame(()=>{resizeLegacy();setTimeout(resizeLegacy,120)});
   };
 
