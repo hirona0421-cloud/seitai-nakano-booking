@@ -1,0 +1,33 @@
+name: Apply customer brand once
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-customer-brand-once.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add shared customer branding
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          files=['index.html','cancel.html','karte.html']
+          link='<link rel="stylesheet" href="./customer-brand.css?v=20260815-2">\n<script src="./customer-brand.js?v=20260815-2" defer></script>\n<meta name="theme-color" content="#741b16">\n'
+          for name in files:
+              p=Path(name)
+              s=p.read_text(encoding='utf-8')
+              if 'customer-brand.css' not in s:
+                  s=s.replace('</head>',link+'</head>',1)
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit customer redesign and remove one-time workflow
+        run: |
+          rm -f .github/workflows/apply-customer-brand-once.yml
+          git config user.name "seitai-nakano"
+          git config user.email "hirona0421@icloud.com"
+          git add index.html cancel.html karte.html .github/workflows/apply-customer-brand-once.yml
+          git commit -m "Apply new customer-facing brand layout" || exit 0
+          git push
