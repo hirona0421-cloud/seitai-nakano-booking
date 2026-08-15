@@ -1,0 +1,54 @@
+name: One-time body chart cache refresh fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cache-refresh-body-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fix body chart refresh paths
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p=Path('body-chart.html')
+          s=p.read_text(encoding='utf-8')
+          needle="for(const [k,v] of params.entries())u.searchParams.set(k,v);\n  return u.href;"
+          repl="for(const [k,v] of params.entries())u.searchParams.set(k,v);\n  u.searchParams.set('_framev',String(Date.now()));\n  return u.href;"
+          if needle in s:
+              s=s.replace(needle,repl,1)
+          p.write_text(s,encoding='utf-8')
+
+          p=Path('customers.html')
+          s=p.read_text(encoding='utf-8')
+          needle="u.searchParams.set('name',selectedCustomer.customer_name||'');location.href=u.href"
+          repl="u.searchParams.set('name',selectedCustomer.customer_name||'');u.searchParams.set('_pagev',String(Date.now()));location.href=u.href"
+          if needle in s:
+              s=s.replace(needle,repl,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Commit fixes and remove one-time workflow
+        shell: bash
+        run: |
+          rm -f .github/workflows/cache-refresh-body-once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Fix body chart cache refresh paths"
+          git push
