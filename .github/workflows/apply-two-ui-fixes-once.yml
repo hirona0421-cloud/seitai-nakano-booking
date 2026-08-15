@@ -1,0 +1,114 @@
+name: Apply two UI fixes once
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-two-ui-fixes-once.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch UI
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          # Body chart: duplicate selected ellipse/text.
+          p=Path('body-ellipse.js')
+          s=p.read_text()
+          old='''      <button class="shapeBtn" id="deleteBodyObject" type="button" disabled>選択した図形を削除</button>
+      <div class="shapeMoveHint">楕円と症状文字は、置いたあとに直接タップしてそのままスワイプすると移動できます。選択中は点線で囲まれます。</div>'''
+          new='''      <button class="shapeBtn" id="duplicateBodyObject" type="button" disabled>選択を複製</button>
+      <button class="shapeBtn" id="deleteBodyObject" type="button" disabled>選択した図形を削除</button>
+      <div class="shapeMoveHint">楕円と症状文字は、置いたあとに直接タップしてスワイプ移動できます。選択中は点線で囲まれます。「選択を複製」で同じ楕円・文字を少しずらしてコピーできます。</div>'''
+          assert old in s, 'body UI marker not found'
+          s=s.replace(old,new,1)
+
+          old="""    document.getElementById('deleteBodyObject').addEventListener('click',()=>{
+      if(!selectedId)return;"""
+          new="""    document.getElementById('duplicateBodyObject').addEventListener('click',()=>{
+      if(!selectedId)return;
+      const original=objects.find(o=>o.id===selectedId);
+      if(!original)return;
+      pushObjectHistory();
+      const copy=JSON.parse(JSON.stringify(original));
+      copy.id=uid();
+      if(copy.type==='ellipse'){
+        copy.cx=clamp((copy.cx||0)+.025,copy.rx||.001,1-(copy.rx||.001));
+        copy.cy=clamp((copy.cy||0)+.025,copy.ry||.001,1-(copy.ry||.001));
+      }else{
+        copy.x=clamp((copy.x||0)+.025,0,1);
+        copy.y=clamp((copy.y||0)+.025,.02,1);
+      }
+      objects.push(copy);
+      selectedId=copy.id;
+      saveObjects();updateDeleteButton();render();
+    });
+    document.getElementById('deleteBodyObject').addEventListener('click',()=>{
+      if(!selectedId)return;"""
+          assert old in s, 'delete listener marker not found'
+          s=s.replace(old,new,1)
+
+          old="function updateDeleteButton(){const b=document.getElementById('deleteBodyObject');if(b)b.disabled=!selectedId}"
+          new="function updateDeleteButton(){const disabled=!selectedId;const d=document.getElementById('deleteBodyObject');if(d)d.disabled=disabled;const c=document.getElementById('duplicateBodyObject');if(c)c.disabled=disabled}"
+          assert old in s, 'button state marker not found'
+          s=s.replace(old,new,1)
+          p.write_text(s)
+
+          # Monthly booking list: tap a row, switch to its day, then open existing editor.
+          p=Path('booking-drag.js')
+          s=p.read_text()
+          old='.monthlyBookingRow{padding:10px 0;border-bottom:1px solid #eee7df;font-size:12px;line-height:1.55}.monthlyBookingRow:last-child{border-bottom:0}.monthlyBookingTime{font-weight:800;font-size:13px}.monthlyBookingCount{color:#77716a;font-weight:600;margin-left:5px}'
+          new='.monthlyBookingRow{padding:10px 8px;border-bottom:1px solid #eee7df;font-size:12px;line-height:1.55;cursor:pointer;border-radius:9px;user-select:none;-webkit-user-select:none}.monthlyBookingRow:last-child{border-bottom:0}.monthlyBookingRow:active{background:#f3eee9}.monthlyBookingTime{font-weight:800;font-size:13px}.monthlyBookingCount{color:#77716a;font-weight:600;margin-left:5px}'
+          assert old in s, 'monthly style marker not found'
+          s=s.replace(old,new,1)
+
+          old="schedule.insertAdjacentElement('afterend',card);loadMonthlyBookings()}"
+          new="card.addEventListener('click',e=>{const row=e.target.closest?.('.monthlyBookingRow[data-booking-id]');if(!row)return;openMonthlyBooking(row.dataset.bookingId,row.dataset.bookingDate)});schedule.insertAdjacentElement('afterend',card);loadMonthlyBookings()}"
+          assert old in s, 'monthly card marker not found'
+          s=s.replace(old,new,1)
+
+          marker='async function loadMonthlyBookings(){'
+          helper='''async function openMonthlyBooking(id,date){
+  const input=$('date');
+  if(!id)return;
+  if(input&&date&&input.value!==date){
+    input.value=date;
+    input.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+  const started=Date.now();
+  const findAndOpen=()=>{
+    const block=[...document.querySelectorAll('.bookingBlock[data-booking-id]')].find(el=>String(el.dataset.bookingId)===String(id));
+    if(block){
+      block.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});
+      setTimeout(()=>block.click(),120);
+      return;
+    }
+    if(Date.now()-started<3000)setTimeout(findAndOpen,120);
+  };
+  findAndOpen();
+}
+'''
+          assert marker in s, 'loadMonthlyBookings marker not found'
+          s=s.replace(marker,helper+marker,1)
+
+          old='<div class="monthlyBookingRow"><div class="monthlyBookingTime">'
+          new='<div class="monthlyBookingRow" data-booking-id="${esc(b.id)}" data-booking-date="${esc(b.booking_date)}"><div class="monthlyBookingTime">'
+          assert old in s, 'monthly row marker not found'
+          s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+          node --check body-ellipse.js
+          node --check booking-drag.js
+      - name: Commit and self-remove
+        run: |
+          rm .github/workflows/apply-two-ui-fixes-once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add body-ellipse.js booking-drag.js .github/workflows/apply-two-ui-fixes-once.yml
+          git commit -m 'Add body object duplicate and monthly booking tap edit'
+          git push
