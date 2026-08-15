@@ -1,0 +1,81 @@
+name: Apply duplicate monthly edit logo v4 once
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-object-duplicate-monthly-edit-logo-v4-once.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch features
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          # 1) Force the corrected logo asset to reload.
+          p=Path('customer-brand.js')
+          s=p.read_text()
+          s=s.replace('./assets/nakano-logo.webp?v=20260815-3','./assets/nakano-logo.webp?v=20260815-4')
+          assert 'nakano-logo.webp?v=20260815-4' in s
+          p.write_text(s)
+
+          # 2) Add duplicate for movable body-chart ellipses/text.
+          p=Path('body-ellipse.js')
+          s=p.read_text()
+          old='''      <button class="shapeBtn" id="deleteBodyObject" type="button" disabled>選択した図形を削除</button>\n      <div class="shapeMoveHint">楕円と症状文字は、置いたあとに直接タップしてそのままスワイプすると移動できます。選択中は点線で囲まれます。</div>'''
+          new='''      <button class="shapeBtn" id="duplicateBodyObject" type="button" disabled>選択を複製</button>\n      <button class="shapeBtn" id="deleteBodyObject" type="button" disabled>選択した図形を削除</button>\n      <div class="shapeMoveHint">楕円と症状文字は、置いたあとに直接タップしてスワイプ移動できます。選択中は点線で囲まれます。「選択を複製」で同じ楕円・文字を少しずらしてコピーできます。</div>'''
+          assert old in s
+          s=s.replace(old,new,1)
+
+          old='''    document.getElementById('deleteBodyObject').addEventListener('click',()=>{\n      if(!selectedId)return;'''
+          new='''    document.getElementById('duplicateBodyObject').addEventListener('click',()=>{\n      if(!selectedId)return;\n      const original=objects.find(o=>o.id===selectedId);\n      if(!original)return;\n      pushObjectHistory();\n      const copy=JSON.parse(JSON.stringify(original));\n      copy.id=uid();\n      if(copy.type==='ellipse'){\n        copy.cx=clamp((copy.cx||0)+.025,copy.rx||.001,1-(copy.rx||.001));\n        copy.cy=clamp((copy.cy||0)+.025,copy.ry||.001,1-(copy.ry||.001));\n      }else{\n        copy.x=clamp((copy.x||0)+.025,0,1);\n        copy.y=clamp((copy.y||0)+.025,.02,1);\n      }\n      objects.push(copy);\n      selectedId=copy.id;\n      saveObjects();updateDeleteButton();render();\n    });\n    document.getElementById('deleteBodyObject').addEventListener('click',()=>{\n      if(!selectedId)return;'''
+          assert old in s
+          s=s.replace(old,new,1)
+
+          old="function updateDeleteButton(){const b=document.getElementById('deleteBodyObject');if(b)b.disabled=!selectedId}"
+          new="function updateDeleteButton(){const disabled=!selectedId;const d=document.getElementById('deleteBodyObject');if(d)d.disabled=disabled;const c=document.getElementById('duplicateBodyObject');if(c)c.disabled=disabled}"
+          assert old in s
+          s=s.replace(old,new,1)
+          p.write_text(s)
+
+          # 3) Make monthly booking rows tappable and reuse the existing booking editor.
+          p=Path('booking-drag.js')
+          s=p.read_text()
+          old='.monthlyBookingRow{padding:10px 0;border-bottom:1px solid #eee7df;font-size:12px;line-height:1.55}.monthlyBookingRow:last-child{border-bottom:0}.monthlyBookingTime{font-weight:800;font-size:13px}.monthlyBookingCount{color:#77716a;font-weight:600;margin-left:5px}'
+          new='.monthlyBookingRow{padding:10px 8px;border-bottom:1px solid #eee7df;font-size:12px;line-height:1.55;cursor:pointer;border-radius:9px;user-select:none;-webkit-user-select:none}.monthlyBookingRow:last-child{border-bottom:0}.monthlyBookingRow:active{background:#f3eee9}.monthlyBookingTime{font-weight:800;font-size:13px}.monthlyBookingEditHint{margin-top:3px;color:#8a8179;font-size:10px}.monthlyBookingCount{color:#77716a;font-weight:600;margin-left:5px}'
+          assert old in s
+          s=s.replace(old,new,1)
+
+          old="card.innerHTML=`<details class=\"monthlyBookingFold\"><summary>今月の予約一覧 <span id=\"monthlyBookingCount\" class=\"monthlyBookingCount\"></span> ▼</summary><div class=\"monthlyBookingInner\"><div id=\"monthlyBookingList\" class=\"muted\">読み込んでいます…</div></div></details>`;schedule.insertAdjacentElement('afterend',card);loadMonthlyBookings()}"
+          new="card.innerHTML=`<details class=\"monthlyBookingFold\"><summary>今月の予約一覧 <span id=\"monthlyBookingCount\" class=\"monthlyBookingCount\"></span> ▼</summary><div class=\"monthlyBookingInner\"><div id=\"monthlyBookingList\" class=\"muted\">読み込んでいます…</div></div></details>`;card.addEventListener('click',e=>{const row=e.target.closest?.('.monthlyBookingRow[data-booking-id]');if(!row)return;openMonthlyBooking(row.dataset.bookingId,row.dataset.bookingDate)});schedule.insertAdjacentElement('afterend',card);loadMonthlyBookings()}"
+          assert old in s
+          s=s.replace(old,new,1)
+
+          marker='async function loadMonthlyBookings(){'
+          assert marker in s
+          helper="""async function openMonthlyBooking(id,date){const input=$('date');if(!id)return;if(input&&date&&input.value!==date){input.value=date;input.dispatchEvent(new Event('change',{bubbles:true}))}const started=Date.now();const findAndOpen=()=>{const block=document.querySelector(`.bookingBlock[data-booking-id=\"${CSS.escape(String(id))}\"]`);if(block){block.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});setTimeout(()=>block.click(),120);return}if(Date.now()-started<2800)setTimeout(findAndOpen,120)};findAndOpen()}\n"
+          s=s.replace(marker,helper+marker,1)
+
+          old='<div class="monthlyBookingRow"><div class="monthlyBookingTime">${esc(b.booking_date.slice(5).replace(\'-\',\'/\'))}　${esc(String(b.start_time).slice(0,5))}〜${esc(minutesToTime(timeToMinutes(b.start_time)+(Number(b.minutes)||30)).slice(0,5))}</div><div>${esc(b.customer_name||\'\')}　${esc(b.menu_name||\'\')}　${Number(b.minutes)||30}分</div></div>'
+          new='<div class="monthlyBookingRow" data-booking-id="${esc(b.id)}" data-booking-date="${esc(b.booking_date)}"><div class="monthlyBookingTime">${esc(b.booking_date.slice(5).replace(\'-\',\'/\'))}　${esc(String(b.start_time).slice(0,5))}〜${esc(minutesToTime(timeToMinutes(b.start_time)+(Number(b.minutes)||30)).slice(0,5))}</div><div>${esc(b.customer_name||\'\')}　${esc(b.menu_name||\'\')}　${Number(b.minutes)||30}分</div><div class="monthlyBookingEditHint">タップして予約を編集</div></div>'
+          assert old in s
+          s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+
+          node --check body-ellipse.js
+          node --check booking-drag.js
+          node --check customer-brand.js
+      - name: Commit changes and remove workflow
+        run: |
+          rm .github/workflows/apply-object-duplicate-monthly-edit-logo-v4-once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add body-ellipse.js booking-drag.js customer-brand.js .github/workflows/apply-object-duplicate-monthly-edit-logo-v4-once.yml
+          git commit -m 'Add body object duplicate and monthly booking tap edit'
+          git push
