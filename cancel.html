@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
   <title>整体なかの｜予約キャンセル</title>
 
   <style>
@@ -182,5 +185,22 @@ cancelBtn.addEventListener('click',async()=>{
 
 </script>
 
+
+<!-- local navigation cache refresh -->
+<script>
+document.addEventListener('click',function(e){
+  const a=e.target.closest?.('a[href]');
+  if(!a)return;
+  const raw=a.getAttribute('href')||'';
+  if(!raw||raw.startsWith('#')||raw.startsWith('javascript:'))return;
+  try{
+    const u=new URL(a.href,location.href);
+    if(u.origin===location.origin&&u.pathname.startsWith('/seitai-nakano-booking/')){
+      u.searchParams.set('_v',String(Date.now()));
+      a.href=u.href;
+    }
+  }catch{}
+},true);
+</script>
 </body>
 </html>

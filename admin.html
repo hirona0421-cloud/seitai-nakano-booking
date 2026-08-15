@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>整体なかの｜管理トップ</title>
 
 <style>
@@ -3815,12 +3818,26 @@ syncAuth();
   共通ドラッグ・現在時刻表示
   自動更新・ホーム画面復帰対応
 -->
-<script
-  type="module"
-  src="./booking-drag.js"
-></script>
+<script type="module">import(`./booking-drag.js?_v=${Date.now()}`);</script>
 
 
 </main>
+
+<!-- local navigation cache refresh -->
+<script>
+document.addEventListener('click',function(e){
+  const a=e.target.closest?.('a[href]');
+  if(!a)return;
+  const raw=a.getAttribute('href')||'';
+  if(!raw||raw.startsWith('#')||raw.startsWith('javascript:'))return;
+  try{
+    const u=new URL(a.href,location.href);
+    if(u.origin===location.origin&&u.pathname.startsWith('/seitai-nakano-booking/')){
+      u.searchParams.set('_v',String(Date.now()));
+      a.href=u.href;
+    }
+  }catch{}
+},true);
+</script>
 </body>
 </html>
