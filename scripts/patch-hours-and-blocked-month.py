@@ -20,7 +20,7 @@ p = Path('admin.html')
 s = p.read_text()
 s = replace_once(s, "  min-width:1740px;", "  min-width:1680px;", 'timeline width')
 s = replace_once(s, "const DAY_END=\n  22*60+30;", "const DAY_END=\n  22*60;", 'admin day end')
-s = replace_once(s, "    minutes<=DAY_END;\n    minutes+=30", "    minutes<DAY_END;\n    minutes+=30", 'base times cutoff')
+s = replace_once(s, "  minutes<=DAY_END;", "  minutes<DAY_END;", 'base times cutoff')
 s = replace_once(s, "          DAY_END+30;", "          DAY_END;", 'whole day visual end')
 s = replace_once(s, "          end,\n          DAY_END+30", "          end,\n          DAY_END", 'blocked visual clamp')
 
@@ -37,7 +37,7 @@ new_date = '''  $('month').value=\n    monthFromDate(\n      $('date').value\n  
 s = replace_once(s, old_date, new_date, 'date sync blocked month')
 
 old_month_handler = '''$('month').onchange=\nasync()=>{\n\n  selectedBlockedDates=\n    new Set();\n\n\n  renderDaySelector();\n\n  await loadMonthBlockedTimes();\n};'''
-new_month_handler = '''$('month').onchange=\nasync()=>{\n  const month=$('month').value;\n  if(month&&$('date').value?.startsWith(month)===false){\n    // OPEN/CLOSEの対象月だけを切り替えます。予定一括の月は独立して保持します。\n  }\n};\n\n\n$('blockedMonth').onchange=\nasync()=>{\n  selectedBlockedDates=new Set();\n  renderDaySelector();\n  await loadMonthBlockedTimes();\n};\n\n\nfunction shiftBlockedMonth(delta){\n  const base=$('blockedMonth').value||monthFromDate($('date').value)||monthFromDate(todayJapan());\n  const [year,mon]=base.split('-').map(Number);\n  const d=new Date(Date.UTC(year,mon-1+delta,1));\n  $('blockedMonth').value=`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}`;\n  $('blockedMonth').dispatchEvent(new Event('change',{bubbles:true}));\n}\n\n$('blockedPrevMonth').onclick=()=>shiftBlockedMonth(-1);\n$('blockedNextMonth').onclick=()=>shiftBlockedMonth(1);'''
+new_month_handler = '''$('month').onchange=\nasync()=>{\n  // OPEN/CLOSEの対象月だけを切り替えます。予定一括の月は独立して保持します。\n};\n\n\n$('blockedMonth').onchange=\nasync()=>{\n  selectedBlockedDates=new Set();\n  renderDaySelector();\n  await loadMonthBlockedTimes();\n};\n\n\nfunction shiftBlockedMonth(delta){\n  const base=$('blockedMonth').value||monthFromDate($('date').value)||monthFromDate(todayJapan());\n  const [year,mon]=base.split('-').map(Number);\n  const d=new Date(Date.UTC(year,mon-1+delta,1));\n  $('blockedMonth').value=`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}`;\n  $('blockedMonth').dispatchEvent(new Event('change',{bubbles:true}));\n}\n\n$('blockedPrevMonth').onclick=()=>shiftBlockedMonth(-1);\n$('blockedNextMonth').onclick=()=>shiftBlockedMonth(1);'''
 s = replace_once(s, old_month_handler, new_month_handler, 'month handlers')
 
 # Only the blocked-date selector and blocked-list loader should use blockedMonth.
