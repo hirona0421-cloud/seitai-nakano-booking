@@ -191,7 +191,7 @@ button:disabled{
 
 .scheduleCanvas{
   position:relative;
-  min-width:1740px;
+  min-width:1680px;
   height:132px;
   background:#faf8f5;
   border:1px solid #e7e0d7;
@@ -718,6 +718,13 @@ CLOSE
 複数の日付を選択して、同じ時間帯をまとめて予約不可にできます。
 </p>
 
+<label>予定を一括登録する月</label>
+<div class="row">
+<button class="secondary" id="blockedPrevMonth" type="button">← 前月</button>
+<button class="secondary" id="blockedNextMonth" type="button">翌月 →</button>
+</div>
+<input type="month" id="blockedMonth">
+
 <div class="weekHeader">
 <div>日</div>
 <div>月</div>
@@ -1012,7 +1019,7 @@ const DAY_START=
   8*60;
 
 const DAY_END=
-  22*60+30;
+  22*60;
 
 const PX_PER_MINUTE=
   2;
@@ -1023,7 +1030,7 @@ const times=[];
 
 for(
   let minutes=DAY_START;
-  minutes<=DAY_END;
+  minutes<DAY_END;
   minutes+=30
 ){
 
@@ -1282,6 +1289,17 @@ async function syncAuth(){
 
 
   if(
+    !$('blockedMonth').value
+  ){
+
+    $('blockedMonth').value=
+      monthFromDate(
+        $('date').value
+      );
+  }
+
+
+  if(
     !$('adminBookingDate').value
   ){
 
@@ -1533,6 +1551,12 @@ async()=>{
     );
 
 
+  $('blockedMonth').value=
+    monthFromDate(
+      $('date').value
+    );
+
+
   $('adminBookingDate').value=
     $('date').value;
 
@@ -1553,15 +1577,28 @@ async()=>{
 
 $('month').onchange=
 async()=>{
+  // OPEN/CLOSEの対象月だけを切り替えます。予定一括の月は独立して保持します。
+};
 
-  selectedBlockedDates=
-    new Set();
 
-
+$('blockedMonth').onchange=
+async()=>{
+  selectedBlockedDates=new Set();
   renderDaySelector();
-
   await loadMonthBlockedTimes();
 };
+
+
+function shiftBlockedMonth(delta){
+  const base=$('blockedMonth').value||monthFromDate($('date').value)||monthFromDate(todayJapan());
+  const [year,mon]=base.split('-').map(Number);
+  const d=new Date(Date.UTC(year,mon-1+delta,1));
+  $('blockedMonth').value=`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}`;
+  $('blockedMonth').dispatchEvent(new Event('change',{bubbles:true}));
+}
+
+$('blockedPrevMonth').onclick=()=>shiftBlockedMonth(-1);
+$('blockedNextMonth').onclick=()=>shiftBlockedMonth(1);
 
 
 /* ==========================
@@ -1709,7 +1746,7 @@ function renderTimeline(){
       ){
 
         end=
-          DAY_END+30;
+          DAY_END;
       }
 
 
@@ -1723,7 +1760,7 @@ function renderTimeline(){
       end=
         Math.min(
           end,
-          DAY_END+30
+          DAY_END
         );
 
 
@@ -2381,7 +2418,7 @@ $('closeMonth').onclick=
 function renderDaySelector(){
 
   const month=
-    $('month').value;
+    $('blockedMonth').value;
 
 
   const box=
@@ -2523,7 +2560,7 @@ function renderSelectedDates(){
 
     dates.length
     ?
-    `選択中：${dates.map(x=>Number(x.slice(-2))+'日').join('・')}`
+    `選択中：${dates.map(x=>Number(x.slice(5,7))+'月'+Number(x.slice(-2))+'日').join('・')}`
     :
     '日付を選択してください。';
 }
@@ -2686,7 +2723,7 @@ $('addBlockedDay').onclick=
 async function loadMonthBlockedTimes(){
 
   const month=
-    $('month').value;
+    $('blockedMonth').value;
 
 
   if(!month){
@@ -3349,6 +3386,12 @@ async()=>{
 
 
   $('month').value=
+    monthFromDate(
+      payload.p_date
+    );
+
+
+  $('blockedMonth').value=
     monthFromDate(
       payload.p_date
     );
