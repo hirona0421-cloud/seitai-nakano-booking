@@ -57,7 +57,123 @@ async function loadSlots(){const box=$('slots');box.innerHTML='';selectedTime=nu
 $('date').min=todayJapan();$('manageDate').min=todayJapan();$('date').onchange=()=>{selectedTime=null;loadSlots()};
 $('confirmBooking').onclick=()=>{const name=$('name').value.trim(),tel=$('tel').value.trim(),memo=$('memo').value.trim();$('msg').textContent='';if(!selectedMenu)return $('msg').textContent='メニューを選択してください。';if(!$('date').value)return $('msg').textContent='日付を選択してください。';if(!selectedTime)return $('msg').textContent='時間を選択してください。';if(!name)return $('msg').textContent='お名前を入力してください。';if(!phoneIsValid(tel))return $('msg').textContent='電話番号を確認してください。';$('confirmSummary').innerHTML=summaryHtml([['メニュー',selectedMenu.name],['日時',`${formatDate($('date').value)} ${String(selectedTime).slice(0,5)}`],['料金',yen(selectedMenu.price)],['お名前',name],['電話番号',tel],['症状・部位',memo||'未入力']]);$('confirmCard').classList.remove('hidden');$('confirmCard').scrollIntoView({behavior:'smooth',block:'start'})};
 $('backToEdit').onclick=()=>{$('confirmCard').classList.add('hidden');$('bookingArea').scrollIntoView({behavior:'smooth',block:'start'})};
-$('book').onclick=async()=>{if(bookingInProgress)return;const name=$('name').value.trim(),tel=$('tel').value.trim(),memo=$('memo').value.trim();if(!selectedMenu||!$('date').value||!selectedTime||!name||!phoneIsValid(tel)){ $('confirmMsg').textContent='入力内容をもう一度確認してください。';return}const bookingDate=$('date').value,bookingTime=selectedTime,bookingMenu=selectedMenu;bookingInProgress=true;$('book').disabled=true;$('backToEdit').disabled=true;$('book').textContent='予約を確定しています…';$('confirmMsg').textContent='';try{if(!lineUser)lineUser=await lineReadyPromise;if(!lineUser&&window.liff?.isLoggedIn()){try{const p=await liff.getProfile();lineUser={userId:p.userId,displayName:p.displayName||''}}catch{}}const{data:bookingId,error:createError}=await supabase.rpc('nakano_create_booking',{p_date:bookingDate,p_start_time:bookingTime,p_menu_id:bookingMenu.id,p_customer_name:name,p_phone:tel,p_memo:memo||null});if(createError){console.error(createError);$('confirmMsg').textContent='申し訳ありません。この時間は予約できなくなりました。空き時間をもう一度お選びください。';await loadSlots();return}if(bookingId&&lineUser?.userId)await supabase.rpc('nakano_attach_line_to_booking',{p_booking_id:bookingId,p_line_user_id:lineUser.userId,p_line_display_name:lineUser.displayName||null});let karteToken=null;const{data:kt}=await supabase.rpc('nakano_customer_get_karte_token',{p_booking_id:bookingId,p_phone:tel});if(kt)karteToken=kt;let token=null;const{data:tt}=await supabase.rpc('nakano_customer_get_manage_token',{p_booking_id:bookingId,p_phone:tel});if(tt){token=tt;setLatestManage(token)}await invokeNotification({booking_date:bookingDate,start_time:bookingTime,menu_name:bookingMenu.name,customer_name:name,phone:tel,memo:memo||null});$('successDetail').innerHTML=summaryHtml([['メニュー',bookingMenu.name],['日時',`${formatDate(bookingDate)} ${String(bookingTime).slice(0,5)}`],['料金',yen(bookingMenu.price)],['お名前',name]]);$('successLineText').textContent=bookingDate===tomorrowJapan()&&currentJapanMinutes()>=22*60?'明日のご予約を承りました。予約内容はLINEでもお送りします。':'予約内容をLINEでお送りします。前日にもご案内をお送りします。';if(karteToken){$('karteLink').href=`${BASE_URL}karte.html?token=${encodeURIComponent(karteToken)}`;$('karteGuide').classList.remove('hidden')}else $('karteGuide').classList.add('hidden');if(token){$('manageLink').href=`${BASE_URL}?manage=${encodeURIComponent(token)}`;$('manageLink').classList.remove('hidden')}else $('manageLink').classList.add('hidden');$('bookingArea').classList.add('hidden');$('successArea').classList.remove('hidden');$('successArea').scrollIntoView({behavior:'smooth',block:'start'})}catch(e){console.error(e);$('confirmMsg').textContent='予約処理中にエラーが発生しました。もう一度お試しください。'}finally{bookingInProgress=false;$('book').disabled=false;$('backToEdit').disabled=false;$('book').textContent='この内容で予約する'}};
+async function finishBookingSetup({bookingId,bookingDate,bookingTime,bookingMenu,name,tel,memo}){
+  try{
+    let currentLine=lineUser;
+    if(!currentLine){
+      try{currentLine=await lineReadyPromise;if(currentLine)lineUser=currentLine}catch{}
+    }
+    if(!currentLine&&window.liff?.isLoggedIn()){
+      try{const p=await liff.getProfile();currentLine={userId:p.userId,displayName:p.displayName||''};lineUser=currentLine}catch{}
+    }
+
+    if(bookingId&&currentLine?.userId){
+      const{error}=await supabase.rpc('nakano_attach_line_to_booking',{
+        p_booking_id:bookingId,
+        p_line_user_id:currentLine.userId,
+        p_line_display_name:currentLine.displayName||null
+      });
+      if(error)console.error('LINE紐付けエラー',error);
+    }
+
+    const [karteResult,manageResult]=await Promise.all([
+      supabase.rpc('nakano_customer_get_karte_token',{p_booking_id:bookingId,p_phone:tel}),
+      supabase.rpc('nakano_customer_get_manage_token',{p_booking_id:bookingId,p_phone:tel})
+    ]);
+
+    const stillCurrent=String($('successArea').dataset.bookingId||'')===String(bookingId);
+    const karteToken=karteResult?.data||null;
+    const token=manageResult?.data||null;
+
+    if(token){
+      setLatestManage(token);
+      if(stillCurrent){
+        $('manageLink').href=`${BASE_URL}?manage=${encodeURIComponent(token)}`;
+        $('manageLink').classList.remove('hidden');
+      }
+    }
+
+    if(stillCurrent){
+      if(karteToken){
+        $('karteLink').href=`${BASE_URL}karte.html?token=${encodeURIComponent(karteToken)}`;
+        $('karteGuide').classList.remove('hidden');
+      }else{
+        $('karteGuide').classList.add('hidden');
+      }
+    }
+
+    await invokeNotification({
+      booking_date:bookingDate,
+      start_time:bookingTime,
+      menu_name:bookingMenu.name,
+      customer_name:name,
+      phone:tel,
+      memo:memo||null
+    });
+  }catch(e){
+    console.error('予約後処理エラー',e);
+  }
+}
+
+$('book').onclick=async()=>{
+  if(bookingInProgress)return;
+  const name=$('name').value.trim(),tel=$('tel').value.trim(),memo=$('memo').value.trim();
+  if(!selectedMenu||!$('date').value||!selectedTime||!name||!phoneIsValid(tel)){
+    $('confirmMsg').textContent='入力内容をもう一度確認してください。';
+    return;
+  }
+
+  const bookingDate=$('date').value,bookingTime=selectedTime,bookingMenu=selectedMenu;
+  bookingInProgress=true;
+  $('book').disabled=true;
+  $('backToEdit').disabled=true;
+  $('book').textContent='予約を確定しています…';
+  $('confirmMsg').textContent='';
+
+  try{
+    const{data:bookingId,error:createError}=await supabase.rpc('nakano_create_booking',{
+      p_date:bookingDate,
+      p_start_time:bookingTime,
+      p_menu_id:bookingMenu.id,
+      p_customer_name:name,
+      p_phone:tel,
+      p_memo:memo||null
+    });
+
+    if(createError){
+      console.error(createError);
+      $('confirmMsg').textContent='申し訳ありません。この時間は予約できなくなりました。空き時間をもう一度お選びください。';
+      await loadSlots();
+      return;
+    }
+
+    $('successArea').dataset.bookingId=String(bookingId||'');
+    $('successDetail').innerHTML=summaryHtml([
+      ['メニュー',bookingMenu.name],
+      ['日時',`${formatDate(bookingDate)} ${String(bookingTime).slice(0,5)}`],
+      ['料金',yen(bookingMenu.price)],
+      ['お名前',name]
+    ]);
+    $('successLineText').textContent=bookingDate===tomorrowJapan()&&currentJapanMinutes()>=22*60
+      ?'明日のご予約を承りました。予約内容はLINEでもお送りします。'
+      :'予約内容をLINEでお送りします。前日にもご案内をお送りします。';
+    $('karteGuide').classList.add('hidden');
+    $('manageLink').classList.add('hidden');
+    $('bookingArea').classList.add('hidden');
+    $('successArea').classList.remove('hidden');
+    $('successArea').scrollIntoView({behavior:'smooth',block:'start'});
+
+    void finishBookingSetup({bookingId,bookingDate,bookingTime,bookingMenu,name,tel,memo});
+  }catch(e){
+    console.error(e);
+    $('confirmMsg').textContent='予約処理中にエラーが発生しました。もう一度お試しください。';
+  }finally{
+    bookingInProgress=false;
+    $('book').disabled=false;
+    $('backToEdit').disabled=false;
+    $('book').textContent='この内容で予約する';
+  }
+};
 $('newBooking').onclick=()=>{selectedMenu=null;selectedTime=null;$('name').value='';$('tel').value='';$('memo').value='';$('date').value='';$('karteGuide').classList.add('hidden');document.querySelectorAll('.menu,.slot').forEach(x=>x.classList.remove('active'));$('slots').innerHTML='<span class="muted">メニューと日付を選択してください。</span>';$('confirmCard').classList.add('hidden');$('successArea').classList.add('hidden');$('bookingArea').classList.remove('hidden');scrollTo({top:0,behavior:'smooth'})};
 async function loadManageBooking(){if(!manageToken)return;localStorage.setItem('nakano_latest_manage_token',manageToken);$('bookingArea').classList.add('hidden');$('successArea').classList.add('hidden');$('latestManage').classList.add('hidden');$('manageArea').classList.remove('hidden');$('manageLoading').classList.remove('hidden');$('manageError').textContent='';const{data,error}=await supabase.rpc('nakano_customer_get_upcoming_bookings',{p_token:manageToken});$('manageLoading').classList.add('hidden');if(error){$('manageError').textContent='ご予約を確認できませんでした。URLをご確認ください。';return}manageBookings=Array.isArray(data)?data:[];renderManageBookings()}
 function renderManageBookings(){const box=$('manageList');box.innerHTML='';if(!manageBookings.length){box.innerHTML='<div class="notice">現在、変更できる今後のご予約はありません。</div>';return}manageBookings.forEach(b=>{const item=document.createElement('div'),time=String(b.start_time||'').slice(0,5);item.className='manageBookingItem';item.innerHTML=`<div class="manageBookingDate">${esc(formatDate(b.booking_date))} ${esc(time)}</div><div class="manageBookingMenu">${esc(b.menu_name||'')}${b.price!=null?`　${esc(yen(b.price))}`:''}</div><div class="manageBookingMeta">${b.customer_name?`お名前：${esc(b.customer_name)}<br>`:''}${b.phone?`電話番号：${esc(b.phone)}`:''}</div><div class="actions"><button class="secondary" type="button" data-action="edit">予約を変更</button><button class="danger" type="button" data-action="cancel">キャンセル</button></div>`;item.querySelector('[data-action=edit]').onclick=()=>openBookingEdit(b);item.querySelector('[data-action=cancel]').onclick=()=>cancelBooking(b);box.appendChild(item)})}
