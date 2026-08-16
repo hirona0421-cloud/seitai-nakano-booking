@@ -1,0 +1,17 @@
+name: check staff edit sync
+on: push
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: node --check staff-edit-sync.js
+      - name: Verify page wiring
+        run: |
+          grep -q 'staff-edit-sync.js?v=20260816-1' customers.html
+          grep -q 'staff-edit-sync.js?v=20260816-1' body-chart.html
+          test -s staff-edit-sync.js
