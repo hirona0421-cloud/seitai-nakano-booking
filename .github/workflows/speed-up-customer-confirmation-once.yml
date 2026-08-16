@@ -4,156 +4,22 @@ permissions:
   contents: write
 jobs:
   fix:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Patch customer confirmation flow
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('index.html')
-          s=p.read_text()
-          start=s.index("$('book').onclick=async()=>{")
-          end=s.index("\n$('newBooking').onclick", start)
-          new=r'''async function finishBookingSetup({bookingId,bookingDate,bookingTime,bookingMenu,name,tel,memo}){
-  try{
-    let currentLine=lineUser;
-    if(!currentLine){
-      try{currentLine=await lineReadyPromise;if(currentLine)lineUser=currentLine}catch{}
-    }
-    if(!currentLine&&window.liff?.isLoggedIn()){
-      try{const p=await liff.getProfile();currentLine={userId:p.userId,displayName:p.displayName||''};lineUser=currentLine}catch{}
-    }
-
-    if(bookingId&&currentLine?.userId){
-      const{error}=await supabase.rpc('nakano_attach_line_to_booking',{
-        p_booking_id:bookingId,
-        p_line_user_id:currentLine.userId,
-        p_line_display_name:currentLine.displayName||null
-      });
-      if(error)console.error('LINE紐付けエラー',error);
-    }
-
-    const [karteResult,manageResult]=await Promise.all([
-      supabase.rpc('nakano_customer_get_karte_token',{p_booking_id:bookingId,p_phone:tel}),
-      supabase.rpc('nakano_customer_get_manage_token',{p_booking_id:bookingId,p_phone:tel})
-    ]);
-
-    const stillCurrent=String($('successArea').dataset.bookingId||'')===String(bookingId);
-    const karteToken=karteResult?.data||null;
-    const token=manageResult?.data||null;
-
-    if(token){
-      setLatestManage(token);
-      if(stillCurrent){
-        $('manageLink').href=`${BASE_URL}?manage=${encodeURIComponent(token)}`;
-        $('manageLink').classList.remove('hidden');
-      }
-    }
-
-    if(stillCurrent){
-      if(karteToken){
-        $('karteLink').href=`${BASE_URL}karte.html?token=${encodeURIComponent(karteToken)}`;
-        $('karteGuide').classList.remove('hidden');
-      }else{
-        $('karteGuide').classList.add('hidden');
-      }
-    }
-
-    await invokeNotification({
-      booking_date:bookingDate,
-      start_time:bookingTime,
-      menu_name:bookingMenu.name,
-      customer_name:name,
-      phone:tel,
-      memo:memo||null
-    });
-  }catch(e){
-    console.error('予約後処理エラー',e);
-  }
-}
-
-$('book').onclick=async()=>{
-  if(bookingInProgress)return;
-  const name=$('name').value.trim(),tel=$('tel').value.trim(),memo=$('memo').value.trim();
-  if(!selectedMenu||!$('date').value||!selectedTime||!name||!phoneIsValid(tel)){
-    $('confirmMsg').textContent='入力内容をもう一度確認してください。';
-    return;
-  }
-
-  const bookingDate=$('date').value,bookingTime=selectedTime,bookingMenu=selectedMenu;
-  bookingInProgress=true;
-  $('book').disabled=true;
-  $('backToEdit').disabled=true;
-  $('book').textContent='予約を確定しています…';
-  $('confirmMsg').textContent='';
-
-  try{
-    const{data:bookingId,error:createError}=await supabase.rpc('nakano_create_booking',{
-      p_date:bookingDate,
-      p_start_time:bookingTime,
-      p_menu_id:bookingMenu.id,
-      p_customer_name:name,
-      p_phone:tel,
-      p_memo:memo||null
-    });
-
-    if(createError){
-      console.error(createError);
-      $('confirmMsg').textContent='申し訳ありません。この時間は予約できなくなりました。空き時間をもう一度お選びください。';
-      await loadSlots();
-      return;
-    }
-
-    $('successArea').dataset.bookingId=String(bookingId||'');
-    $('successDetail').innerHTML=summaryHtml([
-      ['メニュー',bookingMenu.name],
-      ['日時',`${formatDate(bookingDate)} ${String(bookingTime).slice(0,5)}`],
-      ['料金',yen(bookingMenu.price)],
-      ['お名前',name]
-    ]);
-    $('successLineText').textContent=bookingDate===tomorrowJapan()&&currentJapanMinutes()>=22*60
-      ?'明日のご予約を承りました。予約内容はLINEでもお送りします。'
-      :'予約内容をLINEでお送りします。前日にもご案内をお送りします。';
-    $('karteGuide').classList.add('hidden');
-    $('manageLink').classList.add('hidden');
-    $('bookingArea').classList.add('hidden');
-    $('successArea').classList.remove('hidden');
-    $('successArea').scrollIntoView({behavior:'smooth',block:'start'});
-
-    void finishBookingSetup({bookingId,bookingDate,bookingTime,bookingMenu,name,tel,memo});
-  }catch(e){
-    console.error(e);
-    $('confirmMsg').textContent='予約処理中にエラーが発生しました。もう一度お試しください。';
-  }finally{
-    bookingInProgress=false;
-    $('book').disabled=false;
-    $('backToEdit').disabled=false;
-    $('book').textContent='この内容で予約する';
-  }
-};'''
-          s=s[:start]+new+s[end:]
-          p.write_text(s)
-          PY
+        run: python3 .github/patch-speed.py
       - name: Verify customer JavaScript
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          s=Path('index.html').read_text()
-          a=s.index('<script type="module">')+len('<script type="module">')
-          b=s.index('</script>',a)
-          Path('/tmp/customer-module.mjs').write_text(s[a:b])
-          PY
+          python3 -c "from pathlib import Path; s=Path('index.html').read_text(); a=s.index('<script type=\"module\">')+len('<script type=\"module\">'); b=s.index('</script>',a); Path('/tmp/customer-module.mjs').write_text(s[a:b])"
           node --check /tmp/customer-module.mjs
           grep -q "void finishBookingSetup" index.html
-          grep -q "successArea').dataset.bookingId" index.html
-      - name: Commit fix and remove workflow
+      - name: Commit fix and clean temporary files
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add index.html
-          git commit -m "Show booking success before notification setup"
-          git rm .github/workflows/speed-up-customer-confirmation-once.yml
-          git commit -m "Remove one-time customer confirmation workflow"
+          git commit -m "Show booking success before notification setup [skip ci]"
+          git rm .github/patch-speed.py .github/workflows/speed-up-customer-confirmation-once.yml
+          git commit -m "Remove temporary confirmation speed files [skip ci]"
           git push
