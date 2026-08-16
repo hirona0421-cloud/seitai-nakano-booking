@@ -1,0 +1,70 @@
+name: fix OPEN CLOSE stability once
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-open-close-once.yml'
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Patch OPEN CLOSE behavior
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('booking-drag.js')
+          s=p.read_text()
+          replacements=[]
+          replacements.append((
+          "let active=null,autoFrame=null,suppressClickUntil=0,realtimeChannel=null,realtimeTimer=null,hiddenAt=0,lastAutoDate=null,enhanceTimer=null;",
+          "let active=null,autoFrame=null,suppressClickUntil=0,realtimeChannel=null,realtimeTimer=null,hiddenAt=0,lastAutoDate=null,enhanceTimer=null,suppressRealtimeUntil=0,suppressQuarterEnhanceUntil=0;"
+          ))
+          replacements.append((
+          "function setupRealtime(){try{realtimeChannel=supabase.channel(`nakano-management-${Date.now()}`);const reload=()=>{clearTimeout(realtimeTimer);realtimeTimer=setTimeout(()=>{if(!active?.interacting&&!$('blockedInlineEditor')?.classList.contains('open'))location.reload()},650)};for(const table of['nakano_bookings','nakano_blocked_times','nakano_open_slots'])realtimeChannel.on('postgres_changes',{event:'*',schema:'public',table},reload);realtimeChannel.subscribe(status=>{const b=$('bookingRefreshStatus');if(!b)return;if(status==='SUBSCRIBED')b.textContent='自動更新 ON';else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')b.textContent='自動更新 再接続待ち'})}catch(e){console.error('Realtime設定エラー',e)}}",
+          "function setupRealtime(){try{realtimeChannel=supabase.channel(`nakano-management-${Date.now()}`);const reload=()=>{if(Date.now()<suppressRealtimeUntil)return;clearTimeout(realtimeTimer);realtimeTimer=setTimeout(()=>{if(!active?.interacting&&!$('blockedInlineEditor')?.classList.contains('open'))location.reload()},650)};const refreshSlots=()=>{if(Date.now()<suppressRealtimeUntil)return;clearTimeout(realtimeTimer);realtimeTimer=setTimeout(()=>{if(!active?.interacting&&!$('blockedInlineEditor')?.classList.contains('open'))refreshOpenCloseUI()},220)};for(const table of['nakano_bookings','nakano_blocked_times'])realtimeChannel.on('postgres_changes',{event:'*',schema:'public',table},reload);realtimeChannel.on('postgres_changes',{event:'*',schema:'public',table:'nakano_open_slots'},refreshSlots);realtimeChannel.subscribe(status=>{const b=$('bookingRefreshStatus');if(!b)return;if(status==='SUBSCRIBED')b.textContent='自動更新 ON';else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')b.textContent='自動更新 再接続待ち'})}catch(e){console.error('Realtime設定エラー',e)}}"
+          ))
+          replacements.append((
+          "async function toggleQuarterSlot(time,isOpen){const date=selectedDate();if(!date)return;const{error}=await supabase.from('nakano_open_slots').upsert({slot_date:date,start_time:time,is_open:!isOpen},{onConflict:'slot_date,start_time'});if(error){alert('変更できませんでした。');return}setTimeout(()=>location.reload(),120)}",
+          "function beginLocalOpenCloseWrite(ms=2500){suppressRealtimeUntil=Math.max(suppressRealtimeUntil,Date.now()+ms);suppressQuarterEnhanceUntil=Math.max(suppressQuarterEnhanceUntil,Date.now()+900)}\nfunction invalidateQuarterUI(){const box=$('slots');if(box)delete box.dataset.hourUiReadyDate;for(const lane of document.querySelectorAll('#scheduleLane,#lane')){delete lane.dataset.quarterOverlayDate;lane.querySelectorAll('.quarterOpenOverlay').forEach(x=>x.remove())}}\nasync function refreshOpenCloseUI(){suppressQuarterEnhanceUntil=Math.max(suppressQuarterEnhanceUntil,Date.now()+900);invalidateQuarterUI();await refreshQuarterUI();if(isAdmin()&&typeof window.loadAdminTimes==='function')await window.loadAdminTimes();if(isAdmin()&&typeof window.loadEditTimes==='function'&&!$('editCard')?.classList.contains('hidden'))await window.loadEditTimes()}\nasync function toggleQuarterSlot(time,isOpen,button=null){const date=selectedDate();if(!date)return;beginLocalOpenCloseWrite();if(button)button.disabled=true;try{const{error}=await supabase.from('nakano_open_slots').upsert({slot_date:date,start_time:time,is_open:!isOpen},{onConflict:'slot_date,start_time'});if(error)throw error;await refreshOpenCloseUI()}catch(e){console.error(e);alert('変更できませんでした。')}finally{if(button)button.disabled=false}}"
+          ))
+          replacements.append((
+          "toggleQuarterSlot(`${label}:00`,isOpen)",
+          "toggleQuarterSlot(`${label}:00`,isOpen,b)"
+          ))
+          replacements.append((
+          "try{await upsertRows(quarterTimes().map(start_time=>({slot_date:date,start_time,is_open:open})));location.reload()}",
+          "try{beginLocalOpenCloseWrite(3500);await upsertRows(quarterTimes().map(start_time=>({slot_date:date,start_time,is_open:open})));await refreshOpenCloseUI()}"
+          ))
+          replacements.append((
+          "try{const rows=[];for(const date of monthDates(month))for(const start_time of quarterTimes())rows.push({slot_date:date,start_time,is_open:open});await upsertRows(rows);if(msg)msg.textContent=`${month} を15分単位ですべて${label}にしました。`;setTimeout(()=>location.reload(),180)}",
+          "try{const rows=[];for(const date of monthDates(month))for(const start_time of quarterTimes())rows.push({slot_date:date,start_time,is_open:open});beginLocalOpenCloseWrite(5000);await upsertRows(rows);if(msg)msg.textContent=`${month} を15分単位ですべて${label}にしました。`;if(selectedDate().startsWith(month))await refreshOpenCloseUI()}"
+          ))
+          replacements.append((
+          "function enhance(){clearTimeout(enhanceTimer);enhanceTimer=setTimeout(()=>{renamePages();ensureDestinationSlot();createGuide();ensureBlockedEditor();scanBlocks();hydrateBlockedBlocks();scrollToCurrentTime();improveAdminLayout();enhanceQuarterTimes();addQuarterGuides();installQuarterBulkControls();refreshQuarterUI()},100)}",
+          "function enhance(){clearTimeout(enhanceTimer);enhanceTimer=setTimeout(()=>{renamePages();ensureDestinationSlot();createGuide();ensureBlockedEditor();scanBlocks();hydrateBlockedBlocks();scrollToCurrentTime();improveAdminLayout();enhanceQuarterTimes();addQuarterGuides();installQuarterBulkControls();if(Date.now()>=suppressQuarterEnhanceUntil)refreshQuarterUI()},100)}"
+          ))
+          for old,new in replacements:
+              c=s.count(old)
+              if c!=1:
+                  raise SystemExit(f'Expected exactly one match, found {c}: {old[:90]}')
+              s=s.replace(old,new)
+          p.write_text(s)
+          PY
+      - name: Verify JavaScript
+        run: |
+          node --check booking-drag.js
+          grep -q 'beginLocalOpenCloseWrite' booking-drag.js
+          grep -q 'refreshOpenCloseUI' booking-drag.js
+          ! grep -q "toggleQuarterSlot(time,isOpen).*location.reload" booking-drag.js
+      - name: Commit fix and remove one-time workflow
+        run: |
+          git config user.name 'seitai-nakano'
+          git config user.email 'hirona0421@icloud.com'
+          git rm .github/workflows/fix-open-close-once.yml
+          git add booking-drag.js
+          git commit -m 'Fix OPEN CLOSE without self reload loops'
+          git push origin main
